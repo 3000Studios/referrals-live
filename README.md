@@ -44,6 +44,17 @@ If omitted, the app uses curated Unsplash URLs bundled in seed content.
 
 Canonical site URL defaults to `https://referrals.live` (`src/lib/seo.ts`) — override with `VITE_SITE_URL` if needed.
 
+## GitHub Actions (recommended deploy path)
+
+On every push to `main`, `.github/workflows/cloudflare-pages.yml` builds and deploys to Cloudflare Pages.
+
+Add these **repository secrets** in GitHub → Settings → Secrets and variables → Actions:
+
+- `CLOUDFLARE_API_TOKEN` — API token with **Account → Cloudflare Pages → Edit** (and **Account Settings → Read** if prompted).
+- `CLOUDFLARE_ACCOUNT_ID` — from Cloudflare dashboard sidebar (Account ID).
+
+The workflow runs `wrangler pages deploy dist --project-name=referrals-live`. Create the Pages project once (same name) or let the first successful deploy create it depending on your account defaults.
+
 ## Deploy to Cloudflare Pages (Wrangler)
 
 Prereqs: Node 20+, Wrangler v3 (`npm i -g wrangler` or use `npx`).

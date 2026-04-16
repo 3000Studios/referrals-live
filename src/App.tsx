@@ -1,22 +1,24 @@
+import { lazy } from "react";
 import { Route, Routes } from "react-router-dom";
 import { Layout } from "@/components/layout/Layout";
-import { Home } from "@/pages/Home";
-import { Browse } from "@/pages/Browse";
-import { Categories } from "@/pages/Categories";
-import { Submit } from "@/pages/Submit";
-import { Leaderboard } from "@/pages/Leaderboard";
-import { Blog } from "@/pages/Blog";
-import { BlogPost } from "@/pages/BlogPost";
-import { Premium } from "@/pages/Premium";
-import { Login } from "@/pages/Login";
-import { Register } from "@/pages/Register";
-import { Dashboard } from "@/pages/Dashboard";
-import { About } from "@/pages/About";
-import { Contact } from "@/pages/Contact";
-import { Privacy } from "@/pages/Privacy";
-import { Terms } from "@/pages/Terms";
-import { Disclaimer } from "@/pages/Disclaimer";
-import { NotFound } from "@/pages/NotFound";
+
+const Home = lazy(() => import("@/pages/Home").then((m) => ({ default: m.Home })));
+const Browse = lazy(() => import("@/pages/Browse").then((m) => ({ default: m.Browse })));
+const Categories = lazy(() => import("@/pages/Categories").then((m) => ({ default: m.Categories })));
+const Submit = lazy(() => import("@/pages/Submit").then((m) => ({ default: m.Submit })));
+const Leaderboard = lazy(() => import("@/pages/Leaderboard").then((m) => ({ default: m.Leaderboard })));
+const Blog = lazy(() => import("@/pages/Blog").then((m) => ({ default: m.Blog })));
+const BlogPost = lazy(() => import("@/pages/BlogPost").then((m) => ({ default: m.BlogPost })));
+const Premium = lazy(() => import("@/pages/Premium").then((m) => ({ default: m.Premium })));
+const Login = lazy(() => import("@/pages/Login").then((m) => ({ default: m.Login })));
+const Register = lazy(() => import("@/pages/Register").then((m) => ({ default: m.Register })));
+const Dashboard = lazy(() => import("@/pages/Dashboard").then((m) => ({ default: m.Dashboard })));
+const About = lazy(() => import("@/pages/About").then((m) => ({ default: m.About })));
+const Contact = lazy(() => import("@/pages/Contact").then((m) => ({ default: m.Contact })));
+const Privacy = lazy(() => import("@/pages/Privacy").then((m) => ({ default: m.Privacy })));
+const Terms = lazy(() => import("@/pages/Terms").then((m) => ({ default: m.Terms })));
+const Disclaimer = lazy(() => import("@/pages/Disclaimer").then((m) => ({ default: m.Disclaimer })));
+const NotFound = lazy(() => import("@/pages/NotFound").then((m) => ({ default: m.NotFound })));
 
 export default function App() {
   return (

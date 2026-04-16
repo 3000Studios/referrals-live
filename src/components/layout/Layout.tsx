@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { Navbar } from "@/components/layout/Navbar";
@@ -8,6 +9,7 @@ import { Ticker } from "@/components/layout/Ticker";
 import { AdSlot } from "@/components/monetization/AdSlot";
 import { useSimulatedPulse } from "@/hooks/useSimulatedPulse";
 import { EmailCaptureModal } from "@/components/growth/EmailCaptureModal";
+import { PageLoader } from "@/components/layout/PageLoader";
 import { useEffect, useState } from "react";
 
 export function Layout() {
@@ -44,7 +46,9 @@ export function Layout() {
             transition={{ duration: 0.28 }}
             className="mx-auto max-w-7xl px-4 pb-24"
           >
-            <Outlet />
+            <Suspense fallback={<PageLoader />}>
+              <Outlet />
+            </Suspense>
           </motion.main>
         </AnimatePresence>
       </div>
