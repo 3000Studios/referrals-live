@@ -53,7 +53,9 @@ Add these **repository secrets** in GitHub → Settings → Secrets and variable
 - `CLOUDFLARE_API_TOKEN` — API token with **Account → Cloudflare Pages → Edit** (and **Account Settings → Read** if prompted).
 - `CLOUDFLARE_ACCOUNT_ID` — from Cloudflare dashboard sidebar (Account ID).
 
-The workflow runs `wrangler pages deploy dist --project-name=referrals-live`. Create the Pages project once (same name) or let the first successful deploy create it depending on your account defaults.
+The workflow runs `wrangler pages deploy dist --project-name=referrals-live`. The Pages project **`referrals-live`** is created in Cloudflare; production URL will be **`https://referrals-live.pages.dev`** after the first successful deployment.
+
+If the Cloudflare API returns **429 / rate limit** locally, wait several minutes and rerun `npm run deploy`, or rely on the GitHub Action (often less bursty than repeated CLI calls).
 
 ## Deploy to Cloudflare Pages (Wrangler)
 
