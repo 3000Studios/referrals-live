@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://referrals.live/</loc><changefreq>daily</changefreq><priority>1.0</priority></url>
+  <url><loc>https://referrals.live/browse</loc><changefreq>daily</changefreq><priority>0.9</priority></url>
+  <url><loc>https://referrals.live/categories</loc><changefreq>weekly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://referrals.live/submit</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://referrals.live/leaderboard</loc><changefreq>daily</changefreq><priority>0.85</priority></url>
+  <url><loc>https://referrals.live/blog</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://referrals.live/premium</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://referrals.live/login</loc><changefreq>yearly</changefreq><priority>0.4</priority></url>
+  <url><loc>https://referrals.live/register</loc><changefreq>yearly</changefreq><priority>0.4</priority></url>
+  <url><loc>https://referrals.live/dashboard</loc><changefreq>weekly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://referrals.live/about</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://referrals.live/contact</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://referrals.live/privacy</loc><changefreq>yearly</changefreq><priority>0.4</priority></url>
+  <url><loc>https://referrals.live/terms</loc><changefreq>yearly</changefreq><priority>0.4</priority></url>
+  <url><loc>https://referrals.live/disclaimer</loc><changefreq>yearly</changefreq><priority>0.4</priority></url>
+  <url><loc>https://referrals.live/blog/best-referral-programs-2026</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://referrals.live/blog/passive-income-ideas-that-scale</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://referrals.live/blog/affiliate-marketing-for-beginners</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://referrals.live/blog/high-paying-referral-apps</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://referrals.live/blog/credit-card-referral-strategy</loc><changefreq>monthly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://referrals.live/blog/crypto-exchange-referrals-safely</loc><changefreq>monthly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://referrals.live/blog/saas-referral-programs-b2b</loc><changefreq>monthly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://referrals.live/blog/content-seo-for-affiliate-sites</loc><changefreq>monthly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://referrals.live/blog/email-list-building-affiliates</loc><changefreq>monthly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://referrals.live/blog/tracking-clicks-conversions</loc><changefreq>monthly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://referrals.live/blog/avoiding-referral-program-violations</loc><changefreq>monthly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://referrals.live/blog/fintech-referral-bonuses</loc><changefreq>monthly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://referrals.live/blog/travel-rewards-referrals</loc><changefreq>monthly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://referrals.live/blog/ecommerce-affiliate-playbook</loc><changefreq>monthly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://referrals.live/blog/building-a-referral-brand</loc><changefreq>monthly</changefreq><priority>0.75</priority></url>
+</urlset>
