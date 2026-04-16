@@ -7,3 +7,5 @@ dist
 !.env.example
 .wrangler
 .dev.vars
+.pages-jwt
+*.jwt.tmp

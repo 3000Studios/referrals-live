@@ -8,6 +8,7 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "deploy": "npm run build && wrangler pages deploy dist --project-name=referrals-live",
+    "deploy:direct": "npm run build && node scripts/cf-pages-deploy.mjs",
     "lint": "tsc --noEmit"
   },
   "dependencies": {
@@ -24,6 +25,7 @@
     "zustand": "^5.0.2"
   },
   "devDependencies": {
+    "blake3-wasm": "2.1.5",
     "@types/node": "^22.10.2",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",

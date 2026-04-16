@@ -74,6 +74,23 @@ Or use the npm script:
 npm run deploy
 ```
 
+### Direct deploy (when `wrangler pages deploy` hits HTTP 429 on project lookup)
+
+`npm run deploy:direct` runs `scripts/cf-pages-deploy.mjs`: it uses the Pages **upload JWT** for assets, then your **Wrangler OAuth** (after `wrangler login`) or **`CLOUDFLARE_API_TOKEN`** for the final deployment POST. This avoids the `GET .../pages/projects/...` call that often rate-limits.
+
+```bash
+npm run build
+# Obtain JWT: GET .../accounts/{account_id}/pages/projects/referrals-live/upload-token (or use Cloudflare MCP / API)
+$env:PAGES_UPLOAD_JWT="<paste jwt>"
+npm run deploy:direct
+```
+
+### Live status (this environment)
+
+- **Pages**: Production deploy succeeded; the project serves from **`https://referrals-live.pages.dev`** (deployment aliases rotate per deploy).
+- **DNS**: Apex **`referrals.live`** should be a **proxied CNAME** to **`referrals-live.pages.dev`** (replace any parking/A records). **`www`** can CNAME to the same target.
+- **Custom domain in Pages**: Add **`referrals.live`** under Pages → **Custom domains** if it is not already **Active**. If the API returns **429**, finish in the dashboard or retry later.
+
 ### Custom domain (`referrals.live`)
 
 1. In Cloudflare DNS for the domain, add a Pages hostname binding to the `referrals-live` project.
