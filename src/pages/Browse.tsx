@@ -7,7 +7,7 @@ import { sortByNewest, sortByPopular, sortByTrending } from "@/lib/trending";
 import { categories } from "@/data/categories";
 import { AdSlot } from "@/components/monetization/AdSlot";
 
-type Sort = "trending" | "popular" | "new";
+type Sort = "trending" | "popular" | "newest";
 
 export function Browse() {
   const referrals = useAppStore((s) => s.referrals);
