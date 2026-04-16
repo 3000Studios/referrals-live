@@ -8,4 +8,5 @@ dist
 .wrangler
 .dev.vars
 .pages-jwt
+.pages-upload-jwt
 *.jwt.tmp
