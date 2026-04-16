@@ -10,6 +10,7 @@ import { AdSlot } from "@/components/monetization/AdSlot";
 import { useSimulatedPulse } from "@/hooks/useSimulatedPulse";
 import { EmailCaptureModal } from "@/components/growth/EmailCaptureModal";
 import { PageLoader } from "@/components/layout/PageLoader";
+import { EmpireCrossStrip } from "@/components/empire/EmpireCrossStrip";
 import { useEffect, useState } from "react";
 
 export function Layout() {
@@ -30,6 +31,7 @@ export function Layout() {
       <NetworkBackground />
       {showTrail ? <MouseTrail /> : null}
       <Navbar />
+      <EmpireCrossStrip />
       <Ticker />
       <div className="pt-28">
         <div className="mx-auto max-w-7xl px-4 pb-10">
