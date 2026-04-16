@@ -7,7 +7,6 @@ const Browse = lazy(() => import("@/pages/Browse").then((m) => ({ default: m.Bro
 const Categories = lazy(() => import("@/pages/Categories").then((m) => ({ default: m.Categories })));
 const Submit = lazy(() => import("@/pages/Submit").then((m) => ({ default: m.Submit })));
 const Leaderboard = lazy(() => import("@/pages/Leaderboard").then((m) => ({ default: m.Leaderboard })));
-const Games = lazy(() => import("@/pages/Games").then((m) => ({ default: m.Games })));
 const Blog = lazy(() => import("@/pages/Blog").then((m) => ({ default: m.Blog })));
 const BlogPost = lazy(() => import("@/pages/BlogPost").then((m) => ({ default: m.BlogPost })));
 const Premium = lazy(() => import("@/pages/Premium").then((m) => ({ default: m.Premium })));
@@ -30,7 +29,6 @@ export default function App() {
         <Route path="categories" element={<Categories />} />
         <Route path="submit" element={<Submit />} />
         <Route path="leaderboard" element={<Leaderboard />} />
-        <Route path="games" element={<Games />} />
         <Route path="blog" element={<Blog />} />
         <Route path="blog/:slug" element={<BlogPost />} />
         <Route path="premium" element={<Premium />} />

@@ -8,7 +8,6 @@ const links = [
   { to: "/categories", label: "Categories" },
   { to: "/submit", label: "Submit" },
   { to: "/leaderboard", label: "Leaderboard" },
-  { to: "/games", label: "Games" },
   { to: "/blog", label: "Blog" },
   { to: "/premium", label: "Premium" },
 ];
