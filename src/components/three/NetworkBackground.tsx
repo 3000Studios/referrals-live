@@ -18,13 +18,12 @@ function Particles({ count = 90 }: { count?: number }) {
   }, [count]);
 
   useFrame(({ clock, camera }) => {
-    const t = clock.elapsedTime;
-    camera.position.x = Math.sin(t * 0.07) * 3.2;
-    camera.position.y = Math.cos(t * 0.05) * 1.6;
-    camera.position.z = 18 + Math.sin(t * 0.03) * 0.8;
+    camera.position.x = Math.sin(clock.elapsedTime * 0.07) * 3.2;
+    camera.position.y = Math.cos(clock.elapsedTime * 0.05) * 1.6;
+    camera.position.z = 18 + Math.sin(clock.elapsedTime * 0.03) * 0.8;
     camera.lookAt(0, 0, 0);
     if (points.current) {
-      points.current.rotation.y = t * 0.02;
+      points.current.rotation.y = clock.elapsedTime * 0.02;
     }
   });
 
