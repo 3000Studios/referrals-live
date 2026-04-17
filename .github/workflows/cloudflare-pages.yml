@@ -1,4 +1,4 @@
-name: Deploy Cloudflare Pages
+name: Deploy referrals.live
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: cloudflare-pages-${{ github.ref }}
+  group: referrals-live-pages-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -14,7 +14,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      deployments: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -22,18 +21,19 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "22"
           cache: npm
 
-      - name: Install
+      - name: Install dependencies
         run: npm ci
 
       - name: Build
         run: npm run build
 
-      - name: Publish to Cloudflare Pages
+      # Deploys to production branch; custom domains stay attached to project.
+      - name: Publish to Cloudflare Pages (production)
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy dist --project-name=referrals-live
+          command: pages deploy dist --project-name=referrals-live --branch=main

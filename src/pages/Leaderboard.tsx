@@ -1,11 +1,13 @@
+import { useMemo } from "react";
 import { Seo } from "@/components/seo/Seo";
 import { useAppStore } from "@/store/useAppStore";
 import { ReferralCard } from "@/components/referrals/ReferralCard";
 import { sortByPopular } from "@/lib/trending";
 
 export function Leaderboard() {
-  const users = useAppStore((s) => s.leaderboardUsers());
+  const leaderboardUsers = useAppStore((s) => s.leaderboardUsers);
   const referrals = useAppStore((s) => s.referrals);
+  const users = useMemo(() => leaderboardUsers(), [leaderboardUsers, referrals]);
   const topLinks = sortByPopular(referrals).slice(0, 6);
 
   return (

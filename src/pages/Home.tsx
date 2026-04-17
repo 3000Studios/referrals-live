@@ -13,7 +13,7 @@ import { motion } from "framer-motion";
 
 export function Home() {
   const referrals = useAppStore((s) => s.referrals);
-  const leaderboardPreview = useAppStore((s) => s.leaderboardUsers().slice(0, 5));
+  const leaderboardUsers = useAppStore((s) => s.leaderboardUsers);
   const heroRef = useRef<HTMLDivElement>(null);
   const [feedCount, setFeedCount] = useState(9);
 
@@ -36,6 +36,7 @@ export function Home() {
   const trending = useMemo(() => sortByTrending(referrals).slice(0, 6), [referrals]);
   const earning = useMemo(() => sortByPopular(referrals).slice(0, 4), [referrals]);
   const feed = useMemo(() => sortByTrending(referrals).slice(0, feedCount), [referrals, feedCount]);
+  const leaderboardPreview = useMemo(() => leaderboardUsers().slice(0, 5), [leaderboardUsers, referrals]);
 
   return (
     <div>

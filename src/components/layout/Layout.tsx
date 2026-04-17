@@ -8,13 +8,15 @@ import { MouseTrail } from "@/components/effects/MouseTrail";
 import { Ticker } from "@/components/layout/Ticker";
 import { AdSlot } from "@/components/monetization/AdSlot";
 import { useSimulatedPulse } from "@/hooks/useSimulatedPulse";
-import { EmailCaptureModal } from "@/components/growth/EmailCaptureModal";
 import { PageLoader } from "@/components/layout/PageLoader";
 import { useEffect, useState } from "react";
+import { useAppStore } from "@/store/useAppStore";
 
 export function Layout() {
   const location = useLocation();
   useSimulatedPulse();
+  const startIngestionScheduler = useAppStore((s) => s.startIngestionScheduler);
+  const stopIngestionScheduler = useAppStore((s) => s.stopIngestionScheduler);
   const [showTrail, setShowTrail] = useState(true);
 
   useEffect(() => {
@@ -24,6 +26,11 @@ export function Layout() {
     mq.addEventListener("change", update);
     return () => mq.removeEventListener("change", update);
   }, []);
+
+  useEffect(() => {
+    startIngestionScheduler();
+    return () => stopIngestionScheduler();
+  }, [startIngestionScheduler, stopIngestionScheduler]);
 
   return (
     <div className="relative min-h-screen overflow-x-hidden">
@@ -53,7 +60,6 @@ export function Layout() {
         </AnimatePresence>
       </div>
       <Footer />
-      <EmailCaptureModal />
       <div className="hidden md:block">
         <div className="pointer-events-none fixed bottom-6 right-6 z-40 w-[320px]">
           <AdSlot variant="rectangle" className="pointer-events-auto" />

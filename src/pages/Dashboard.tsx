@@ -5,7 +5,8 @@ import { useMemo } from "react";
 
 export function Dashboard() {
   const user = useAppStore((s) => s.user);
-  const referrals = useAppStore((s) => s.referrals);
+  const referrals = useAppStore((s) => s.userReferrals);
+  const publicReferrals = useAppStore((s) => s.referrals);
   const boost = useAppStore((s) => s.boostReferral);
 
   const mine = useMemo(() => referrals.filter((r) => user && r.authorId === user.id), [referrals, user]);
@@ -42,7 +43,7 @@ export function Dashboard() {
         </Link>
       </div>
 
-      <div className="mt-10 grid gap-6 lg:grid-cols-3">
+      <div className="mt-10 grid gap-6 lg:grid-cols-4">
         <div className="glass rounded-3xl border border-white/10 p-6">
           <div className="text-xs uppercase tracking-wide text-muted">Points</div>
           <div className="mt-2 font-display text-4xl font-extrabold text-neon">{user.points}</div>
@@ -63,6 +64,11 @@ export function Dashboard() {
             ))}
             {!user.badges.length ? <li className="text-muted">Earn {badgeLabels.EARLY_USER} by staying active.</li> : null}
           </ul>
+        </div>
+        <div className="glass rounded-3xl border border-white/10 p-6">
+          <div className="text-xs uppercase tracking-wide text-muted">Public board</div>
+          <div className="mt-2 font-display text-4xl font-extrabold text-gold">{publicReferrals.length}</div>
+          <p className="mt-2 text-xs text-muted">Curated crawlable referrals currently live.</p>
         </div>
       </div>
 
@@ -110,6 +116,16 @@ export function Dashboard() {
           Wire these cards to your analytics backend: outbound CTR, redemption rate proxies, and cohort retention by category.
         </p>
       </div>
+      {user.isAdmin ? (
+        <div className="mt-6">
+          <Link
+            to="/admin/attribution"
+            className="inline-flex rounded-2xl border border-neon/40 px-5 py-3 text-sm font-semibold text-neon hover:bg-neon/10"
+          >
+            Open Owner Attribution Admin
+          </Link>
+        </div>
+      ) : null}
     </div>
   );
 }

@@ -1,7 +1,8 @@
 import clsx from "clsx";
 import { motion, useScroll, useTransform } from "framer-motion";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Link, NavLink } from "react-router-dom";
+import { useAppStore } from "@/store/useAppStore";
 
 const links = [
   { to: "/browse", label: "Browse" },
@@ -16,15 +17,83 @@ export function Navbar() {
   const { scrollY } = useScroll();
   const headerBg = useTransform(scrollY, [0, 120], ["rgba(5, 5, 8, 0.55)", "rgba(5, 5, 8, 0.94)"]);
   const [open, setOpen] = useState(false);
+  const [pointer, setPointer] = useState({ x: 0.5, y: 0.25 });
+  const user = useAppStore((s) => s.user);
+  const wireNodes = useMemo(
+    () => [
+      { x: 4, y: 28 },
+      { x: 18, y: 8 },
+      { x: 34, y: 24 },
+      { x: 50, y: 6 },
+      { x: 66, y: 24 },
+      { x: 82, y: 10 },
+      { x: 96, y: 28 },
+    ],
+    [],
+  );
+
+  const updatePointer = (clientX: number, clientY: number, rect: DOMRect) => {
+    const nx = Math.min(1, Math.max(0, (clientX - rect.left) / rect.width));
+    const ny = Math.min(1, Math.max(0, (clientY - rect.top) / rect.height));
+    setPointer({ x: nx, y: ny });
+  };
 
   return (
     <motion.header
       style={{ backgroundColor: headerBg }}
       className={clsx("fixed inset-x-0 top-0 z-50 border-b border-white/10 backdrop-blur-xl transition-colors")}
+      onMouseMove={(e) => updatePointer(e.clientX, e.clientY, e.currentTarget.getBoundingClientRect())}
+      onTouchMove={(e) => {
+        const t = e.touches[0];
+        if (!t) return;
+        updatePointer(t.clientX, t.clientY, e.currentTarget.getBoundingClientRect());
+      }}
+      onMouseLeave={() => setPointer({ x: 0.5, y: 0.25 })}
     >
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-20 overflow-hidden opacity-85">
+        <svg viewBox="0 0 100 40" preserveAspectRatio="none" className="h-full w-full">
+          <defs>
+            <linearGradient id="wireGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="rgba(120,80,255,0.35)" />
+              <stop offset="50%" stopColor="rgba(0,204,255,0.35)" />
+              <stop offset="100%" stopColor="rgba(0,255,136,0.35)" />
+            </linearGradient>
+          </defs>
+          {wireNodes.map((node, idx) => {
+            if (idx === wireNodes.length - 1) return null;
+            const next = wireNodes[idx + 1];
+            const shiftX = (pointer.x - 0.5) * (idx % 2 === 0 ? 6 : -6);
+            const shiftY = (pointer.y - 0.2) * (idx % 2 === 0 ? -8 : 8);
+            return (
+              <line
+                key={`line-${idx}`}
+                x1={node.x + shiftX}
+                y1={node.y + shiftY}
+                x2={next.x + shiftX * 0.8}
+                y2={next.y + shiftY * 0.8}
+                stroke="url(#wireGrad)"
+                strokeWidth="0.6"
+              />
+            );
+          })}
+          {wireNodes.map((node, idx) => {
+            const pullX = (pointer.x - 0.5) * (idx % 2 === 0 ? 8 : -8);
+            const pullY = (pointer.y - 0.2) * (idx % 2 === 0 ? -10 : 10);
+            return (
+              <circle
+                key={`node-${idx}`}
+                cx={node.x + pullX}
+                cy={node.y + pullY}
+                r="1.2"
+                fill={idx % 2 === 0 ? "rgba(0,255,136,0.45)" : "rgba(128,94,255,0.45)"}
+              />
+            );
+          })}
+        </svg>
+      </div>
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4">
         <Link to="/" className="group flex items-center gap-2">
-          <span className="font-display text-xl font-extrabold tracking-tight text-white">
+          <span className="logo-animated font-display text-xl font-extrabold tracking-tight text-white">
             referrals<span className="text-neon">.live</span>
           </span>
           <span className="hidden rounded-full border border-neon/30 px-2 py-0.5 text-[10px] uppercase tracking-[0.2em] text-neon/90 sm:inline">
@@ -47,6 +116,16 @@ export function Navbar() {
               {l.label}
             </NavLink>
           ))}
+          {user?.isAdmin ? (
+            <NavLink
+              to="/admin/attribution"
+              className={({ isActive }) =>
+                clsx("text-sm font-semibold transition", isActive ? "text-gold" : "text-gold/70 hover:text-gold")
+              }
+            >
+              Admin
+            </NavLink>
+          ) : null}
         </nav>
 
         <div className="hidden items-center gap-3 md:flex">
@@ -66,7 +145,7 @@ export function Navbar() {
 
         <button
           type="button"
-          className="relative z-50 flex h-11 w-11 items-center justify-center rounded-xl border border-white/10 lg:hidden"
+          className="relative z-50 flex h-11 w-11 items-center justify-center rounded-xl border border-white/10 bg-white/[0.02] lg:hidden"
           aria-expanded={open}
           aria-label="Menu"
           onClick={() => setOpen((v) => !v)}
@@ -74,15 +153,18 @@ export function Navbar() {
           <span className="sr-only">Toggle menu</span>
           <div className="flex w-6 flex-col gap-1.5">
             <motion.span
-              animate={open ? { rotate: 45, y: 6 } : { rotate: 0, y: 0 }}
+              animate={open ? { rotate: 45, y: 6, scaleX: 1.05 } : { rotate: 0, y: 0, scaleX: 1 }}
+              transition={{ type: "spring", stiffness: 320, damping: 26 }}
               className="h-0.5 w-full bg-white"
             />
             <motion.span
-              animate={open ? { opacity: 0 } : { opacity: 1 }}
+              animate={open ? { opacity: 0, x: 10 } : { opacity: 1, x: 0 }}
+              transition={{ duration: 0.2 }}
               className="h-0.5 w-full bg-white"
             />
             <motion.span
-              animate={open ? { rotate: -45, y: -6 } : { rotate: 0, y: 0 }}
+              animate={open ? { rotate: -45, y: -6, scaleX: 1.05 } : { rotate: 0, y: 0, scaleX: 1 }}
+              transition={{ type: "spring", stiffness: 320, damping: 26 }}
               className="h-0.5 w-full bg-white"
             />
           </div>
@@ -91,20 +173,24 @@ export function Navbar() {
 
       {open ? (
         <motion.div
-          initial={{ height: 0, opacity: 0 }}
-          animate={{ height: "auto", opacity: 1 }}
+          initial={{ height: 0, opacity: 0, y: -8 }}
+          animate={{ height: "auto", opacity: 1, y: 0 }}
+          exit={{ height: 0, opacity: 0, y: -8 }}
+          transition={{ duration: 0.28, ease: "easeOut" }}
           className="border-t border-white/10 bg-void/95 lg:hidden"
         >
           <div className="flex flex-col gap-2 px-4 py-4">
             {links.map((l) => (
-              <Link
+              <motion.div key={l.to} initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }}>
+                <Link
                 key={l.to}
                 to={l.to}
                 onClick={() => setOpen(false)}
                 className="rounded-xl border border-white/5 px-3 py-3 text-sm font-semibold text-white/90"
               >
                 {l.label}
-              </Link>
+                </Link>
+              </motion.div>
             ))}
             <Link
               to="/dashboard"
@@ -113,6 +199,15 @@ export function Navbar() {
             >
               Dashboard
             </Link>
+            {user?.isAdmin ? (
+              <Link
+                to="/admin/attribution"
+                onClick={() => setOpen(false)}
+                className="rounded-xl border border-gold/40 px-3 py-3 text-sm font-semibold text-gold"
+              >
+                Admin
+              </Link>
+            ) : null}
             <div className="mt-2 flex gap-2">
               <Link
                 to="/login"

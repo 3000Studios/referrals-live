@@ -62,13 +62,13 @@ export function Submit() {
     <div>
       <Seo
         title="Submit a referral — referrals.live"
-        description="Submit a referral program to the marketplace. URLs are validated and listings go live instantly on the client-side demo."
+        description="Submit a referral to your member board. Public crawlable referrals are curated separately."
         path="/submit"
       />
       <div className="text-xs font-semibold uppercase tracking-[0.25em] text-neon">Submission</div>
       <h1 className="font-display text-4xl font-extrabold text-white">Submit a referral</h1>
       <p className="mt-3 max-w-2xl text-sm text-muted">
-        This demo stores submissions locally in your browser (Zustand + persistence). Wire your API when you scale.
+        Member submissions stay on user-owned boards. Public homepage referrals are curated and owner-attributed.
       </p>
 
       <div className="mt-10 grid gap-10 lg:grid-cols-[1.1fr_0.9fr]">
@@ -162,10 +162,10 @@ export function Submit() {
             <div className="glass rounded-3xl border border-neon/30 p-6 text-sm text-white">
               <div className="font-display text-lg font-bold text-neon">Live on your device</div>
               <p className="mt-2 text-muted">
-                Listing <span className="text-white">{doneId}</span> is now in your local marketplace. Visit Browse to see it.
+                Listing <span className="text-white">{doneId}</span> is now in your member board.
               </p>
-              <Link className="mt-4 inline-flex text-electric hover:text-white" to="/browse">
-                Go to Browse →
+              <Link className="mt-4 inline-flex text-electric hover:text-white" to="/dashboard">
+                Open Dashboard →
               </Link>
             </div>
           ) : null}

@@ -46,7 +46,9 @@ export function ReferralCard({ referral, index = 0 }: Props) {
       transition={{ delay: index * 0.04, duration: 0.35 }}
       className="h-full"
     >
-      <TiltCard className="glass h-full border border-white/10">
+      <TiltCard className="group glass card-shell h-full border border-white/10">
+        <div className="card-aurora pointer-events-none absolute inset-0" />
+        <div className="card-perimeter pointer-events-none absolute inset-0 rounded-3xl" />
         <div className="relative overflow-hidden">
           <img
             src={referral.image}
@@ -68,7 +70,7 @@ export function ReferralCard({ referral, index = 0 }: Props) {
             ) : null}
           </div>
         </div>
-        <div className="space-y-3 p-5">
+        <div className="relative z-[2] space-y-3 p-5">
           <div className="flex items-start justify-between gap-3">
             <div>
               <h3 className="font-display text-lg font-semibold text-white">{referral.title}</h3>
