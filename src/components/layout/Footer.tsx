@@ -24,6 +24,7 @@ const cols = [
     links: [
       { to: "/privacy", label: "Privacy" },
       { to: "/terms", label: "Terms" },
+      { to: "/disclosure", label: "Disclosure" },
       { to: "/disclaimer", label: "Disclaimer" },
     ],
   },

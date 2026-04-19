@@ -26,9 +26,10 @@ const slots: Record<NonNullable<Props["variant"]>, string | undefined> = {
 export function AdSlot({ variant = "banner", className, label = "Advertisement" }: Props) {
   const ref = useRef<HTMLModElement>(null);
   const slot = slots[variant];
+  if (!slot) return null;
 
   useEffect(() => {
-    if (!slot || !ref.current) return;
+    if (!ref.current) return;
     try {
       (window.adsbygoogle = window.adsbygoogle || []).push({});
     } catch {
@@ -58,23 +59,15 @@ export function AdSlot({ variant = "banner", className, label = "Advertisement" 
         <span className="text-neon/80">AdSense</span>
       </div>
       <div className="p-3">
-        {slot ? (
-          <ins
-            ref={ref as never}
-            className="adsbygoogle block"
-            style={{ display: "block" }}
-            data-ad-client={client}
-            data-ad-slot={slot}
-            data-ad-format="auto"
-            data-full-width-responsive="true"
-          />
-        ) : (
-          <div className="flex h-full min-h-[inherit] items-center justify-center bg-gradient-to-br from-white/5 via-transparent to-electric/10 px-4 text-center text-xs text-muted">
-            Connect your AdSense ad unit IDs via{" "}
-            <code className="mx-1 rounded bg-white/5 px-1 text-neon">VITE_ADSENSE_SLOT_{variant.replace("-", "_").toUpperCase()}</code>{" "}
-            in Cloudflare Pages environment variables to activate live ads.
-          </div>
-        )}
+        <ins
+          ref={ref as never}
+          className="adsbygoogle block"
+          style={{ display: "block" }}
+          data-ad-client={client}
+          data-ad-slot={slot}
+          data-ad-format="auto"
+          data-full-width-responsive="true"
+        />
       </div>
     </aside>
   );

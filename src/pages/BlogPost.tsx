@@ -4,10 +4,18 @@ import { getArticleBySlug } from "@/data/blogArticles";
 import { NotFound } from "@/pages/NotFound";
 import { AffiliateBlock } from "@/components/monetization/AffiliateBlock";
 
+const DEFAULT_ARTICLE_VIDEO = {
+  src: "https://cdn.coverr.co/videos/coverr-typing-on-a-laptop-9718/1080p.mp4",
+  label: "Auto-play video: typing on a laptop",
+  attributionLabel: "Video source: Coverr (free license)",
+  attributionHref: "https://coverr.co/",
+};
+
 export function BlogPost() {
   const { slug } = useParams();
   const article = slug ? getArticleBySlug(slug) : undefined;
   if (!article) return <NotFound />;
+  const video = article.video ?? DEFAULT_ARTICLE_VIDEO;
 
   return (
     <article>
@@ -26,6 +34,25 @@ export function BlogPost() {
       </div>
       <h1 className="mt-4 font-display text-4xl font-extrabold text-white md:text-5xl">{article.title}</h1>
       <p className="mt-4 max-w-3xl text-lg text-muted">{article.excerpt}</p>
+
+      <figure className="mt-8 overflow-hidden rounded-3xl border border-white/10 bg-black/20">
+        <video
+          className="h-auto w-full"
+          src={video.src}
+          muted
+          autoPlay
+          loop
+          playsInline
+          preload="metadata"
+          aria-label={video.label}
+        />
+        <figcaption className="flex flex-wrap items-center justify-between gap-3 px-5 py-3 text-xs text-muted">
+          <span>{video.label}</span>
+          <a href={video.attributionHref} target="_blank" rel="noreferrer" className="text-electric hover:text-white">
+            {video.attributionLabel}
+          </a>
+        </figcaption>
+      </figure>
 
       <div className="mt-8 space-y-10">
         {article.sections.map((s) => (

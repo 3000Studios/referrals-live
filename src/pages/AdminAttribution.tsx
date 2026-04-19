@@ -15,7 +15,7 @@ export function AdminAttribution() {
 
   const [providerId, setProviderId] = useState(() => providers[0]?.id ?? "");
   const activeProvider = providers.find((p) => p.id === providerId) ?? providers[0];
-  const [previewUrl, setPreviewUrl] = useState("https://example.com/sample-offer");
+  const [previewUrl, setPreviewUrl] = useState("https://referrals.live/browse");
   const [params, setParams] = useState<Record<string, string>>({});
   const [result, setResult] = useState<{ ok: boolean; text: string } | null>(null);
 

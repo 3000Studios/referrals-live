@@ -96,4 +96,10 @@ export type BlogArticle = {
   keywords: string[];
   sections: { heading: string; body: string[] }[];
   embeds?: { label: string; href: string }[];
+  video?: {
+    src: string;
+    label: string;
+    attributionLabel: string;
+    attributionHref: string;
+  };
 };

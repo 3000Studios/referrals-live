@@ -13,7 +13,6 @@ export function jsonLdOrganization() {
     name: "referrals.live",
     url: SITE_URL,
     logo: absoluteUrl("/favicon.svg"),
-    sameAs: ["https://twitter.com/", "https://www.linkedin.com/"],
   };
 }
 

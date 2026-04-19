@@ -16,6 +16,7 @@ import { Contact } from "@/pages/Contact";
 import { Privacy } from "@/pages/Privacy";
 import { Terms } from "@/pages/Terms";
 import { Disclaimer } from "@/pages/Disclaimer";
+import { Disclosure } from "@/pages/Disclosure";
 import { NotFound } from "@/pages/NotFound";
 import { AdminAttribution } from "@/pages/AdminAttribution";
 
@@ -38,6 +39,7 @@ export default function App() {
         <Route path="contact" element={<Contact />} />
         <Route path="privacy" element={<Privacy />} />
         <Route path="terms" element={<Terms />} />
+        <Route path="disclosure" element={<Disclosure />} />
         <Route path="disclaimer" element={<Disclaimer />} />
         <Route path="admin/attribution" element={<AdminAttribution />} />
         <Route path="*" element={<NotFound />} />

@@ -14,7 +14,8 @@ export function Disclaimer() {
         Always read the provider’s current terms before applying or investing.
       </p>
       <p className="text-muted">
-        Some links may be referral or affiliate links. referrals.live may earn commissions at no additional cost to you.
+        This page is separate from our affiliate and advertising disclosure. For disclosure details, visit{" "}
+        <a href="/disclosure">/disclosure</a>.
       </p>
     </div>
   );
