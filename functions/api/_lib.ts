@@ -112,8 +112,8 @@ export async function hashPassword(password: string) {
 
 export async function verifyPassword(password: string, stored: string) {
   const parts = stored.split("$");
-  if (parts.length !== 6) return false;
-  const [scheme, algo, _a, iter, saltB64, hashB64] = parts;
+  if (parts.length !== 5) return false;
+  const [scheme, algo, iter, saltB64, hashB64] = parts;
   if (scheme !== "pbkdf2" || algo !== "sha256") return false;
   const iterations = Number(iter);
   if (!Number.isFinite(iterations) || iterations < 50_000) return false;
@@ -126,4 +126,3 @@ export async function verifyPassword(password: string, stored: string) {
   for (let i = 0; i < derived.length; i += 1) diff |= derived[i] ^ expected[i];
   return diff === 0;
 }
-
