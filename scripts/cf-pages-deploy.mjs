@@ -46,9 +46,15 @@ function walkFiles(dir, base = dir, out = []) {
           ? "text/css; charset=utf-8"
           : lower.endsWith(".js")
             ? "application/javascript"
-            : lower.endsWith(".svg")
-              ? "image/svg+xml"
-              : "application/octet-stream";
+            : lower.endsWith(".json")
+              ? "application/json; charset=utf-8"
+              : lower.endsWith(".xml")
+                ? "application/xml; charset=utf-8"
+                : lower.endsWith(".txt")
+                  ? "text/plain; charset=utf-8"
+                  : lower.endsWith(".svg")
+                    ? "image/svg+xml"
+                    : "application/octet-stream";
       out.push({
         rel,
         full,
@@ -153,6 +159,12 @@ async function main() {
   if (fs.existsSync(redirectsPath)) {
     const text = fs.readFileSync(redirectsPath, "utf-8");
     form.append("_redirects", new File([text], "_redirects", { type: "text/plain" }));
+  }
+
+  const headersPath = path.join(DIST, "_headers");
+  if (fs.existsSync(headersPath)) {
+    const text = fs.readFileSync(headersPath, "utf-8");
+    form.append("_headers", new File([text], "_headers", { type: "text/plain" }));
   }
 
   const candidates = [...new Set([process.env.CLOUDFLARE_API_TOKEN, readWranglerOauth(), jwt].filter(Boolean))];
