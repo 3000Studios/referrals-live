@@ -86,7 +86,7 @@ export default {
   },
   async fetch(request: Request, env: Env) {
     const url = new URL(request.url);
-    if (url.pathname === "/chat") {
+    if (url.pathname === "/chat" || url.pathname.startsWith("/chat/")) {
       const id = env.CHAT.idFromName("global");
       return env.CHAT.get(id).fetch(request);
     }
