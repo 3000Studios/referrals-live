@@ -140,7 +140,7 @@ function fromB64(s: string) {
 }
 
 export async function hashPassword(password: string) {
-  const iterations = 210_000;
+  const iterations = 100_000;
   const salt = crypto.getRandomValues(new Uint8Array(16));
   const derived = await pbkdf2Hash(password, salt, iterations);
   return `pbkdf2$sha256$${iterations}$${b64(salt)}$${b64(derived)}`;
@@ -152,7 +152,7 @@ export async function verifyPassword(password: string, stored: string) {
   const [scheme, algo, iter, saltB64, hashB64] = parts;
   if (scheme !== "pbkdf2" || algo !== "sha256") return false;
   const iterations = Number(iter);
-  if (!Number.isFinite(iterations) || iterations < 50_000) return false;
+  if (!Number.isFinite(iterations) || iterations < 50_000 || iterations > 100_000) return false;
   const salt = fromB64(saltB64);
   const expected = fromB64(hashB64);
   const derived = await pbkdf2Hash(password, salt, iterations);
