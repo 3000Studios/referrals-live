@@ -1,13 +1,10 @@
-import { useMemo } from "react";
 import { Seo } from "@/components/seo/Seo";
 import { useAppStore } from "@/store/useAppStore";
 import { ReferralCard } from "@/components/referrals/ReferralCard";
 import { sortByPopular } from "@/lib/trending";
 
 export function Leaderboard() {
-  const leaderboardUsers = useAppStore((s) => s.leaderboardUsers);
   const referrals = useAppStore((s) => s.referrals);
-  const users = useMemo(() => leaderboardUsers(), [leaderboardUsers, referrals]);
   const topLinks = sortByPopular(referrals).slice(0, 6);
 
   return (
@@ -26,19 +23,9 @@ export function Leaderboard() {
       <div className="mt-10 grid gap-8 lg:grid-cols-2">
         <div className="glass rounded-3xl border border-white/10 p-6">
           <div className="text-xs font-semibold uppercase tracking-[0.25em] text-electric">Top users</div>
-          <ol className="mt-4 space-y-3">
-            {users.map((u, idx) => (
-              <li key={u.name} className="flex items-center justify-between rounded-2xl bg-white/5 px-4 py-3 text-sm">
-                <div>
-                  <div className="font-semibold text-white">
-                    #{idx + 1} {u.name}
-                  </div>
-                  <div className="text-xs text-muted">{u.badges.join(" · ") || "Rising operator"}</div>
-                </div>
-                <div className="text-neon font-semibold">{u.points} pts</div>
-              </li>
-            ))}
-          </ol>
+          <p className="mt-4 text-sm text-muted">
+            Coming next: verified operator leaderboard based on real clicks, votes, and premium conversions.
+          </p>
         </div>
         <div className="glass rounded-3xl border border-white/10 p-6">
           <div className="text-xs font-semibold uppercase tracking-[0.25em] text-gold">Top links</div>

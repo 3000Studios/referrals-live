@@ -4,14 +4,14 @@ import { useAppStore } from "@/store/useAppStore";
 
 export function SponsoredStrip() {
   const referrals = useAppStore((s) => s.referrals);
-  const sponsored = useMemo(() => referrals.filter((r) => r.sponsored).slice(0, 3), [referrals]);
-  if (!sponsored.length) return null;
+  const featured = useMemo(() => referrals.slice(0, 3), [referrals]);
+  if (!featured.length) return null;
   return (
     <section className="glass rounded-3xl border border-gold/25 p-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <div className="text-xs font-semibold uppercase tracking-[0.25em] text-gold">Sponsored placements</div>
-          <p className="mt-1 text-sm text-muted">Premium visibility for brands that convert with our audience.</p>
+          <div className="text-xs font-semibold uppercase tracking-[0.25em] text-gold">Featured placements</div>
+          <p className="mt-1 text-sm text-muted">Top programs trending with our audience right now.</p>
         </div>
         <Link
           to="/contact"
@@ -21,10 +21,10 @@ export function SponsoredStrip() {
         </Link>
       </div>
       <div className="mt-5 grid gap-4 md:grid-cols-3">
-        {sponsored.map((r) => (
+        {featured.map((r) => (
           <a
             key={r.id}
-            href={r.url}
+            href={`/go/${r.id}`}
             target="_blank"
             rel="noreferrer"
             className="group rounded-2xl border border-white/10 bg-black/30 p-4 transition hover:border-neon/40"

@@ -13,7 +13,6 @@ import { motion } from "framer-motion";
 
 export function Home() {
   const referrals = useAppStore((s) => s.referrals);
-  const leaderboardUsers = useAppStore((s) => s.leaderboardUsers);
   const heroRef = useRef<HTMLDivElement>(null);
   const [feedCount, setFeedCount] = useState(9);
 
@@ -36,7 +35,6 @@ export function Home() {
   const trending = useMemo(() => sortByTrending(referrals).slice(0, 6), [referrals]);
   const earning = useMemo(() => sortByPopular(referrals).slice(0, 4), [referrals]);
   const feed = useMemo(() => sortByTrending(referrals).slice(0, feedCount), [referrals, feedCount]);
-  const leaderboardPreview = useMemo(() => leaderboardUsers().slice(0, 5), [leaderboardUsers, referrals]);
 
   return (
     <div>
@@ -131,16 +129,9 @@ export function Home() {
         <div className="glass rounded-3xl border border-white/10 p-6">
           <div className="text-xs font-semibold uppercase tracking-[0.25em] text-electric">Leaderboard preview</div>
           <h3 className="mt-2 font-display text-2xl font-bold text-white">Top operators</h3>
-          <ol className="mt-4 space-y-3 text-sm">
-            {leaderboardPreview.map((u, idx) => (
-              <li key={u.name} className="flex items-center justify-between rounded-2xl bg-white/5 px-3 py-2">
-                <span className="text-muted">
-                  #{idx + 1} {u.name}
-                </span>
-                <span className="font-semibold text-neon">{u.points} pts</span>
-              </li>
-            ))}
-          </ol>
+          <p className="mt-4 text-sm text-muted">
+            Coming next: real leaderboards powered by verified clicks and subscriber performance.
+          </p>
           <Link to="/leaderboard" className="mt-5 inline-flex text-sm font-semibold text-electric hover:text-white">
             Full leaderboard →
           </Link>

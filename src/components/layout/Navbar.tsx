@@ -19,6 +19,7 @@ export function Navbar() {
   const [open, setOpen] = useState(false);
   const [pointer, setPointer] = useState({ x: 0.5, y: 0.25 });
   const user = useAppStore((s) => s.user);
+  const logout = useAppStore((s) => s.logout);
   const wireNodes = useMemo(
     () => [
       { x: 4, y: 28 },
@@ -116,31 +117,41 @@ export function Navbar() {
               {l.label}
             </NavLink>
           ))}
-          {user?.isAdmin ? (
-            <NavLink
-              to="/admin/attribution"
-              className={({ isActive }) =>
-                clsx("text-sm font-semibold transition", isActive ? "text-gold" : "text-gold/70 hover:text-gold")
-              }
-            >
-              Admin
-            </NavLink>
-          ) : null}
         </nav>
 
         <div className="hidden items-center gap-3 md:flex">
-          <Link
-            to="/login"
-            className="rounded-full border border-white/10 px-4 py-2 text-sm font-semibold text-white/90 hover:border-neon/40"
-          >
-            Login
-          </Link>
-          <Link
-            to="/register"
-            className="rounded-full bg-gradient-to-r from-neon to-emerald-400 px-4 py-2 text-sm font-semibold text-black shadow-neon"
-          >
-            Join
-          </Link>
+          {user ? (
+            <>
+              <Link
+                to="/dashboard"
+                className="rounded-full border border-white/10 px-4 py-2 text-sm font-semibold text-white/90 hover:border-neon/40"
+              >
+                Dashboard
+              </Link>
+              <button
+                type="button"
+                onClick={() => logout().catch(() => null)}
+                className="rounded-full border border-white/10 px-4 py-2 text-sm font-semibold text-white/80 hover:border-neon/40"
+              >
+                Logout
+              </button>
+            </>
+          ) : (
+            <>
+              <Link
+                to="/login"
+                className="rounded-full border border-white/10 px-4 py-2 text-sm font-semibold text-white/90 hover:border-neon/40"
+              >
+                Login
+              </Link>
+              <Link
+                to="/register"
+                className="rounded-full bg-gradient-to-r from-neon to-emerald-400 px-4 py-2 text-sm font-semibold text-black shadow-neon"
+              >
+                Join
+              </Link>
+            </>
+          )}
         </div>
 
         <button
@@ -199,30 +210,45 @@ export function Navbar() {
             >
               Dashboard
             </Link>
-            {user?.isAdmin ? (
-              <Link
-                to="/admin/attribution"
-                onClick={() => setOpen(false)}
-                className="rounded-xl border border-gold/40 px-3 py-3 text-sm font-semibold text-gold"
-              >
-                Admin
-              </Link>
-            ) : null}
             <div className="mt-2 flex gap-2">
-              <Link
-                to="/login"
-                onClick={() => setOpen(false)}
-                className="flex-1 rounded-xl border border-white/10 py-3 text-center text-sm font-semibold"
-              >
-                Login
-              </Link>
-              <Link
-                to="/register"
-                onClick={() => setOpen(false)}
-                className="flex-1 rounded-xl bg-neon py-3 text-center text-sm font-semibold text-black"
-              >
-                Join
-              </Link>
+              {user ? (
+                <>
+                  <Link
+                    to="/dashboard"
+                    onClick={() => setOpen(false)}
+                    className="flex-1 rounded-xl border border-white/10 py-3 text-center text-sm font-semibold"
+                  >
+                    Dashboard
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      logout().catch(() => null);
+                      setOpen(false);
+                    }}
+                    className="flex-1 rounded-xl bg-neon py-3 text-center text-sm font-semibold text-black"
+                  >
+                    Logout
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link
+                    to="/login"
+                    onClick={() => setOpen(false)}
+                    className="flex-1 rounded-xl border border-white/10 py-3 text-center text-sm font-semibold"
+                  >
+                    Login
+                  </Link>
+                  <Link
+                    to="/register"
+                    onClick={() => setOpen(false)}
+                    className="flex-1 rounded-xl bg-neon py-3 text-center text-sm font-semibold text-black"
+                  >
+                    Join
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </motion.div>

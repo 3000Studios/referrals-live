@@ -7,8 +7,9 @@
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
-    "deploy": "npm run build && wrangler pages deploy dist --project-name=referrals-live",
+    "deploy": "npm run build && wrangler pages deploy dist --project-name=referrals-live && npm run deploy:ingest",
     "deploy:direct": "npm run build && node scripts/cf-pages-deploy.mjs",
+    "deploy:ingest": "wrangler deploy --config wrangler.ingest.toml",
     "lint": "tsc --noEmit"
   },
   "dependencies": {

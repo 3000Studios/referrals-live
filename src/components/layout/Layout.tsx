@@ -7,16 +7,13 @@ import { NetworkBackground } from "@/components/three/NetworkBackground";
 import { MouseTrail } from "@/components/effects/MouseTrail";
 import { Ticker } from "@/components/layout/Ticker";
 import { AdSlot } from "@/components/monetization/AdSlot";
-import { useSimulatedPulse } from "@/hooks/useSimulatedPulse";
 import { PageLoader } from "@/components/layout/PageLoader";
 import { useEffect, useState } from "react";
 import { useAppStore } from "@/store/useAppStore";
 
 export function Layout() {
   const location = useLocation();
-  useSimulatedPulse();
-  const startIngestionScheduler = useAppStore((s) => s.startIngestionScheduler);
-  const stopIngestionScheduler = useAppStore((s) => s.stopIngestionScheduler);
+  const hydrate = useAppStore((s) => s.hydrate);
   const [showTrail, setShowTrail] = useState(true);
 
   useEffect(() => {
@@ -28,9 +25,8 @@ export function Layout() {
   }, []);
 
   useEffect(() => {
-    startIngestionScheduler();
-    return () => stopIngestionScheduler();
-  }, [startIngestionScheduler, stopIngestionScheduler]);
+    hydrate().catch(() => null);
+  }, [hydrate]);
 
   return (
     <div className="relative min-h-screen overflow-x-hidden">

@@ -24,7 +24,6 @@ const plans = [
 
 export function Premium() {
   const user = useAppStore((s) => s.user);
-  const upgrade = useAppStore((s) => s.upgradePremium);
 
   useEffect(() => {
     trackPremiumView("premium_page");
@@ -67,8 +66,13 @@ export function Premium() {
             <button
               type="button"
               onClick={() => {
-                upgrade();
                 trackEvent("premium_click", { plan: p.name });
+                fetch("/api/billing/checkout", { method: "POST", credentials: "include" })
+                  .then((r) => r.json())
+                  .then((d) => {
+                    if (d?.url) window.location.href = d.url;
+                  })
+                  .catch(() => null);
               }}
               className="mt-8 w-full rounded-2xl bg-gradient-to-r from-neon to-emerald-400 px-4 py-3 text-sm font-semibold text-black shadow-neon disabled:opacity-40"
               disabled={!user}

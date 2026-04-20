@@ -12,8 +12,9 @@ export function Register() {
 
   const onSubmit = (e: FormEvent) => {
     e.preventDefault();
-    register(email.trim(), password, name.trim() || "Creator");
-    navigate("/dashboard");
+    register(email.trim(), password, name.trim() || "Creator")
+      .then(() => navigate("/dashboard?onboarding=1"))
+      .catch(() => null);
   };
 
   return (

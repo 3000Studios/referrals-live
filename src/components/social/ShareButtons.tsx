@@ -1,4 +1,5 @@
 import { trackShare } from "@/lib/analytics";
+import { api } from "@/lib/api";
 import clsx from "clsx";
 
 type Props = {
@@ -16,6 +17,7 @@ export function ShareButtons({ title, url, referralId, className }: Props) {
 
   const go = (channel: string, href: string) => {
     trackShare(channel, referralId);
+    if (referralId) api.share(referralId, channel).catch(() => null);
     window.open(href, "_blank", "noopener,noreferrer");
   };
 

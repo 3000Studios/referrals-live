@@ -1,0 +1,117 @@
+import type { Env } from "../_lib";
+import { json, now } from "../_lib";
+
+function timingSafeEqual(a: Uint8Array, b: Uint8Array) {
+  if (a.length !== b.length) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i += 1) diff |= a[i] ^ b[i];
+  return diff === 0;
+}
+
+async function hmacSha256(secret: string, payload: ArrayBuffer) {
+  const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(secret), { name: "HMAC", hash: "SHA-256" }, false, [
+    "sign",
+  ]);
+  const sig = await crypto.subtle.sign("HMAC", key, payload);
+  return new Uint8Array(sig);
+}
+
+function hex(bytes: Uint8Array) {
+  return [...bytes].map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+function parseStripeSig(header: string | null) {
+  if (!header) return null;
+  const parts = header.split(",").map((p) => p.trim());
+  const m: Record<string, string[]> = {};
+  for (const p of parts) {
+    const [k, v] = p.split("=");
+    if (!k || !v) continue;
+    m[k] = m[k] ? [...m[k], v] : [v];
+  }
+  const t = m["t"]?.[0];
+  const v1 = m["v1"] ?? [];
+  if (!t || !v1.length) return null;
+  return { t, v1 };
+}
+
+async function verifyStripeWebhook(env: Env, raw: ArrayBuffer, sigHeader: string | null) {
+  if (!env.STRIPE_WEBHOOK_SECRET) return false;
+  const parsed = parseStripeSig(sigHeader);
+  if (!parsed) return false;
+  const payloadToSign = new TextEncoder().encode(`${parsed.t}.`).buffer;
+  // concatenate `${t}.` + raw
+  const combined = new Uint8Array(payloadToSign.byteLength + raw.byteLength);
+  combined.set(new Uint8Array(payloadToSign), 0);
+  combined.set(new Uint8Array(raw), payloadToSign.byteLength);
+
+  const computed = await hmacSha256(env.STRIPE_WEBHOOK_SECRET, combined.buffer);
+  const computedHex = hex(computed);
+  // allow any matching v1 signature
+  return parsed.v1.some((sig) => timingSafeEqual(new TextEncoder().encode(sig), new TextEncoder().encode(computedHex)));
+}
+
+export async function onRequestPost(context: { request: Request; env: Env }) {
+  const raw = await context.request.arrayBuffer();
+  const ok = await verifyStripeWebhook(context.env, raw, context.request.headers.get("Stripe-Signature"));
+  if (!ok) return json({ ok: false }, { status: 400 });
+
+  const evt = JSON.parse(new TextDecoder().decode(raw)) as any;
+  const type = evt.type as string;
+  const obj = evt.data?.object;
+
+  const db = context.env.DB;
+  const ts = now();
+
+  // We map via client_reference_id when present.
+  const userId =
+    obj?.client_reference_id ||
+    obj?.metadata?.user_id ||
+    obj?.metadata?.userId ||
+    null;
+
+  if (userId) {
+    await db
+      .prepare("INSERT INTO audit_log (id, user_id, action, meta_json, created_at) VALUES (?, ?, ?, ?, ?)")
+      .bind(`audit-${crypto.randomUUID()}`, userId, "stripe_webhook", JSON.stringify({ type }), ts)
+      .run();
+  }
+
+  if (type === "checkout.session.completed") {
+    const subscriptionId = obj?.subscription as string | undefined;
+    const customerId = obj?.customer as string | undefined;
+    const clientRef = obj?.client_reference_id as string | undefined;
+    if (clientRef) {
+      await db
+        .prepare(
+          "INSERT OR REPLACE INTO subscriptions (user_id, stripe_customer_id, stripe_sub_id, status, current_period_end) VALUES (?, ?, ?, 'active', COALESCE(current_period_end, ?))",
+        )
+        .bind(clientRef, customerId ?? null, subscriptionId ?? null, ts + 30 * 24 * 60 * 60 * 1000)
+        .run();
+    }
+  }
+
+  if (type === "customer.subscription.created" || type === "customer.subscription.updated") {
+    const subscriptionId = obj?.id as string | undefined;
+    const customerId = obj?.customer as string | undefined;
+    const currentPeriodEndSec = obj?.current_period_end as number | undefined;
+    const status = obj?.status as string | undefined;
+    const currentPeriodEnd = currentPeriodEndSec ? currentPeriodEndSec * 1000 : null;
+
+    if (customerId && subscriptionId) {
+      // Look up user by stripe_customer_id.
+      const row = await db.prepare("SELECT user_id FROM subscriptions WHERE stripe_customer_id=? LIMIT 1").bind(customerId).first<any>();
+      const targetUserId = row?.user_id;
+      if (targetUserId) {
+        const normalized = status === "active" || status === "trialing" ? "active" : "inactive";
+        await db
+          .prepare("UPDATE subscriptions SET stripe_sub_id=?, status=?, current_period_end=? WHERE user_id=?")
+          .bind(subscriptionId, normalized, currentPeriodEnd, targetUserId)
+          .run();
+      }
+    }
+  }
+
+  return json({ ok: true });
+}
+

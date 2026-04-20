@@ -25,8 +25,10 @@ export function Submit() {
   const [image, setImage] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [doneId, setDoneId] = useState<string | null>(null);
+  const user = useAppStore((s) => s.user);
+  const [wantPublicCandidate, setWantPublicCandidate] = useState(false);
 
-  const onSubmit = (e: FormEvent) => {
+  const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError(null);
     if (!title.trim() || !description.trim()) {
@@ -46,16 +48,22 @@ export function Submit() {
       image.trim() && isValidUrl(image.trim())
         ? image.trim()
         : curatedImage("1557804506-669a67965ba0");
-    const created = submitReferral({
-      title: title.trim(),
-      description: description.trim(),
-      url: url.trim(),
-      category,
-      tags: tagList.length ? tagList : ["community"],
-      image: img,
-    });
-    trackEvent("referral_submitted", { id: created.id });
-    setDoneId(created.id);
+    try {
+      const created = await submitReferral({
+        title: title.trim(),
+        description: description.trim(),
+        url: url.trim(),
+        category,
+        tags: tagList.length ? tagList : ["community"],
+        image: img,
+        wantPublicCandidate,
+      });
+      trackEvent("referral_submitted", { id: created.id });
+      setDoneId(created.id);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to submit referral.";
+      setError(message);
+    }
   };
 
   return (
@@ -136,6 +144,16 @@ export function Submit() {
               className="mt-2 w-full rounded-2xl border border-white/10 bg-black/40 px-4 py-3 text-sm outline-none ring-neon/30 focus:ring"
             />
           </label>
+          {user?.premium ? (
+            <label className="flex items-center gap-3 rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-white/90">
+              <input
+                type="checkbox"
+                checked={wantPublicCandidate}
+                onChange={(e) => setWantPublicCandidate(e.target.checked)}
+              />
+              <span>Submit as a public candidate (premium)</span>
+            </label>
+          ) : null}
           {error ? <div className="rounded-2xl border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-200">{error}</div> : null}
           <button
             type="submit"

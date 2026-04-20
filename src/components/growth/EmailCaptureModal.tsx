@@ -19,7 +19,7 @@ export function EmailCaptureModal() {
     e.preventDefault();
     const v = email.trim();
     if (!v) return;
-    add(v);
+    add(v, "modal").catch(() => null);
     trackEmailCapture("modal");
     sessionStorage.setItem("rl-email-modal", "1");
     setOpen(false);

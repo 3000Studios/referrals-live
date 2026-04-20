@@ -1,11 +1,11 @@
 import { motion } from "framer-motion";
 import { useState } from "react";
-import type { Referral } from "@/types";
 import { TiltCard } from "@/components/effects/TiltCard";
 import { useAppStore } from "@/store/useAppStore";
 import { trackOutboundClick, trackVote } from "@/lib/analytics";
 import { ShareButtons } from "@/components/social/ShareButtons";
 import clsx from "clsx";
+import type { Referral } from "@/store/useAppStore";
 
 type Props = { referral: Referral; index?: number };
 
@@ -19,11 +19,11 @@ export function ReferralCard({ referral, index = 0 }: Props) {
   const onVisit = () => {
     track(referral.id);
     trackOutboundClick(referral.id, referral.url);
-    window.open(referral.url, "_blank", "noopener,noreferrer");
+    window.open(`/go/${referral.id}`, "_blank", "noopener,noreferrer");
   };
 
-  const onVote = () => {
-    upvote(referral.id);
+  const onVote = async () => {
+    await upvote(referral.id);
     trackVote(referral.id);
   };
 
@@ -57,18 +57,6 @@ export function ReferralCard({ referral, index = 0 }: Props) {
             loading="lazy"
             decoding="async"
           />
-          <div className="absolute left-3 top-3 flex flex-wrap gap-2">
-            {referral.sponsored ? (
-              <span className="rounded-full bg-gold/90 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-black">
-                Sponsored
-              </span>
-            ) : null}
-            {referral.boosted ? (
-              <span className="rounded-full bg-electric/90 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-black">
-                Boosted
-              </span>
-            ) : null}
-          </div>
         </div>
         <div className="relative z-[2] space-y-3 p-5">
           <div className="flex items-start justify-between gap-3">
@@ -88,7 +76,6 @@ export function ReferralCard({ referral, index = 0 }: Props) {
             <span className="rounded-full bg-white/5 px-2 py-1">{referral.category}</span>
             <span>⬆ {referral.votes.toLocaleString()}</span>
             <span>🔗 {referral.clicks.toLocaleString()} clicks</span>
-            {referral.authorName ? <span>by {referral.authorName}</span> : null}
           </div>
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
             <button

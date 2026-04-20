@@ -10,7 +10,7 @@ export function EmailInlineCapture() {
     e.preventDefault();
     const v = email.trim();
     if (!v) return;
-    add(v);
+    add(v, "inline_home").catch(() => null);
     trackEmailCapture("inline_home");
     setEmail("");
   };

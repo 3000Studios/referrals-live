@@ -11,8 +11,9 @@ export function Login() {
 
   const onSubmit = (e: FormEvent) => {
     e.preventDefault();
-    login(email.trim(), password);
-    navigate("/dashboard");
+    login(email.trim(), password)
+      .then(() => navigate("/dashboard"))
+      .catch(() => null);
   };
 
   return (
