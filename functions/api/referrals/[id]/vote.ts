@@ -1,5 +1,5 @@
-import type { Env } from "../../../_lib";
-import { badRequest, json, now } from "../../../_lib";
+import type { Env } from "../../_lib";
+import { badRequest, json, now } from "../../_lib";
 import { requireUser } from "../../_session";
 
 export async function onRequestPost(context: { request: Request; env: Env; params: { id: string } }) {

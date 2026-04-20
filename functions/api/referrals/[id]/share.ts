@@ -1,5 +1,5 @@
-import type { Env } from "../../../_lib";
-import { json, now, parseJson, uid } from "../../../_lib";
+import type { Env } from "../../_lib";
+import { json, now, parseJson, uid } from "../../_lib";
 import { requireUser } from "../../_session";
 
 type Body = { channel: string };
