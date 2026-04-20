@@ -91,16 +91,52 @@ export async function pbkdf2Hash(password: string, saltBytes: Uint8Array, iterat
 }
 
 function b64(bytes: Uint8Array) {
-  let s = "";
-  bytes.forEach((b) => (s += String.fromCharCode(b)));
-  return btoa(s);
+  const btoaFn = (globalThis as any).btoa as ((s: string) => string) | undefined;
+  if (btoaFn) {
+    let s = "";
+    bytes.forEach((b) => (s += String.fromCharCode(b)));
+    return btoaFn(s);
+  }
+  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+  let out = "";
+  for (let i = 0; i < bytes.length; i += 3) {
+    const a = bytes[i]!;
+    const b = bytes[i + 1];
+    const c = bytes[i + 2];
+    const n = (a << 16) | ((b ?? 0) << 8) | (c ?? 0);
+    out += alphabet[(n >> 18) & 63]!;
+    out += alphabet[(n >> 12) & 63]!;
+    out += b == null ? "=" : alphabet[(n >> 6) & 63]!;
+    out += c == null ? "=" : alphabet[n & 63]!;
+  }
+  return out;
 }
 
 function fromB64(s: string) {
-  const bin = atob(s);
-  const out = new Uint8Array(bin.length);
-  for (let i = 0; i < bin.length; i += 1) out[i] = bin.charCodeAt(i);
-  return out;
+  const atobFn = (globalThis as any).atob as ((s: string) => string) | undefined;
+  if (atobFn) {
+    const bin = atobFn(s);
+    const out = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i += 1) out[i] = bin.charCodeAt(i);
+    return out;
+  }
+  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+  const lookup = new Map<string, number>();
+  for (let i = 0; i < alphabet.length; i += 1) lookup.set(alphabet[i]!, i);
+  const clean = s.replace(/=+$/, "");
+  const out = new Uint8Array(Math.floor((clean.length * 3) / 4));
+  let outIdx = 0;
+  for (let i = 0; i < clean.length; i += 4) {
+    const n1 = lookup.get(clean[i]!) ?? 0;
+    const n2 = lookup.get(clean[i + 1]!) ?? 0;
+    const n3 = lookup.get(clean[i + 2]!) ?? 0;
+    const n4 = lookup.get(clean[i + 3]!) ?? 0;
+    const n = (n1 << 18) | (n2 << 12) | (n3 << 6) | n4;
+    out[outIdx++] = (n >> 16) & 255;
+    if (clean[i + 2] != null) out[outIdx++] = (n >> 8) & 255;
+    if (clean[i + 3] != null) out[outIdx++] = n & 255;
+  }
+  return out.slice(0, outIdx);
 }
 
 export async function hashPassword(password: string) {
