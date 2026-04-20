@@ -10,6 +10,7 @@ import { AdSlot } from "@/components/monetization/AdSlot";
 import { PageLoader } from "@/components/layout/PageLoader";
 import { useEffect, useState } from "react";
 import { useAppStore } from "@/store/useAppStore";
+import { LiveChatDock } from "@/components/community/LiveChatDock";
 
 export function Layout() {
   const location = useLocation();
@@ -59,6 +60,9 @@ export function Layout() {
       <div className="hidden md:block">
         <div className="pointer-events-none fixed bottom-6 right-6 z-40 w-[320px]">
           <AdSlot variant="rectangle" className="pointer-events-auto" />
+          <div className="mt-3 pointer-events-auto">
+            <LiveChatDock />
+          </div>
         </div>
       </div>
       <AdSlot variant="mobile-sticky" />

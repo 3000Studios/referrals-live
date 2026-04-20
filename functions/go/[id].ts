@@ -17,6 +17,25 @@ export async function onRequestGet(context: { request: Request; env: Env; params
     .bind(ts, id)
     .run();
 
-  return Response.redirect(row.url, 302);
-}
+  let out = row.url as string;
+  try {
+    const u = new URL(out);
+    const domain = u.hostname.replace(/^www\./, "").toLowerCase();
+    const attr = await db.prepare("SELECT params_json FROM owner_attribution WHERE domain=? LIMIT 1").bind(domain).first<any>();
+    if (attr?.params_json) {
+      const params = JSON.parse(attr.params_json) as Record<string, string>;
+      Object.entries(params).forEach(([k, v]) => {
+        if (!k || !v) return;
+        u.searchParams.set(k, v);
+      });
+      u.searchParams.set("utm_source", "referrals_live");
+      u.searchParams.set("utm_medium", "curated_public");
+      u.searchParams.set("utm_campaign", "owner_attribution");
+      out = u.toString();
+    }
+  } catch {
+    // keep original
+  }
 
+  return Response.redirect(out, 302);
+}

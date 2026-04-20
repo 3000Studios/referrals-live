@@ -46,4 +46,9 @@ export const api = {
 
   emailCapture: (email: string, source: string) =>
     apiFetch<{ ok: true }>("/api/email-capture", { method: "POST", body: JSON.stringify({ email, source }) }),
+
+  chatWsUrl: () => {
+    const proto = window.location.protocol === "https:" ? "wss:" : "ws:";
+    return `${proto}//referrals-live-ingest.mr-jwswain.workers.dev/chat/ws`;
+  },
 };

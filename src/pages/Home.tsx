@@ -74,6 +74,9 @@ export function Home() {
             <span className="rounded-full border border-white/10 px-3 py-1">Viral sharing</span>
             <span className="rounded-full border border-white/10 px-3 py-1">Gamified ranks</span>
           </div>
+          <div className="mt-6 text-[11px] text-muted">
+            Outbound clicks use tracked redirects. Owner-attribution parameters are applied only for domains you’ve configured.
+          </div>
         </div>
       </section>
 

@@ -145,10 +145,10 @@ export function Navbar() {
                 Login
               </Link>
               <Link
-                to="/register"
+                to="/register?mode=username"
                 className="rounded-full bg-gradient-to-r from-neon to-emerald-400 px-4 py-2 text-sm font-semibold text-black shadow-neon"
               >
-                Join
+                Claim username
               </Link>
             </>
           )}
@@ -241,11 +241,11 @@ export function Navbar() {
                     Login
                   </Link>
                   <Link
-                    to="/register"
+                    to="/register?mode=username"
                     onClick={() => setOpen(false)}
                     className="flex-1 rounded-xl bg-neon py-3 text-center text-sm font-semibold text-black"
                   >
-                    Join
+                    Claim username
                   </Link>
                 </>
               )}

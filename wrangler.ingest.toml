@@ -10,3 +10,10 @@ binding = "DB"
 database_name = "referrals-live"
 database_id = "8c825251-cdbf-4087-82a6-eebff2bbb176"
 
+[[durable_objects.bindings]]
+name = "CHAT"
+class_name = "ChatRoom"
+
+[[migrations]]
+tag = "v1"
+new_classes = ["ChatRoom"]

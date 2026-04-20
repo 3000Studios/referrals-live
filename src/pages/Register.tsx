@@ -1,14 +1,24 @@
-import { FormEvent, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { FormEvent, useMemo, useState } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Seo } from "@/components/seo/Seo";
 import { useAppStore } from "@/store/useAppStore";
 
 export function Register() {
   const register = useAppStore((s) => s.register);
   const navigate = useNavigate();
+  const [params] = useSearchParams();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
+  const mode = params.get("mode") ?? "";
+  const headline = useMemo(() => (mode === "username" ? "Claim your username" : "Create account"), [mode]);
+  const subline = useMemo(
+    () =>
+      mode === "username"
+        ? "Pick a name people will recognize when you share referrals."
+        : "Local profile + gamification hooks activate instantly.",
+    [mode],
+  );
 
   const onSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -21,15 +31,16 @@ export function Register() {
     <div className="mx-auto max-w-lg">
       <Seo title="Register — referrals.live" description="Create your referrals.live account." path="/register" />
       <div className="text-xs font-semibold uppercase tracking-[0.25em] text-neon">Account</div>
-      <h1 className="font-display text-4xl font-extrabold text-white">Create account</h1>
-      <p className="mt-3 text-sm text-muted">Local profile + gamification hooks activate instantly.</p>
+      <h1 className="font-display text-4xl font-extrabold text-white">{headline}</h1>
+      <p className="mt-3 text-sm text-muted">{subline}</p>
       <form onSubmit={onSubmit} className="mt-8 glass space-y-4 rounded-3xl border border-white/10 p-6">
         <label className="block text-xs uppercase tracking-wide text-muted">
-          Display name
+          Username
           <input
             required
             value={name}
             onChange={(e) => setName(e.target.value)}
+            placeholder="e.g. LinkWizard"
             className="mt-2 w-full rounded-2xl border border-white/10 bg-black/40 px-4 py-3 text-sm outline-none ring-neon/30 focus:ring"
           />
         </label>
