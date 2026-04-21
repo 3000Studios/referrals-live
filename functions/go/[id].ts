@@ -5,13 +5,19 @@ export async function onRequestGet(context: { request: Request; env: Env; params
   const id = context.params.id;
   if (!id) return new Response("Missing id", { status: 400 });
   const db = context.env.DB;
+  const ts = now();
   const row = await db
-    .prepare("SELECT url FROM referrals WHERE id=? AND status='public' LIMIT 1")
-    .bind(id)
+    .prepare(
+      `SELECT r.url as url
+       FROM referrals r
+       LEFT JOIN featured_slots f ON f.referral_id=r.id AND f.ends_at>?
+       WHERE r.id=? AND (r.status='public' OR f.referral_id IS NOT NULL)
+       LIMIT 1`,
+    )
+    .bind(ts, id)
     .first<any>();
   if (!row?.url) return new Response("Not found", { status: 404 });
 
-  const ts = now();
   await db
     .prepare("UPDATE referral_metrics SET clicks=clicks+1, last_click_at=? WHERE referral_id=?")
     .bind(ts, id)

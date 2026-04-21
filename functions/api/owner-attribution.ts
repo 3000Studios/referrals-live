@@ -1,5 +1,6 @@
 import type { Env } from "./_lib";
 import { json, now, parseJson, uid } from "./_lib";
+import { requireUser } from "./_session";
 
 type Entry = { domain: string; params: Record<string, string> };
 
@@ -14,6 +15,9 @@ export async function onRequestGet(context: { request: Request; env: Env }) {
 }
 
 export async function onRequestPost(context: { request: Request; env: Env }) {
+  const user = await requireUser(context.request, context.env);
+  if (!user) return json({ ok: false, error: "Unauthorized" }, { status: 401 });
+  if (!user.isAdmin) return json({ ok: false, error: "Forbidden" }, { status: 403 });
   const body = await parseJson<Entry>(context.request);
   const domain = String(body.domain ?? "").trim().toLowerCase();
   const params = body.params ?? {};
@@ -32,4 +36,3 @@ export async function onRequestPost(context: { request: Request; env: Env }) {
     .run();
   return json({ ok: true });
 }
-

@@ -5,10 +5,11 @@ import { useAppStore } from "@/store/useAppStore";
 
 type ChatMessage = { id: string; ts: number; user: string; role: string; text: string };
 
-export function LiveChatDock() {
+export function LiveChatDock({ defaultOpen = false, className }: { defaultOpen?: boolean; className?: string }) {
   const user = useAppStore((s) => s.user);
-  const canPost = Boolean(user?.premium);
-  const [open, setOpen] = useState(false);
+  const [serverCanPost, setServerCanPost] = useState(false);
+  const canPost = Boolean(user?.premium) && serverCanPost;
+  const [open, setOpen] = useState(defaultOpen);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [text, setText] = useState("");
   const wsRef = useRef<WebSocket | null>(null);
@@ -25,6 +26,10 @@ export function LiveChatDock() {
         const data = JSON.parse(String(evt.data));
         if (data?.type === "init") {
           setMessages((data.messages ?? []) as ChatMessage[]);
+          return;
+        }
+        if (data?.type === "cap") {
+          setServerCanPost(Boolean(data.canPost));
           return;
         }
         if (data?.type === "msg") {
@@ -63,7 +68,7 @@ export function LiveChatDock() {
   };
 
   return (
-    <div className="pointer-events-auto">
+    <div className={clsx("pointer-events-auto", className)}>
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
@@ -122,4 +127,3 @@ export function LiveChatDock() {
     </div>
   );
 }
-

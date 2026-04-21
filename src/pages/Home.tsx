@@ -10,11 +10,16 @@ import { SponsoredStrip } from "@/components/monetization/SponsoredStrip";
 import { AdSlot } from "@/components/monetization/AdSlot";
 import { EmailInlineCapture } from "@/components/growth/EmailInlineCapture";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
+import { LiveChatDock } from "@/components/community/LiveChatDock";
 
 export function Home() {
   const referrals = useAppStore((s) => s.referrals);
   const heroRef = useRef<HTMLDivElement>(null);
   const [feedCount, setFeedCount] = useState(9);
+  const [featured, setFeatured] = useState<typeof referrals>([]);
+  const [q, setQ] = useState("");
+  const navigate = useNavigate();
 
   useEffect(() => {
     const root = heroRef.current;
@@ -30,6 +35,13 @@ export function Home() {
       gsap.from(".hero-cta", { scale: 0.96, opacity: 0, duration: 0.55, delay: 0.35, ease: "power2.out" });
     }, root);
     return () => ctx.revert();
+  }, []);
+
+  useEffect(() => {
+    fetch("/api/home")
+      .then((r) => r.json())
+      .then((d) => setFeatured(d?.featured ?? []))
+      .catch(() => null);
   }, []);
 
   const trending = useMemo(() => sortByTrending(referrals).slice(0, 6), [referrals]);
@@ -73,6 +85,34 @@ export function Home() {
             <span className="rounded-full border border-white/10 px-3 py-1">AdSense-ready</span>
             <span className="rounded-full border border-white/10 px-3 py-1">Viral sharing</span>
             <span className="rounded-full border border-white/10 px-3 py-1">Gamified ranks</span>
+          </div>
+          <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <div className="w-full max-w-xl">
+              <label className="sr-only" htmlFor="home-search">
+                Search referrals
+              </label>
+              <input
+                id="home-search"
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder="Search referral programs…"
+                className="w-full rounded-2xl border border-white/10 bg-black/40 px-4 py-3 text-sm text-white outline-none ring-neon/30 focus:ring"
+              />
+            </div>
+            <button
+              type="button"
+              onClick={() => navigate(`/browse?q=${encodeURIComponent(q.trim())}`)}
+              className="w-full max-w-xl rounded-2xl border border-white/15 px-6 py-3 text-sm font-semibold text-white hover:border-neon/40 sm:w-auto"
+            >
+              Search
+            </button>
+            <button
+              type="button"
+              onClick={() => document.getElementById("live-chat")?.scrollIntoView({ behavior: "smooth" })}
+              className="w-full max-w-xl rounded-2xl bg-gradient-to-r from-electric/60 to-neon/60 px-6 py-3 text-sm font-semibold text-white hover:brightness-110 sm:w-auto"
+            >
+              Jump to chat ↓
+            </button>
           </div>
           <div className="mt-6 text-[11px] text-muted">
             Outbound clicks use tracked redirects. Owner-attribution parameters are applied only for domains you’ve configured.
@@ -141,6 +181,26 @@ export function Home() {
         </div>
       </section>
 
+      {featured.length ? (
+        <section className="mt-14 space-y-6">
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <div>
+              <div className="text-xs font-semibold uppercase tracking-[0.25em] text-gold">Featured by members</div>
+              <h2 className="font-display text-3xl font-bold text-white">Homepage placements</h2>
+              <p className="mt-2 max-w-2xl text-sm text-muted">Premium members can feature 2 links at a time.</p>
+            </div>
+            <Link to="/premium" className="text-sm font-semibold text-electric hover:text-white">
+              Upgrade →
+            </Link>
+          </div>
+          <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+            {featured.slice(0, 6).map((r, i) => (
+              <ReferralCard key={`featured-${r.id}`} referral={r} index={i} />
+            ))}
+          </div>
+        </section>
+      ) : null}
+
       <div className="mt-12">
         <AdSlot variant="in-feed" />
       </div>
@@ -193,6 +253,17 @@ export function Home() {
 
       <section className="mt-16">
         <EmailInlineCapture />
+      </section>
+
+      <section id="live-chat" className="mt-16">
+        <div className="mb-6 text-center">
+          <div className="text-xs font-semibold uppercase tracking-[0.25em] text-electric">Community</div>
+          <h2 className="font-display text-3xl font-bold text-white">Live chat</h2>
+          <p className="mt-2 text-sm text-muted">Everyone can read. Premium members can post.</p>
+        </div>
+        <div className="mx-auto max-w-3xl">
+          <LiveChatDock defaultOpen className="w-full" />
+        </div>
       </section>
     </div>
   );

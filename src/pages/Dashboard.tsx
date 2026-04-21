@@ -3,6 +3,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import { Seo } from "@/components/seo/Seo";
 import { api } from "@/lib/api";
 import { useAppStore } from "@/store/useAppStore";
+import { useViewerMode } from "@/store/useViewerMode";
 
 type MyReferral = {
   id: string;
@@ -15,6 +16,7 @@ type MyReferral = {
 export function Dashboard() {
   const user = useAppStore((s) => s.user);
   const hydrate = useAppStore((s) => s.hydrate);
+  const { mode, setMode, isAdmin, premiumView } = useViewerMode();
   const [params] = useSearchParams();
 
   const [myReferrals, setMyReferrals] = useState<MyReferral[]>([]);
@@ -65,16 +67,57 @@ export function Dashboard() {
           <div className="text-xs font-semibold uppercase tracking-[0.25em] text-neon">Operator desk</div>
           <h1 className="font-display text-4xl font-extrabold text-white">Dashboard</h1>
           <p className="mt-2 text-sm text-muted">
-            Premium: <span className="text-white">{user.premium ? "active" : "not active"}</span>
+            Premium: <span className="text-white">{premiumView ? "active" : "not active"}</span>
           </p>
         </div>
         <Link
           to="/premium"
           className="rounded-2xl border border-gold/40 px-5 py-3 text-sm font-semibold text-gold hover:bg-gold/10"
         >
-          {user.premium ? "Manage billing" : "Upgrade"}
+          {premiumView ? "Manage billing" : "Upgrade"}
         </Link>
       </div>
+
+      {isAdmin ? (
+        <div className="mt-6 glass rounded-3xl border border-white/10 p-4">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="text-sm font-semibold text-white">View mode</div>
+            <div className="flex gap-2">
+              {[
+                { key: "user", label: "User" },
+                { key: "premium", label: "Premium user" },
+                { key: "admin", label: "Admin" },
+              ].map((b) => (
+                <button
+                  key={b.key}
+                  type="button"
+                  onClick={() => setMode(b.key as any)}
+                  className={
+                    mode === b.key
+                      ? "rounded-2xl bg-neon px-4 py-2 text-xs font-semibold uppercase tracking-wide text-black shadow-neon"
+                      : "rounded-2xl border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-white/90 hover:border-neon/40"
+                  }
+                >
+                  {b.label}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="mt-2 text-xs text-muted">
+            This toggle is for testing UI states only. Billing + chat posting still require a real Premium subscription.
+          </div>
+          {mode === "admin" ? (
+            <div className="mt-3">
+              <Link
+                to="/admin"
+                className="inline-flex rounded-2xl border border-electric/40 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-electric hover:bg-electric/10"
+              >
+                Open admin dashboard →
+              </Link>
+            </div>
+          ) : null}
+        </div>
+      ) : null}
 
       {error ? (
         <div className="mt-6 rounded-2xl border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-200">{error}</div>
@@ -117,7 +160,7 @@ export function Dashboard() {
                   </div>
                 </div>
 
-                {user.premium ? (
+                {premiumView ? (
                   <div className="flex flex-wrap gap-2">
                     {[1, 2].map((slot) => {
                       const active = featuredMap.get(slot) === r.id;
@@ -166,4 +209,3 @@ export function Dashboard() {
     </div>
   );
 }
-

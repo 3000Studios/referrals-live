@@ -2,6 +2,7 @@ export type Env = {
   DB: D1Database;
   APP_ORIGIN: string;
   SESSION_DAYS?: string;
+  OWNER_ADMIN_EMAIL?: string;
   STRIPE_SECRET_KEY?: string;
   STRIPE_PRICE_ID?: string;
   STRIPE_WEBHOOK_SECRET?: string;

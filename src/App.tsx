@@ -18,6 +18,7 @@ import { Terms } from "@/pages/Terms";
 import { Disclaimer } from "@/pages/Disclaimer";
 import { Disclosure } from "@/pages/Disclosure";
 import { NotFound } from "@/pages/NotFound";
+import { Admin } from "@/pages/Admin";
 
 export default function App() {
   return (
@@ -40,6 +41,7 @@ export default function App() {
         <Route path="terms" element={<Terms />} />
         <Route path="disclosure" element={<Disclosure />} />
         <Route path="disclaimer" element={<Disclaimer />} />
+        <Route path="admin" element={<Admin />} />
         <Route path="*" element={<NotFound />} />
       </Route>
     </Routes>

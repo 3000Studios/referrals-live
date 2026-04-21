@@ -98,11 +98,15 @@ export class ChatRoom {
   state: DurableObjectState;
   env: Env;
   sockets: Set<WebSocket>;
+  socketCanPost: WeakMap<WebSocket, boolean>;
+  socketLastSent: WeakMap<WebSocket, number>;
 
   constructor(state: DurableObjectState, env: Env) {
     this.state = state;
     this.env = env;
     this.sockets = new Set();
+    this.socketCanPost = new WeakMap();
+    this.socketLastSent = new WeakMap();
     this.state.blockConcurrencyWhile(async () => {
       // Seed a small, clearly-labeled system intro if empty.
       const existing = await this.state.storage.get<string>("seeded");
@@ -111,11 +115,48 @@ export class ChatRoom {
         const seed = [
           { id: crypto.randomUUID(), ts, user: "Referrals.live Guide", role: "system", text: "Welcome to Referrals.live Live Chat. Read-only for free users; Premium members can post." },
           { id: crypto.randomUUID(), ts: ts + 1, user: "Referrals.live Guide", role: "system", text: "Tip: Click any offer to open the tracked redirect. Upvote the ones you want us to surface more." },
+          { id: crypto.randomUUID(), ts: ts + 2, user: "CommunityBot (BOT)", role: "bot", text: "New here? Say hi after you upgrade. Tell the room what niche you’re in (fintech/crypto/saas/travel)." },
+          { id: crypto.randomUUID(), ts: ts + 3, user: "CommunityBot (BOT)", role: "bot", text: "Reminder: only share official program pages or your own verified referral links. Keep it PG-13." },
         ];
         await this.state.storage.put("messages", seed);
         await this.state.storage.put("seeded", "1");
       }
     });
+  }
+
+  cookie(request: Request, name: string) {
+    const cookie = request.headers.get("Cookie") ?? "";
+    const parts = cookie.split(";").map((p) => p.trim());
+    for (const p of parts) {
+      const idx = p.indexOf("=");
+      if (idx === -1) continue;
+      const k = p.slice(0, idx).trim();
+      if (k !== name) continue;
+      return decodeURIComponent(p.slice(idx + 1));
+    }
+    return null;
+  }
+
+  async canPostFromRequest(request: Request) {
+    const sessionId = this.cookie(request, "rl_session");
+    if (!sessionId) return false;
+    const ts = Date.now();
+    const row = await this.env.DB.prepare(
+      "SELECT s.id as sid, u.id as uid, sub.status as sub_status, sub.current_period_end as cpe FROM sessions s JOIN users u ON u.id=s.user_id LEFT JOIN subscriptions sub ON sub.user_id=u.id WHERE s.id=? AND s.expires_at>? LIMIT 1",
+    )
+      .bind(sessionId, ts)
+      .first<any>();
+    if (!row) return false;
+    const premium = row.sub_status === "active" && (!row.cpe || Number(row.cpe) > ts);
+    return Boolean(premium);
+  }
+
+  scrub(text: string) {
+    const t = text.trim().slice(0, 500);
+    const blocked = ["porn", "sex", "nazi", "hitler", "kill", "suicide", "rape"];
+    const lower = t.toLowerCase();
+    if (blocked.some((w) => lower.includes(w))) return "Message removed by moderation.";
+    return t;
   }
 
   async fetch(request: Request) {
@@ -125,24 +166,33 @@ export class ChatRoom {
       const [client, server] = Object.values(pair) as [WebSocket, WebSocket];
       server.accept();
       this.sockets.add(server);
+      const canPost = await this.canPostFromRequest(request);
+      this.socketCanPost.set(server, canPost);
 
       const msgs = (await this.state.storage.get<any[]>("messages")) ?? [];
       server.send(JSON.stringify({ type: "init", messages: msgs.slice(-50) }));
+      server.send(JSON.stringify({ type: "cap", canPost }));
 
       server.addEventListener("message", (evt) => {
         try {
           const data = JSON.parse(String((evt as MessageEvent).data));
           if (data?.type !== "msg") return;
+          if (!this.socketCanPost.get(server)) return;
+          // Basic per-socket rate limit
+          const now = Date.now();
+          const last = this.socketLastSent.get(server) ?? 0;
+          if (now - last < 800) return;
+          this.socketLastSent.set(server, now);
           const message = {
             id: crypto.randomUUID(),
-            ts: Date.now(),
+            ts: now,
             user: String(data.user ?? "anon").slice(0, 32),
             role: String(data.role ?? "member"),
-            text: String(data.text ?? "").slice(0, 500),
+            text: this.scrub(String(data.text ?? "")),
           };
           if (!message.text.trim()) return;
           // No deception: only allow system/guide messages from server-side seeds.
-          if (message.role === "system") return;
+          if (message.role === "system" || message.role === "bot") return;
 
           this.state.blockConcurrencyWhile(async () => {
             const existing = (await this.state.storage.get<any[]>("messages")) ?? [];

@@ -47,10 +47,9 @@ export async function onRequestPost(context: { request: Request; env: Env }) {
 
     const headers = new Headers();
     headers.set("Set-Cookie", setCookie("rl_session", sessionId, { maxAgeSeconds }));
-    return json(
-      { ok: true, user: { id: userId, email: cleanEmail, displayName: cleanName, premium: false } },
-      { headers },
-    );
+    const adminEmail = (context.env.OWNER_ADMIN_EMAIL ?? "").trim().toLowerCase();
+    const isAdmin = adminEmail && cleanEmail === adminEmail;
+    return json({ ok: true, user: { id: userId, email: cleanEmail, displayName: cleanName, premium: false, isAdmin } }, { headers });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Register failed";
     return json({ ok: false, error: message }, { status: 500 });

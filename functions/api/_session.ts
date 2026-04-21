@@ -1,7 +1,7 @@
 import type { Env } from "./_lib";
 import { getCookie, now } from "./_lib";
 
-export type SessionUser = { id: string; email: string; displayName: string; premium: boolean };
+export type SessionUser = { id: string; email: string; displayName: string; premium: boolean; isAdmin: boolean };
 
 export async function requireUser(request: Request, env: Env): Promise<SessionUser | null> {
   const sessionId = getCookie(request, "rl_session");
@@ -14,6 +14,7 @@ export async function requireUser(request: Request, env: Env): Promise<SessionUs
     .first<any>();
   if (!row) return null;
   const premium = row.sub_status === "active" && (!row.current_period_end || Number(row.current_period_end) > ts);
-  return { id: row.id, email: row.email, displayName: row.display_name, premium };
+  const adminEmail = (env.OWNER_ADMIN_EMAIL ?? "").trim().toLowerCase();
+  const isAdmin = adminEmail && row.email?.toLowerCase() === adminEmail;
+  return { id: row.id, email: row.email, displayName: row.display_name, premium, isAdmin };
 }
-

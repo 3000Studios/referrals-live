@@ -32,11 +32,12 @@ export async function onRequestPost(context: { request: Request; env: Env }) {
   ).run();
 
   const premium = row.sub_status === "active" && (!row.current_period_end || Number(row.current_period_end) > ts);
+  const adminEmail = (context.env.OWNER_ADMIN_EMAIL ?? "").trim().toLowerCase();
+  const isAdmin = adminEmail && row.email?.toLowerCase() === adminEmail;
   const headers = new Headers();
   headers.set("Set-Cookie", setCookie("rl_session", sessionId, { maxAgeSeconds }));
   return json(
-    { ok: true, user: { id: row.id, email: row.email, displayName: row.display_name, premium } },
+    { ok: true, user: { id: row.id, email: row.email, displayName: row.display_name, premium, isAdmin } },
     { headers },
   );
 }
-

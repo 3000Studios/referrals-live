@@ -15,6 +15,7 @@ export async function onRequestGet(context: { request: Request; env: Env }) {
 
   if (!row) return json({ ok: true, user: null });
   const premium = row.sub_status === "active" && (!row.current_period_end || Number(row.current_period_end) > ts);
-  return json({ ok: true, user: { id: row.id, email: row.email, displayName: row.display_name, premium } });
+  const adminEmail = (context.env.OWNER_ADMIN_EMAIL ?? "").trim().toLowerCase();
+  const isAdmin = adminEmail && row.email?.toLowerCase() === adminEmail;
+  return json({ ok: true, user: { id: row.id, email: row.email, displayName: row.display_name, premium, isAdmin } });
 }
-
