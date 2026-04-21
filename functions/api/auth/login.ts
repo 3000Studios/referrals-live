@@ -10,7 +10,7 @@ export async function onRequestPost(context: { request: Request; env: Env }) {
   if (!cleanEmail.includes("@")) return badRequest("Enter a valid email.");
 
   const row = await DB.prepare(
-    "SELECT u.id as id, u.email as email, u.display_name as display_name, u.password_hash as password_hash, s.status as sub_status, s.current_period_end as current_period_end FROM users u LEFT JOIN subscriptions s ON s.user_id=u.id WHERE u.email=? LIMIT 1",
+    "SELECT u.id as id, u.email as email, u.display_name as display_name, u.avatar as avatar, u.color as color, u.password_hash as password_hash, s.status as sub_status, s.current_period_end as current_period_end FROM users u LEFT JOIN subscriptions s ON s.user_id=u.id WHERE u.email=? LIMIT 1",
   )
     .bind(cleanEmail)
     .first<any>();
@@ -37,7 +37,7 @@ export async function onRequestPost(context: { request: Request; env: Env }) {
   const headers = new Headers();
   headers.set("Set-Cookie", setCookie("rl_session", sessionId, { maxAgeSeconds }));
   return json(
-    { ok: true, user: { id: row.id, email: row.email, displayName: row.display_name, premium, isAdmin } },
+    { ok: true, user: { id: row.id, email: row.email, displayName: row.display_name, premium, isAdmin, avatar: row.avatar ?? null, color: row.color ?? null } },
     { headers },
   );
 }

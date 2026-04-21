@@ -16,12 +16,14 @@ export async function onRequestPost(context: { request: Request; env: Env }) {
     const passwordHash = await hashPassword(password);
     const userId = uid("user");
     const ts = now();
+    const avatar = "spark";
+    const color = "neon";
 
     try {
       await DB.batch([
         DB.prepare(
-          "INSERT INTO users (id, email, display_name, password_hash, created_at) VALUES (?, ?, ?, ?, ?)",
-        ).bind(userId, cleanEmail, cleanName, passwordHash, ts),
+          "INSERT INTO users (id, email, display_name, password_hash, avatar, color, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
+        ).bind(userId, cleanEmail, cleanName, passwordHash, avatar, color, ts),
         DB.prepare(
           "INSERT OR REPLACE INTO subscriptions (user_id, status, current_period_end) VALUES (?, 'free', NULL)",
         ).bind(userId),
@@ -49,7 +51,7 @@ export async function onRequestPost(context: { request: Request; env: Env }) {
     headers.set("Set-Cookie", setCookie("rl_session", sessionId, { maxAgeSeconds }));
     const adminEmail = (context.env.OWNER_ADMIN_EMAIL ?? "").trim().toLowerCase();
     const isAdmin = adminEmail && cleanEmail === adminEmail;
-    return json({ ok: true, user: { id: userId, email: cleanEmail, displayName: cleanName, premium: false, isAdmin } }, { headers });
+    return json({ ok: true, user: { id: userId, email: cleanEmail, displayName: cleanName, premium: false, isAdmin, avatar, color } }, { headers });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Register failed";
     return json({ ok: false, error: message }, { status: 500 });

@@ -121,6 +121,12 @@ export class ChatRoom {
         await this.state.storage.put("messages", seed);
         await this.state.storage.put("seeded", "1");
       }
+      const alarm = await this.state.storage.get<number>("nextAlarm");
+      if (!alarm) {
+        const next = Date.now() + 15 * 60 * 1000;
+        await this.state.storage.put("nextAlarm", next);
+        await this.state.storage.setAlarm(next);
+      }
     });
   }
 
@@ -224,5 +230,32 @@ export class ChatRoom {
     }
 
     return new Response("not found", { status: 404 });
+  }
+
+  async alarm() {
+    // Post a clearly-labeled BOT message periodically (no deception).
+    const ts = Date.now();
+    const botLines = [
+      "If you’ve got a good referral program page, drop it after you upgrade—mods keep it clean and high-signal.",
+      "Pro tip: upvote the offers that actually convert for your niche so they stay on top.",
+      "Reminder: keep chat PG‑13. No scams, no personal info, no hate.",
+      "What’s your niche today: fintech, crypto, saas, travel, ecommerce, or health?",
+    ];
+    const pick = botLines[Math.floor(Math.random() * botLines.length)]!;
+    const message = { id: crypto.randomUUID(), ts, user: "CommunityBot (BOT)", role: "bot", text: pick };
+    const existing = (await this.state.storage.get<any[]>("messages")) ?? [];
+    const next = [...existing, message].slice(-200);
+    await this.state.storage.put("messages", next);
+
+    const payload = JSON.stringify({ type: "msg", message });
+    for (const ws of this.sockets) {
+      try {
+        ws.send(payload);
+      } catch {}
+    }
+
+    const nextAlarm = ts + 20 * 60 * 1000;
+    await this.state.storage.put("nextAlarm", nextAlarm);
+    await this.state.storage.setAlarm(nextAlarm);
   }
 }

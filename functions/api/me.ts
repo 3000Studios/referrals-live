@@ -8,7 +8,7 @@ export async function onRequestGet(context: { request: Request; env: Env }) {
 
   const ts = now();
   const row = await DB.prepare(
-    "SELECT u.id as id, u.email as email, u.display_name as display_name, s2.status as sub_status, s2.current_period_end as current_period_end FROM sessions s JOIN users u ON u.id=s.user_id LEFT JOIN subscriptions s2 ON s2.user_id=u.id WHERE s.id=? AND s.expires_at>? LIMIT 1",
+    "SELECT u.id as id, u.email as email, u.display_name as display_name, u.avatar as avatar, u.color as color, s2.status as sub_status, s2.current_period_end as current_period_end FROM sessions s JOIN users u ON u.id=s.user_id LEFT JOIN subscriptions s2 ON s2.user_id=u.id WHERE s.id=? AND s.expires_at>? LIMIT 1",
   )
     .bind(sessionId, ts)
     .first<any>();
@@ -17,5 +17,5 @@ export async function onRequestGet(context: { request: Request; env: Env }) {
   const premium = row.sub_status === "active" && (!row.current_period_end || Number(row.current_period_end) > ts);
   const adminEmail = (context.env.OWNER_ADMIN_EMAIL ?? "").trim().toLowerCase();
   const isAdmin = adminEmail && row.email?.toLowerCase() === adminEmail;
-  return json({ ok: true, user: { id: row.id, email: row.email, displayName: row.display_name, premium, isAdmin } });
+  return json({ ok: true, user: { id: row.id, email: row.email, displayName: row.display_name, premium, isAdmin, avatar: row.avatar ?? null, color: row.color ?? null } });
 }

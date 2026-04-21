@@ -1,4 +1,4 @@
-export type ApiUser = { id: string; email: string; displayName: string; premium: boolean; isAdmin?: boolean };
+export type ApiUser = { id: string; email: string; displayName: string; premium: boolean; isAdmin?: boolean; avatar?: string | null; color?: string | null };
 export type ApiReferral = {
   id: string;
   title: string;

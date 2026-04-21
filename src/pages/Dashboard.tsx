@@ -23,6 +23,7 @@ export function Dashboard() {
   const [slots, setSlots] = useState<Array<{ slot: 1 | 2; referralId: string }>>([]);
   const [error, setError] = useState<string | null>(null);
   const onboarding = params.get("onboarding") === "1";
+  const [profile, setProfile] = useState<{ avatar?: string | null; color?: string | null }>({});
 
   const featuredMap = useMemo(() => {
     const m = new Map<number, string>();
@@ -35,6 +36,7 @@ export function Dashboard() {
     await hydrate();
     const me = (await api.me()).user;
     if (!me) return;
+    setProfile({ avatar: me.avatar ?? null, color: me.color ?? null });
     const [r, f] = await Promise.all([api.myReferrals(), api.featured()]);
     setMyReferrals(r.referrals as any);
     setSlots((f.slots ?? []).map((s: any) => ({ slot: s.slot as 1 | 2, referralId: s.referralId })));
@@ -118,6 +120,27 @@ export function Dashboard() {
           ) : null}
         </div>
       ) : null}
+
+      <div className="mt-6 glass rounded-3xl border border-white/10 p-6">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <div className="text-xs font-semibold uppercase tracking-[0.25em] text-electric">Profile</div>
+            <div className="mt-2 text-sm text-muted">
+              Avatar: <span className="text-white">{profile.avatar ?? "—"}</span> · Color:{" "}
+              <span className="text-white">{profile.color ?? "—"}</span>
+            </div>
+          </div>
+          <a
+            href="/admin"
+            className="rounded-2xl border border-electric/40 px-5 py-3 text-sm font-semibold text-electric hover:bg-electric/10"
+          >
+            Owner settings →
+          </a>
+        </div>
+        <p className="mt-3 text-sm text-muted">
+          Change your avatar + name color in the chat soon. (Next: profile editor UI.)
+        </p>
+      </div>
 
       {error ? (
         <div className="mt-6 rounded-2xl border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-200">{error}</div>
