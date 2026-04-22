@@ -19,7 +19,7 @@ export function MouseTrail() {
   return (
     <motion.div
       aria-hidden
-      className="pointer-events-none fixed left-0 top-0 z-30 h-40 w-40 -translate-x-1/2 -translate-y-1/2 rounded-full bg-gradient-to-br from-neon/25 via-electric/10 to-transparent blur-3xl mix-blend-screen"
+      className="pointer-events-none fixed left-0 top-0 z-0 h-32 w-32 -translate-x-1/2 -translate-y-1/2 rounded-full bg-gradient-to-br from-neon/12 via-electric/6 to-transparent opacity-60 blur-3xl"
       style={{ x: sx, y: sy }}
     />
   );

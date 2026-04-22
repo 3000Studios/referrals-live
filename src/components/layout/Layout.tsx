@@ -49,9 +49,11 @@ export function Layout() {
             transition={{ duration: 0.28 }}
             className="mx-auto max-w-7xl px-4 pb-24"
           >
-            <Suspense fallback={<PageLoader />}>
-              <Outlet />
-            </Suspense>
+            <div className="page-shell rounded-[2rem] border border-white/10 px-4 py-6 shadow-[0_24px_90px_rgba(0,0,0,0.45)] md:px-6 md:py-8">
+              <Suspense fallback={<PageLoader />}>
+                <Outlet />
+              </Suspense>
+            </div>
           </motion.main>
         </AnimatePresence>
       </div>

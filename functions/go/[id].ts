@@ -1,6 +1,10 @@
 import type { Env } from "../api/_lib";
 import { now } from "../api/_lib";
 
+function replaceTokens(value: string, profile: Record<string, string>) {
+  return value.replace(/\{\{([A-Z_]+)\}\}/g, (_match, token) => profile[token] ?? "");
+}
+
 export async function onRequestGet(context: { request: Request; env: Env; params: { id: string } }) {
   const id = context.params.id;
   if (!id) return new Response("Missing id", { status: 400 });
@@ -28,11 +32,24 @@ export async function onRequestGet(context: { request: Request; env: Env; params
     const u = new URL(out);
     const domain = u.hostname.replace(/^www\./, "").toLowerCase();
     const attr = await db.prepare("SELECT params_json FROM owner_attribution WHERE domain=? LIMIT 1").bind(domain).first<any>();
+    const owner = await db.prepare(
+      "SELECT owner_name, owner_email, paypal_email, venmo_handle, stripe_email, default_referral_code FROM owner_profile WHERE id='owner' LIMIT 1",
+    ).first<any>();
     if (attr?.params_json) {
+      const profile = {
+        OWNER_NAME: String(owner?.owner_name ?? ""),
+        OWNER_EMAIL: String(owner?.owner_email ?? ""),
+        PAYPAL_EMAIL: String(owner?.paypal_email ?? ""),
+        VENMO_HANDLE: String(owner?.venmo_handle ?? ""),
+        STRIPE_EMAIL: String(owner?.stripe_email ?? ""),
+        DEFAULT_REFERRAL_CODE: String(owner?.default_referral_code ?? ""),
+      };
       const params = JSON.parse(attr.params_json) as Record<string, string>;
       Object.entries(params).forEach(([k, v]) => {
         if (!k || !v) return;
-        u.searchParams.set(k, v);
+        const resolved = replaceTokens(String(v), profile).trim();
+        if (!resolved) return;
+        u.searchParams.set(k, resolved);
       });
       u.searchParams.set("utm_source", "referrals_live");
       u.searchParams.set("utm_medium", "curated_public");

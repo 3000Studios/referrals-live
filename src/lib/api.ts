@@ -10,6 +10,7 @@ export type ApiReferral = {
   votes: number;
   clicks: number;
   createdAt: number;
+  source?: string;
 };
 
 async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
@@ -34,6 +35,10 @@ export const api = {
   logout: () => apiFetch<{ ok: true }>("/api/auth/logout", { method: "POST" }),
 
   publicReferrals: () => apiFetch<{ ok: true; referrals: ApiReferral[] }>("/api/referrals"),
+  searchDiscovery: (query: string, category = "all") =>
+    apiFetch<{ ok: true; results: ApiReferral[] }>(
+      `/api/discovery/search?q=${encodeURIComponent(query)}&cat=${encodeURIComponent(category)}`,
+    ),
   myReferrals: () => apiFetch<{ ok: true; referrals: any[] }>("/api/my/referrals"),
   createReferral: (input: { title: string; description: string; url: string; category: string; tags: string[]; imageUrl: string; status?: "private" | "public_candidate" }) =>
     apiFetch<{ ok: true; referral: { id: string } }>("/api/referrals", { method: "POST", body: JSON.stringify(input) }),

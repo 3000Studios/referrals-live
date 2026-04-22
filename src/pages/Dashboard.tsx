@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Seo } from "@/components/seo/Seo";
 import { api } from "@/lib/api";
 import { useAppStore } from "@/store/useAppStore";
@@ -18,12 +18,14 @@ export function Dashboard() {
   const hydrate = useAppStore((s) => s.hydrate);
   const { mode, setMode, isAdmin, premiumView } = useViewerMode();
   const [params] = useSearchParams();
+  const navigate = useNavigate();
 
   const [myReferrals, setMyReferrals] = useState<MyReferral[]>([]);
   const [slots, setSlots] = useState<Array<{ slot: 1 | 2; referralId: string }>>([]);
   const [error, setError] = useState<string | null>(null);
   const onboarding = params.get("onboarding") === "1";
   const [profile, setProfile] = useState<{ avatar?: string | null; color?: string | null }>({});
+  const [promoQuery, setPromoQuery] = useState("");
 
   const featuredMap = useMemo(() => {
     const m = new Map<number, string>();
@@ -130,16 +132,41 @@ export function Dashboard() {
               <span className="text-white">{profile.color ?? "—"}</span>
             </div>
           </div>
-          <a
-            href="/admin"
-            className="rounded-2xl border border-electric/40 px-5 py-3 text-sm font-semibold text-electric hover:bg-electric/10"
-          >
-            Owner settings →
-          </a>
+          {isAdmin ? (
+            <a
+              href="/admin"
+              className="rounded-2xl border border-electric/40 px-5 py-3 text-sm font-semibold text-electric hover:bg-electric/10"
+            >
+              Owner settings →
+            </a>
+          ) : null}
         </div>
         <p className="mt-3 text-sm text-muted">
           Change your avatar + name color in the chat soon. (Next: profile editor UI.)
         </p>
+      </div>
+
+      <div className="mt-6 glass rounded-3xl border border-white/10 p-6">
+        <div className="text-xs font-semibold uppercase tracking-[0.25em] text-gold">Promo finder</div>
+        <h2 className="mt-2 font-display text-2xl font-bold text-white">Find more promo codes</h2>
+        <p className="mt-2 text-sm text-muted">
+          Search the live discovery feed for more referral pages and promo opportunities.
+        </p>
+        <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+          <input
+            value={promoQuery}
+            onChange={(e) => setPromoQuery(e.target.value)}
+            placeholder="Try fintech, hosting, travel, cards, cashback..."
+            className="w-full rounded-2xl border border-white/10 bg-black/40 px-4 py-3 text-sm text-white outline-none ring-neon/30 focus:ring"
+          />
+          <button
+            type="button"
+            onClick={() => navigate(`/browse?q=${encodeURIComponent(promoQuery.trim())}`)}
+            className="rounded-2xl bg-gradient-to-r from-neon to-emerald-400 px-6 py-3 text-sm font-semibold text-black shadow-neon"
+          >
+            Find more promo codes
+          </button>
+        </div>
       </div>
 
       {error ? (

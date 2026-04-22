@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Seo } from "@/components/seo/Seo";
 import { useAppStore } from "@/store/useAppStore";
@@ -6,6 +6,7 @@ import { ReferralCard } from "@/components/referrals/ReferralCard";
 import { sortByNewest, sortByPopular, sortByTrending } from "@/lib/trending";
 import { categories } from "@/data/categories";
 import { AdSlot } from "@/components/monetization/AdSlot";
+import { api } from "@/lib/api";
 
 type Sort = "trending" | "popular" | "newest";
 
@@ -18,10 +19,31 @@ export function Browse() {
   const [query, setQuery] = useState(initialQ);
   const [category, setCategory] = useState(initialCat);
   const [sort, setSort] = useState<Sort>("trending");
+  const [remoteResults, setRemoteResults] = useState(referrals);
+  const [searching, setSearching] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    setSearching(true);
+    api
+      .searchDiscovery(query, category)
+      .then((res) => {
+        if (!cancelled) setRemoteResults(res.results as typeof referrals);
+      })
+      .catch(() => {
+        if (!cancelled) setRemoteResults(referrals);
+      })
+      .finally(() => {
+        if (!cancelled) setSearching(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [query, category, referrals]);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return referrals.filter((r) => {
+    return remoteResults.filter((r) => {
       const catOk = category === "all" || r.category === category;
       if (!catOk) return false;
       if (!q) return true;
@@ -31,7 +53,7 @@ export function Browse() {
         r.tags.some((t) => t.toLowerCase().includes(q))
       );
     });
-  }, [referrals, query, category]);
+  }, [remoteResults, query, category]);
 
   const sorted = useMemo(() => {
     if (sort === "trending") return sortByTrending(filtered);
@@ -51,7 +73,7 @@ export function Browse() {
           <div className="text-xs font-semibold uppercase tracking-[0.25em] text-neon">Marketplace</div>
           <h1 className="font-display text-4xl font-extrabold text-white">Browse referrals</h1>
           <p className="mt-3 max-w-2xl text-sm text-muted">
-            Instant search + sorting. Click tracking hooks are wired for analytics integrations.
+            Instant search + sorting across live member links and the hourly discovery feed.
           </p>
         </div>
       </div>
@@ -105,6 +127,12 @@ export function Browse() {
           <ReferralCard key={r.id} referral={r} index={i} />
         ))}
       </div>
+      {!sorted.length ? (
+        <div className="mt-8 glass rounded-3xl p-6 text-sm text-muted">
+          No promo codes matched yet. Try a broader keyword like `bank`, `travel`, `hosting`, or `cashback`.
+        </div>
+      ) : null}
+      <div className="mt-4 text-xs text-muted">{searching ? "Searching the discovery feed…" : `Showing ${sorted.length} results`}</div>
     </div>
   );
 }
