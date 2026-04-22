@@ -78,6 +78,26 @@ async function upsert(env: Env) {
     );
   }
   await env.DB.batch(stmts);
+
+  const gateway = await env.DB.prepare("SELECT value_json FROM site_settings WHERE key='hq_gateway' LIMIT 1").first<any>();
+  if (gateway?.value_json) {
+    const config = JSON.parse(gateway.value_json) as { webhookUrl?: string; sharedSecret?: string };
+    if (config.webhookUrl) {
+      const payload = {
+        site: "referrals.live",
+        generatedAt: ts,
+        crawlSchedule: "*/30 * * * *",
+        offers: curated.map((item) => ({ id: item.id, title: item.title, category: item.category, score: item.score })),
+      };
+      const headers: Record<string, string> = { "Content-Type": "application/json; charset=utf-8" };
+      if (config.sharedSecret) headers["x-3000studios-secret"] = config.sharedSecret;
+      await fetch(config.webhookUrl, {
+        method: "POST",
+        headers,
+        body: JSON.stringify(payload),
+      }).catch(() => null);
+    }
+  }
 }
 
 export default {

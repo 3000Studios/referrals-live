@@ -58,6 +58,46 @@ body {
   backdrop-filter: blur(10px);
 }
 
+.footer-wave-wrap {
+  min-height: 360px;
+}
+
+.footer-wave {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: linear-gradient(180deg, rgba(5, 18, 9, 0.88), rgba(2, 9, 4, 0.98));
+  box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.45);
+}
+
+.footer-wave span {
+  position: absolute;
+  width: 240vw;
+  height: 240vw;
+  left: 50%;
+  top: 0;
+  transform: translate(-50%, -82%);
+  background: #000;
+}
+
+.footer-wave span:nth-child(1) {
+  border-radius: 45%;
+  background: rgba(9, 24, 12, 1);
+  animation: footerWaveSpin 8s linear infinite;
+}
+
+.footer-wave span:nth-child(2) {
+  border-radius: 40%;
+  background: rgba(10, 80, 26, 0.42);
+  animation: footerWaveSpin 13s linear infinite;
+}
+
+.footer-wave span:nth-child(3) {
+  border-radius: 42.5%;
+  background: rgba(16, 185, 88, 0.2);
+  animation: footerWaveSpin 18s linear infinite;
+}
+
 .neon-ring {
   box-shadow:
     0 0 0 1px rgba(0, 255, 136, 0.25),
@@ -144,6 +184,15 @@ body {
   }
 }
 
+@keyframes footerWaveSpin {
+  0% {
+    transform: translate(-50%, -82%) rotate(0deg);
+  }
+  100% {
+    transform: translate(-50%, -82%) rotate(360deg);
+  }
+}
+
 .animate-ticker {
   animation: ticker 38s linear infinite;
 }
@@ -153,7 +202,8 @@ body {
     animation: none;
   }
   .logo-animated,
-  .card-aurora::before {
+  .card-aurora::before,
+  .footer-wave span {
     animation: none;
   }
 }

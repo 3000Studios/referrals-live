@@ -12,6 +12,19 @@ type OwnerProfile = {
   defaultReferralCode: string;
   notes: Record<string, string>;
 };
+type Overview = {
+  publicReferrals: number;
+  activePremium: number;
+  emailCaptures: number;
+  activeFeaturedSlots: number;
+  ingestedOffers: number;
+  lastIngestedAt: number;
+  stripeConfigured: boolean;
+  adsTxtUrl: string;
+  ownerRewardProfileReady: boolean;
+  hqGateway: { webhookUrl: string; sharedSecretConfigured: boolean; updatedAt: number };
+  crawlSchedule: string;
+};
 
 export function Admin() {
   const user = useAppStore((s) => s.user);
@@ -34,6 +47,9 @@ export function Admin() {
   });
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
+  const [overview, setOverview] = useState<Overview | null>(null);
+  const [hqWebhookUrl, setHqWebhookUrl] = useState("");
+  const [hqSharedSecret, setHqSharedSecret] = useState("");
 
   const load = async () => {
     const r = await fetch("/api/owner-attribution", { credentials: "include" });
@@ -61,9 +77,19 @@ export function Admin() {
     });
   };
 
+  const loadOverview = async () => {
+    const r = await fetch("/api/admin/overview", { credentials: "include" });
+    const data = await r.json();
+    if (!r.ok) throw new Error(data?.error ?? "Failed to load overview");
+    setOverview(data.overview ?? null);
+    setHqWebhookUrl(data.overview?.hqGateway?.webhookUrl ?? "");
+    setHqSharedSecret("");
+  };
+
   useEffect(() => {
     load().catch(() => null);
     loadOwnerProfile().catch(() => null);
+    loadOverview().catch(() => null);
   }, []);
 
   const note = useMemo(
@@ -90,6 +116,47 @@ export function Admin() {
       <p className="mt-3 max-w-3xl whitespace-pre-line text-sm text-muted">{note}</p>
 
       <div className="mt-10 grid gap-8 lg:grid-cols-[1fr_1fr]">
+        <div className="glass rounded-3xl border border-white/10 p-6 lg:col-span-2">
+          <div className="text-xs font-semibold uppercase tracking-[0.25em] text-electric">Site command center</div>
+          <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+            {[
+              ["Public referrals", overview?.publicReferrals ?? 0],
+              ["Active premium", overview?.activePremium ?? 0],
+              ["Email captures", overview?.emailCaptures ?? 0],
+              ["Featured slots live", overview?.activeFeaturedSlots ?? 0],
+              ["Ingested offers", overview?.ingestedOffers ?? 0],
+            ].map(([label, value]) => (
+              <div key={String(label)} className="rounded-2xl border border-white/10 bg-black/30 p-4">
+                <div className="text-[11px] uppercase tracking-[0.2em] text-muted">{label}</div>
+                <div className="mt-2 font-display text-3xl font-bold text-white">{String(value)}</div>
+              </div>
+            ))}
+          </div>
+          <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            <div className="rounded-2xl border border-white/10 bg-black/30 p-4 text-sm text-muted">
+              <div className="text-[11px] uppercase tracking-[0.2em] text-gold">Billing</div>
+              <div className="mt-2 font-semibold text-white">{overview?.stripeConfigured ? "Stripe connected" : "Stripe needs attention"}</div>
+            </div>
+            <div className="rounded-2xl border border-white/10 bg-black/30 p-4 text-sm text-muted">
+              <div className="text-[11px] uppercase tracking-[0.2em] text-gold">Ads</div>
+              <a className="mt-2 block font-semibold text-electric hover:text-white" href={overview?.adsTxtUrl ?? "/ads.txt"} target="_blank" rel="noreferrer">
+                Check ads.txt →
+              </a>
+            </div>
+            <div className="rounded-2xl border border-white/10 bg-black/30 p-4 text-sm text-muted">
+              <div className="text-[11px] uppercase tracking-[0.2em] text-gold">Reward profile</div>
+              <div className="mt-2 font-semibold text-white">{overview?.ownerRewardProfileReady ? "Configured" : "Missing payout details"}</div>
+            </div>
+            <div className="rounded-2xl border border-white/10 bg-black/30 p-4 text-sm text-muted">
+              <div className="text-[11px] uppercase tracking-[0.2em] text-gold">Crawler</div>
+              <div className="mt-2 font-semibold text-white">{overview?.crawlSchedule ?? "Every 30 minutes"}</div>
+              <div className="mt-1 text-xs text-muted">
+                {overview?.lastIngestedAt ? new Date(overview.lastIngestedAt).toLocaleString() : "Waiting for next run"}
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div className="glass rounded-3xl border border-white/10 p-6">
           <div className="text-xs font-semibold uppercase tracking-[0.25em] text-gold">Owner reward profile</div>
           <p className="mt-2 text-sm text-muted">
@@ -164,6 +231,61 @@ export function Admin() {
           >
             Save reward profile
           </button>
+        </div>
+
+        <div className="glass rounded-3xl border border-white/10 p-6">
+          <div className="text-xs font-semibold uppercase tracking-[0.25em] text-electric">3000studios.vip gateway</div>
+          <p className="mt-2 text-sm text-muted">
+            Configure a headquarters webhook so this site can push crawl summaries and health signals into `3000studios.vip`.
+          </p>
+          <div className="mt-5 space-y-4">
+            <label className="block text-xs uppercase tracking-wide text-muted">
+              HQ webhook URL
+              <input
+                value={hqWebhookUrl}
+                onChange={(e) => setHqWebhookUrl(e.target.value)}
+                placeholder="https://3000studios.vip/api/hq/intake"
+                className="mt-2 w-full rounded-2xl border border-white/10 bg-black/40 px-4 py-3 text-sm outline-none ring-neon/30 focus:ring"
+              />
+            </label>
+            <label className="block text-xs uppercase tracking-wide text-muted">
+              Shared secret
+              <input
+                value={hqSharedSecret}
+                onChange={(e) => setHqSharedSecret(e.target.value)}
+                placeholder="optional secret for secure posts"
+                className="mt-2 w-full rounded-2xl border border-white/10 bg-black/40 px-4 py-3 text-sm outline-none ring-neon/30 focus:ring"
+              />
+            </label>
+            <div className="text-xs text-muted">
+              Status: <span className="text-white">{overview?.hqGateway?.webhookUrl ? "Connected" : "Not connected"}</span>
+            </div>
+            <button
+              type="button"
+              onClick={async () => {
+                setError(null);
+                setSaved(false);
+                try {
+                  const r = await fetch("/api/admin/overview", {
+                    method: "POST",
+                    credentials: "include",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ webhookUrl: hqWebhookUrl.trim(), sharedSecret: hqSharedSecret.trim() }),
+                  });
+                  const data = await r.json();
+                  if (!r.ok) throw new Error(data?.error ?? "Failed to save HQ gateway");
+                  await loadOverview();
+                  setSaved(true);
+                  setTimeout(() => setSaved(false), 1200);
+                } catch (e) {
+                  setError(e instanceof Error ? e.message : "Failed to save HQ gateway");
+                }
+              }}
+              className="w-full rounded-2xl bg-gradient-to-r from-electric to-neon px-6 py-4 text-sm font-semibold text-black"
+            >
+              Save HQ gateway
+            </button>
+          </div>
         </div>
 
         <div className="glass rounded-3xl border border-white/10 p-6">

@@ -1,7 +1,8 @@
 import { Seo } from "@/components/seo/Seo";
 import { useAppStore } from "@/store/useAppStore";
 import { trackEvent, trackPremiumView } from "@/lib/analytics";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 
 const plan = {
   name: "Premium",
@@ -17,6 +18,8 @@ const plan = {
 
 export function Premium() {
   const user = useAppStore((s) => s.user);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     trackPremiumView("premium_page");
@@ -48,22 +51,39 @@ export function Premium() {
               </li>
             ))}
           </ul>
-          <button
-            type="button"
-            onClick={() => {
-              trackEvent("premium_click", { plan: plan.name });
-              fetch("/api/billing/checkout", { method: "POST", credentials: "include" })
-                .then((r) => r.json())
-                .then((d) => {
-                  if (d?.url) window.location.href = d.url;
-                })
-                .catch(() => null);
-            }}
-            className="mt-8 w-full rounded-2xl bg-gradient-to-r from-neon to-emerald-400 px-4 py-3 text-sm font-semibold text-black shadow-neon disabled:opacity-40"
-            disabled={!user}
-          >
-            {user ? "Upgrade to Premium" : "Login to upgrade"}
-          </button>
+          {user ? (
+            <button
+              type="button"
+              onClick={() => {
+                setLoading(true);
+                setError(null);
+                trackEvent("premium_click", { plan: plan.name });
+                fetch("/api/billing/checkout", { method: "POST", credentials: "include" })
+                  .then((r) => r.json())
+                  .then((d) => {
+                    if (d?.url) {
+                      window.location.href = d.url;
+                      return;
+                    }
+                    throw new Error(d?.error ?? "Unable to start checkout");
+                  })
+                  .catch((err) => setError(err instanceof Error ? err.message : "Unable to start checkout"))
+                  .finally(() => setLoading(false));
+              }}
+              className="mt-8 w-full rounded-2xl bg-gradient-to-r from-neon to-emerald-400 px-4 py-3 text-sm font-semibold text-black shadow-neon disabled:opacity-40"
+              disabled={loading}
+            >
+              {loading ? "Opening checkout..." : "Upgrade to Premium"}
+            </button>
+          ) : (
+            <Link
+              to="/login"
+              className="mt-8 inline-flex w-full justify-center rounded-2xl bg-gradient-to-r from-neon to-emerald-400 px-4 py-3 text-sm font-semibold text-black shadow-neon"
+            >
+              Login to upgrade
+            </Link>
+          )}
+          {error ? <div className="mt-4 rounded-2xl border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-100">{error}</div> : null}
         </div>
 
         <div className="glass rounded-3xl border border-white/10 p-6 text-sm text-muted">
