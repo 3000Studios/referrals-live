@@ -1,4 +1,12 @@
 export type ApiUser = { id: string; email: string; displayName: string; premium: boolean; isAdmin?: boolean; avatar?: string | null; color?: string | null };
+export type BillingStatus = {
+  premium: boolean;
+  stripeCustomerId: string | null;
+  stripeSubscriptionId: string | null;
+  status: string;
+  currentPeriodEnd: number;
+  activeUntil: number;
+};
 export type ApiReferral = {
   id: string;
   title: string;
@@ -48,6 +56,10 @@ export const api = {
   featured: () => apiFetch<{ ok: true; slots: Array<{ slot: number; referralId: string; startsAt: number; endsAt: number }> }>("/api/my/featured"),
   setFeatured: (slot: 1 | 2, referralId: string) =>
     apiFetch<{ ok: true }>("/api/my/featured", { method: "POST", body: JSON.stringify({ slot, referralId }) }),
+  billingStatus: () => apiFetch<{ ok: true; billing: BillingStatus }>("/api/billing/status"),
+  saveProfile: (input: { displayName?: string; avatar?: string; color?: string }) =>
+    apiFetch<{ ok: true }>("/api/my/profile", { method: "POST", body: JSON.stringify(input) }),
+  profileOptions: () => apiFetch<{ ok: true; profile: { displayName?: string; avatar?: string | null; color?: string | null }; allowed: { avatars: string[]; colors: string[] } }>("/api/my/profile"),
 
   emailCapture: (email: string, source: string) =>
     apiFetch<{ ok: true }>("/api/email-capture", { method: "POST", body: JSON.stringify({ email, source }) }),

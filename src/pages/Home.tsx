@@ -20,6 +20,7 @@ export function Home() {
   const [featured, setFeatured] = useState<typeof referrals>([]);
   const [q, setQ] = useState("");
   const navigate = useNavigate();
+  const suggestedTags = ["SaaS", "Crypto", "Travel", "Cashback", "Hosting", "AI"];
 
   useEffect(() => {
     const root = heroRef.current;
@@ -114,6 +115,18 @@ export function Home() {
               Jump to chat ↓
             </button>
           </div>
+          <div className="mt-4 flex flex-wrap justify-center gap-2">
+            {suggestedTags.map((tag) => (
+              <button
+                key={tag}
+                type="button"
+                onClick={() => navigate(`/browse?q=${encodeURIComponent(tag)}`)}
+                className="rounded-full border border-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/80 hover:border-neon/40 hover:text-white"
+              >
+                #{tag}
+              </button>
+            ))}
+          </div>
           <div className="mt-6 text-[11px] text-muted">
             Outbound clicks use tracked redirects. Owner-attribution parameters are applied only for domains you’ve configured.
           </div>
@@ -135,9 +148,9 @@ export function Home() {
             View all →
           </Link>
         </div>
-        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-8 md:grid-cols-2 xl:grid-cols-3">
           {trending.map((r, i) => (
-            <ReferralCard key={r.id} referral={r} index={i} />
+            <ReferralCard key={r.id} referral={r} index={i} variant="trending" />
           ))}
         </div>
       </section>

@@ -19,6 +19,8 @@ import { Disclaimer } from "@/pages/Disclaimer";
 import { Disclosure } from "@/pages/Disclosure";
 import { NotFound } from "@/pages/NotFound";
 import { Admin } from "@/pages/Admin";
+import { Program } from "@/pages/Program";
+import { OfferRedirect } from "@/pages/OfferRedirect";
 
 export default function App() {
   return (
@@ -32,6 +34,8 @@ export default function App() {
         <Route path="blog" element={<Blog />} />
         <Route path="blog/:slug" element={<BlogPost />} />
         <Route path="premium" element={<Premium />} />
+        <Route path="program/:id" element={<Program />} />
+        <Route path="offer/:id" element={<OfferRedirect />} />
         <Route path="login" element={<Login />} />
         <Route path="register" element={<Register />} />
         <Route path="dashboard" element={<Dashboard />} />

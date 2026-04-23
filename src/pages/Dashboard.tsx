@@ -13,6 +13,9 @@ type MyReferral = {
   clicks: number;
 };
 
+const avatarOptions = ["spark", "cube", "bolt", "crown", "ghost", "star", "wave"] as const;
+const colorOptions = ["neon", "electric", "gold", "purple", "white"] as const;
+
 export function Dashboard() {
   const user = useAppStore((s) => s.user);
   const hydrate = useAppStore((s) => s.hydrate);
@@ -26,6 +29,11 @@ export function Dashboard() {
   const onboarding = params.get("onboarding") === "1";
   const [profile, setProfile] = useState<{ avatar?: string | null; color?: string | null }>({});
   const [promoQuery, setPromoQuery] = useState("");
+  const [billing, setBilling] = useState<{ status: string; activeUntil: number; stripeCustomerId: string | null } | null>(null);
+  const [displayName, setDisplayName] = useState("");
+  const [avatar, setAvatar] = useState<string>("spark");
+  const [color, setColor] = useState<string>("neon");
+  const [profileSaved, setProfileSaved] = useState(false);
 
   const featuredMap = useMemo(() => {
     const m = new Map<number, string>();
@@ -38,10 +46,18 @@ export function Dashboard() {
     await hydrate();
     const me = (await api.me()).user;
     if (!me) return;
+    setDisplayName(me.displayName ?? "");
     setProfile({ avatar: me.avatar ?? null, color: me.color ?? null });
-    const [r, f] = await Promise.all([api.myReferrals(), api.featured()]);
+    setAvatar(me.avatar ?? "spark");
+    setColor(me.color ?? "neon");
+    const [r, f, b] = await Promise.all([api.myReferrals(), api.featured(), api.billingStatus()]);
     setMyReferrals(r.referrals as any);
     setSlots((f.slots ?? []).map((s: any) => ({ slot: s.slot as 1 | 2, referralId: s.referralId })));
+    setBilling({
+      status: b.billing.status,
+      activeUntil: b.billing.activeUntil,
+      stripeCustomerId: b.billing.stripeCustomerId,
+    });
   };
 
   useEffect(() => {
@@ -141,9 +157,103 @@ export function Dashboard() {
             </a>
           ) : null}
         </div>
-        <p className="mt-3 text-sm text-muted">
-          Change your avatar + name color in the chat soon. (Next: profile editor UI.)
-        </p>
+        <div className="mt-5 grid gap-4 md:grid-cols-3">
+          <label className="text-xs uppercase tracking-wide text-muted">
+            Display name
+            <input
+              value={displayName}
+              onChange={(e) => setDisplayName(e.target.value)}
+              className="mt-2 w-full rounded-2xl border border-white/10 bg-black/40 px-4 py-3 text-sm text-white outline-none ring-neon/30 focus:ring"
+            />
+          </label>
+          <label className="text-xs uppercase tracking-wide text-muted">
+            Avatar
+            <select
+              value={avatar}
+              onChange={(e) => setAvatar(e.target.value)}
+              className="mt-2 w-full rounded-2xl border border-white/10 bg-black/40 px-4 py-3 text-sm text-white outline-none"
+            >
+              {avatarOptions.map((item) => (
+                <option key={item} value={item}>
+                  {item}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="text-xs uppercase tracking-wide text-muted">
+            Chat color
+            <select
+              value={color}
+              onChange={(e) => setColor(e.target.value)}
+              className="mt-2 w-full rounded-2xl border border-white/10 bg-black/40 px-4 py-3 text-sm text-white outline-none"
+            >
+              {colorOptions.map((item) => (
+                <option key={item} value={item}>
+                  {item}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+        <div className="mt-4 flex flex-wrap items-center gap-3">
+          <button
+            type="button"
+            onClick={() =>
+              api
+                .saveProfile({ displayName: displayName.trim(), avatar, color })
+                .then(() => {
+                  setProfile({ avatar, color });
+                  setProfileSaved(true);
+                  setTimeout(() => setProfileSaved(false), 1200);
+                  return load();
+                })
+                .catch((err) => setError(err instanceof Error ? err.message : "Failed to save profile."))
+            }
+            className="rounded-2xl bg-gradient-to-r from-electric to-neon px-5 py-3 text-sm font-semibold text-black"
+          >
+            Save profile
+          </button>
+          {profileSaved ? <div className="text-sm text-neon">Profile saved.</div> : null}
+        </div>
+      </div>
+
+      <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_1fr]">
+        <div className="glass rounded-3xl border border-white/10 p-6">
+          <div className="text-xs font-semibold uppercase tracking-[0.25em] text-gold">Billing status</div>
+          <div className="mt-2 text-2xl font-bold text-white">{billing?.status ?? "inactive"}</div>
+          <div className="mt-2 text-sm text-muted">
+            {billing?.activeUntil ? `Active until ${new Date(billing.activeUntil).toLocaleString()}` : "No active Premium subscription recorded."}
+          </div>
+          <div className="mt-2 text-xs text-muted">
+            Stripe customer: <span className="text-white/80">{billing?.stripeCustomerId ?? "not created yet"}</span>
+          </div>
+          <div className="mt-4 flex flex-wrap gap-3">
+            <Link to="/premium" className="rounded-2xl border border-gold/40 px-4 py-2 text-sm font-semibold text-gold hover:bg-gold/10">
+              {premiumView ? "Review Premium" : "Upgrade"}
+            </Link>
+          </div>
+        </div>
+
+        <div className="glass rounded-3xl border border-white/10 p-6">
+          <div className="text-xs font-semibold uppercase tracking-[0.25em] text-neon">Premium controls</div>
+          <div className="mt-2 text-sm text-muted">
+            Premium users can feature 2 homepage links, post in live chat, and track outbound performance.
+          </div>
+          <div className="mt-4 grid gap-3 md:grid-cols-3">
+            <div className="rounded-2xl border border-white/10 bg-black/30 p-4">
+              <div className="text-[11px] uppercase tracking-[0.2em] text-muted">Referrals</div>
+              <div className="mt-2 text-2xl font-bold text-white">{myReferrals.length}</div>
+            </div>
+            <div className="rounded-2xl border border-white/10 bg-black/30 p-4">
+              <div className="text-[11px] uppercase tracking-[0.2em] text-muted">Featured live</div>
+              <div className="mt-2 text-2xl font-bold text-white">{slots.length}/2</div>
+            </div>
+            <div className="rounded-2xl border border-white/10 bg-black/30 p-4">
+              <div className="text-[11px] uppercase tracking-[0.2em] text-muted">Clicks</div>
+              <div className="mt-2 text-2xl font-bold text-white">{myReferrals.reduce((sum, ref) => sum + ref.clicks, 0)}</div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div className="mt-6 glass rounded-3xl border border-white/10 p-6">

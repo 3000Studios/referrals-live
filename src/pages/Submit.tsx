@@ -27,6 +27,7 @@ export function Submit() {
   const [doneId, setDoneId] = useState<string | null>(null);
   const user = useAppStore((s) => s.user);
   const [wantPublicCandidate, setWantPublicCandidate] = useState(false);
+  const [autofillLoading, setAutofillLoading] = useState(false);
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -63,6 +64,35 @@ export function Submit() {
     } catch (err) {
       const message = err instanceof Error ? err.message : "Failed to submit referral.";
       setError(message);
+    }
+  };
+
+  const autofillFromUrl = async () => {
+    if (!isValidUrl(url.trim())) {
+      setError("Enter a valid URL first.");
+      return;
+    }
+    setAutofillLoading(true);
+    setError(null);
+    try {
+      const r = await fetch(`/api/discovery/search?q=${encodeURIComponent(url.trim())}`);
+      await r.json().catch(() => null);
+      const parsed = new URL(url.trim());
+      const domain = parsed.hostname.replace(/^www\./, "");
+      const guessedTitle = domain
+        .split(".")[0]
+        ?.split(/[-_]/g)
+        .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+        .join(" ");
+      if (!title.trim()) setTitle(`${guessedTitle} Referral Offer`);
+      if (!description.trim()) setDescription(`Official offer page for ${domain}. Review the current signup terms before publishing.`);
+      if (!image.trim()) setImage(curatedImage("1498050108023-c5249f4df085"));
+      const matchedCategory = categories.find((item) => domain.includes(item.id.replace(/-/g, "")));
+      if (matchedCategory) setCategory(matchedCategory.id);
+    } catch {
+      setError("Unable to auto-fill from that URL.");
+    } finally {
+      setAutofillLoading(false);
     }
   };
 
@@ -110,6 +140,13 @@ export function Submit() {
               className="mt-2 w-full rounded-2xl border border-white/10 bg-black/40 px-4 py-3 text-sm outline-none ring-neon/30 focus:ring"
             />
           </label>
+          <button
+            type="button"
+            onClick={autofillFromUrl}
+            className="w-full rounded-2xl border border-electric/40 px-5 py-3 text-sm font-semibold text-electric hover:bg-electric/10"
+          >
+            {autofillLoading ? "Auto-filling..." : "Auto-fill from URL"}
+          </button>
           <div className="grid gap-4 md:grid-cols-2">
             <label className="text-xs uppercase tracking-wide text-muted">
               Category

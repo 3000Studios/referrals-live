@@ -38,7 +38,12 @@ export async function onRequestPost(context: { request: Request; env: Env }) {
   if (!customerId) {
     const customer = await stripePost(context.env, "/v1/customers", { email: user.email, name: user.displayName });
     customerId = customer.id;
-    await db.prepare("UPDATE subscriptions SET stripe_customer_id=? WHERE user_id=?").bind(customerId, user.id).run();
+    await db
+      .prepare(
+        "INSERT OR REPLACE INTO subscriptions (user_id, stripe_customer_id, stripe_sub_id, status, current_period_end) VALUES (?, ?, COALESCE((SELECT stripe_sub_id FROM subscriptions WHERE user_id=?), NULL), COALESCE((SELECT status FROM subscriptions WHERE user_id=?), 'inactive'), COALESCE((SELECT current_period_end FROM subscriptions WHERE user_id=?), 0))",
+      )
+      .bind(customerId ? user.id : user.id, customerId, user.id, user.id, user.id)
+      .run();
   }
 
   const session = await stripePost(context.env, "/v1/checkout/sessions", {
@@ -49,8 +54,9 @@ export async function onRequestPost(context: { request: Request; env: Env }) {
     success_url: `${appOrigin}/dashboard?billing=success`,
     cancel_url: `${appOrigin}/premium?billing=cancel`,
     client_reference_id: user.id,
+    "metadata[user_id]": user.id,
+    "subscription_data[metadata][user_id]": user.id,
   });
 
   return json({ ok: true, url: session.url });
 }
-

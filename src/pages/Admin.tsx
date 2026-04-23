@@ -23,6 +23,7 @@ type Overview = {
   adsTxtUrl: string;
   ownerRewardProfileReady: boolean;
   hqGateway: { webhookUrl: string; sharedSecretConfigured: boolean; updatedAt: number };
+  automation: { autoFeatureAttributedFeed: boolean; autoFeatureLimit: number };
   crawlSchedule: string;
 };
 
@@ -50,6 +51,8 @@ export function Admin() {
   const [overview, setOverview] = useState<Overview | null>(null);
   const [hqWebhookUrl, setHqWebhookUrl] = useState("");
   const [hqSharedSecret, setHqSharedSecret] = useState("");
+  const [autoFeatureAttributedFeed, setAutoFeatureAttributedFeed] = useState(true);
+  const [autoFeatureLimit, setAutoFeatureLimit] = useState(4);
 
   const load = async () => {
     const r = await fetch("/api/owner-attribution", { credentials: "include" });
@@ -84,6 +87,8 @@ export function Admin() {
     setOverview(data.overview ?? null);
     setHqWebhookUrl(data.overview?.hqGateway?.webhookUrl ?? "");
     setHqSharedSecret("");
+    setAutoFeatureAttributedFeed(data.overview?.automation?.autoFeatureAttributedFeed !== false);
+    setAutoFeatureLimit(Number(data.overview?.automation?.autoFeatureLimit ?? 4));
   };
 
   useEffect(() => {
@@ -260,6 +265,26 @@ export function Admin() {
             <div className="text-xs text-muted">
               Status: <span className="text-white">{overview?.hqGateway?.webhookUrl ? "Connected" : "Not connected"}</span>
             </div>
+            <label className="flex items-center justify-between rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-white">
+              <span>Auto-feature attributable offers on homepage</span>
+              <input
+                type="checkbox"
+                checked={autoFeatureAttributedFeed}
+                onChange={(e) => setAutoFeatureAttributedFeed(e.target.checked)}
+                className="h-4 w-4 accent-lime-400"
+              />
+            </label>
+            <label className="block text-xs uppercase tracking-wide text-muted">
+              Auto-feature limit
+              <input
+                type="number"
+                min={0}
+                max={12}
+                value={autoFeatureLimit}
+                onChange={(e) => setAutoFeatureLimit(Number(e.target.value || 0))}
+                className="mt-2 w-full rounded-2xl border border-white/10 bg-black/40 px-4 py-3 text-sm outline-none ring-neon/30 focus:ring"
+              />
+            </label>
             <button
               type="button"
               onClick={async () => {
@@ -270,7 +295,12 @@ export function Admin() {
                     method: "POST",
                     credentials: "include",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ webhookUrl: hqWebhookUrl.trim(), sharedSecret: hqSharedSecret.trim() }),
+                    body: JSON.stringify({
+                      webhookUrl: hqWebhookUrl.trim(),
+                      sharedSecret: hqSharedSecret.trim(),
+                      autoFeatureAttributedFeed,
+                      autoFeatureLimit,
+                    }),
                   });
                   const data = await r.json();
                   if (!r.ok) throw new Error(data?.error ?? "Failed to save HQ gateway");

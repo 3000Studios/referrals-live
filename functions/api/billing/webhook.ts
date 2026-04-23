@@ -112,6 +112,18 @@ export async function onRequestPost(context: { request: Request; env: Env }) {
     }
   }
 
+  if (type === "customer.subscription.deleted") {
+    const customerId = obj?.customer as string | undefined;
+    if (customerId) {
+      const row = await db.prepare("SELECT user_id FROM subscriptions WHERE stripe_customer_id=? LIMIT 1").bind(customerId).first<any>();
+      if (row?.user_id) {
+        await db
+          .prepare("UPDATE subscriptions SET status='inactive', current_period_end=0 WHERE user_id=?")
+          .bind(row.user_id)
+          .run();
+      }
+    }
+  }
+
   return json({ ok: true });
 }
-

@@ -3,6 +3,16 @@ export type Env = {
   CHAT: DurableObjectNamespace;
 };
 
+type ChatStoredMessage = {
+  id: string;
+  ts: number;
+  user: string;
+  role: string;
+  text: string;
+  avatar?: string;
+  color?: string;
+};
+
 type Curated = {
   id: string;
   title: string;
@@ -53,6 +63,9 @@ function now() {
 
 async function upsert(env: Env) {
   const ts = now();
+  const owner = await env.DB.prepare(
+    "SELECT owner_name, owner_email, default_referral_code FROM owner_profile WHERE id='owner' LIMIT 1",
+  ).first<any>();
   const stmts: D1PreparedStatement[] = [];
   for (const item of curated) {
     stmts.push(
@@ -88,6 +101,11 @@ async function upsert(env: Env) {
         generatedAt: ts,
         crawlSchedule: "*/30 * * * *",
         offers: curated.map((item) => ({ id: item.id, title: item.title, category: item.category, score: item.score })),
+        owner: {
+          ownerName: owner?.owner_name ?? "",
+          ownerEmail: owner?.owner_email ?? "",
+          defaultReferralCode: owner?.default_referral_code ?? "",
+        },
       };
       const headers: Record<string, string> = { "Content-Type": "application/json; charset=utf-8" };
       if (config.sharedSecret) headers["x-3000studios-secret"] = config.sharedSecret;
@@ -98,6 +116,19 @@ async function upsert(env: Env) {
       }).catch(() => null);
     }
   }
+}
+
+async function attributableDiscovery(env: Env, limit = 6) {
+  const rows = await env.DB.prepare(
+    `SELECT i.id, i.title, i.description, i.url, i.category, i.tags_json, i.image_url, i.created_at, i.score
+     FROM ingested_offers i
+     JOIN owner_attribution oa ON REPLACE(REPLACE(LOWER(substr(i.url, instr(i.url, '//') + 2)), 'www.', ''), '/', '') LIKE '%' || oa.domain || '%'
+     ORDER BY i.score DESC, i.updated_at DESC
+     LIMIT ?`,
+  )
+    .bind(limit)
+    .all<any>();
+  return rows.results ?? [];
 }
 
 export default {
@@ -132,11 +163,11 @@ export class ChatRoom {
       const existing = await this.state.storage.get<string>("seeded");
       if (!existing) {
         const ts = Date.now();
-        const seed = [
-          { id: crypto.randomUUID(), ts, user: "Referrals.live Guide", role: "system", text: "Welcome to Referrals.live Live Chat. Read-only for free users; Premium members can post." },
-          { id: crypto.randomUUID(), ts: ts + 1, user: "Referrals.live Guide", role: "system", text: "Tip: Click any offer to open the tracked redirect. Upvote the ones you want us to surface more." },
-          { id: crypto.randomUUID(), ts: ts + 2, user: "CommunityBot (BOT)", role: "bot", text: "New here? Say hi after you upgrade. Tell the room what niche you’re in (fintech/crypto/saas/travel)." },
-          { id: crypto.randomUUID(), ts: ts + 3, user: "CommunityBot (BOT)", role: "bot", text: "Reminder: only share official program pages or your own verified referral links. Keep it PG-13." },
+      const seed = [
+          { id: crypto.randomUUID(), ts, user: "Referrals.live Guide", role: "system", text: "Welcome to Referrals.live Live Chat. Read-only for free users; Premium members can post.", avatar: "wave", color: "electric" },
+          { id: crypto.randomUUID(), ts: ts + 1, user: "Referrals.live Guide", role: "system", text: "Tip: Click any offer to open the tracked redirect. Upvote the ones you want us to surface more.", avatar: "wave", color: "electric" },
+          { id: crypto.randomUUID(), ts: ts + 2, user: "CommunityBot (BOT)", role: "bot", text: "New here? Say hi after you upgrade. Tell the room what niche you’re in (fintech/crypto/saas/travel).", avatar: "spark", color: "neon" },
+          { id: crypto.randomUUID(), ts: ts + 3, user: "CommunityBot (BOT)", role: "bot", text: "Reminder: only share official program pages or your own verified referral links. Keep it PG-13.", avatar: "spark", color: "neon" },
         ];
         await this.state.storage.put("messages", seed);
         await this.state.storage.put("seeded", "1");
@@ -195,9 +226,18 @@ export class ChatRoom {
       const canPost = await this.canPostFromRequest(request);
       this.socketCanPost.set(server, canPost);
 
-      const msgs = (await this.state.storage.get<any[]>("messages")) ?? [];
+      const msgs = ((await this.state.storage.get<ChatStoredMessage[]>("messages")) ?? []);
       server.send(JSON.stringify({ type: "init", messages: msgs.slice(-50) }));
       server.send(JSON.stringify({ type: "cap", canPost }));
+      const broadcastPresence = () => {
+        const payload = JSON.stringify({ type: "presence", count: this.sockets.size });
+        for (const ws of this.sockets) {
+          try {
+            ws.send(payload);
+          } catch {}
+        }
+      };
+      broadcastPresence();
 
       server.addEventListener("message", (evt) => {
         try {
@@ -215,6 +255,8 @@ export class ChatRoom {
             user: String(data.user ?? "anon").slice(0, 32),
             role: String(data.role ?? "member"),
             text: this.scrub(String(data.text ?? "")),
+            avatar: String(data.avatar ?? "spark").slice(0, 16),
+            color: String(data.color ?? "neon").slice(0, 16),
           };
           if (!message.text.trim()) return;
           // No deception: only allow system/guide messages from server-side seeds.
@@ -237,13 +279,19 @@ export class ChatRoom {
 
       server.addEventListener("close", () => {
         this.sockets.delete(server);
+        const payload = JSON.stringify({ type: "presence", count: this.sockets.size });
+        for (const ws of this.sockets) {
+          try {
+            ws.send(payload);
+          } catch {}
+        }
       });
 
       return new Response(null, { status: 101, webSocket: client });
     }
 
     if (url.pathname === "/chat/messages") {
-      const msgs = (await this.state.storage.get<any[]>("messages")) ?? [];
+      const msgs = ((await this.state.storage.get<ChatStoredMessage[]>("messages")) ?? []);
       return new Response(JSON.stringify({ ok: true, messages: msgs.slice(-50) }), {
         headers: { "Content-Type": "application/json; charset=utf-8" },
       });
@@ -253,17 +301,27 @@ export class ChatRoom {
   }
 
   async alarm() {
-    // Post a clearly-labeled BOT message periodically (no deception).
     const ts = Date.now();
-    const botLines = [
-      "If you’ve got a good referral program page, drop it after you upgrade—mods keep it clean and high-signal.",
-      "Pro tip: upvote the offers that actually convert for your niche so they stay on top.",
-      "Reminder: keep chat PG‑13. No scams, no personal info, no hate.",
-      "What’s your niche today: fintech, crypto, saas, travel, ecommerce, or health?",
-    ];
+    const trend = await this.env.DB.prepare(
+      `SELECT r.title, COALESCE(m.votes,0) AS votes
+       FROM referrals r
+       LEFT JOIN referral_metrics m ON m.referral_id=r.id
+       WHERE r.status='public'
+       ORDER BY COALESCE(m.votes,0) DESC, COALESCE(m.clicks,0) DESC
+       LIMIT 1`,
+    ).first<any>();
+    const botLines = trend?.title
+      ? [
+          `🔥 ${trend.title} just hit ${Number(trend.votes ?? 0)} votes and is trending now.`,
+          `📈 ${trend.title} is getting the strongest community traction right now.`,
+        ]
+      : [
+          "If you’ve got a good referral program page, drop it after you upgrade—mods keep it clean and high-signal.",
+          "Pro tip: upvote the offers that actually convert for your niche so they stay on top.",
+        ];
     const pick = botLines[Math.floor(Math.random() * botLines.length)]!;
-    const message = { id: crypto.randomUUID(), ts, user: "CommunityBot (BOT)", role: "bot", text: pick };
-    const existing = (await this.state.storage.get<any[]>("messages")) ?? [];
+    const message = { id: crypto.randomUUID(), ts, user: "CommunityBot (BOT)", role: "bot", text: pick, avatar: "spark", color: "neon" };
+    const existing = ((await this.state.storage.get<ChatStoredMessage[]>("messages")) ?? []);
     const next = [...existing, message].slice(-200);
     await this.state.storage.put("messages", next);
 
@@ -274,7 +332,7 @@ export class ChatRoom {
       } catch {}
     }
 
-    const nextAlarm = ts + 20 * 60 * 1000;
+    const nextAlarm = ts + 45 * 60 * 1000;
     await this.state.storage.put("nextAlarm", nextAlarm);
     await this.state.storage.setAlarm(nextAlarm);
   }
