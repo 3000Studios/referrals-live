@@ -21,6 +21,17 @@ export type ApiReferral = {
   source?: string;
 };
 
+export type ApiBlogVideo = { src: string; label: string; attributionLabel: string; attributionHref: string };
+export type ApiBlogListItem = {
+  slug: string;
+  title: string;
+  excerpt: string;
+  keywords: string[];
+  video: ApiBlogVideo | null;
+  publishedAt: number;
+};
+export type ApiBlogPost = ApiBlogListItem & { contentMd: string };
+
 async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(path, {
     credentials: "include",
@@ -63,6 +74,9 @@ export const api = {
 
   emailCapture: (email: string, source: string) =>
     apiFetch<{ ok: true }>("/api/email-capture", { method: "POST", body: JSON.stringify({ email, source }) }),
+
+  blogList: () => apiFetch<{ ok: true; posts: ApiBlogListItem[] }>("/api/blog"),
+  blogPost: (slug: string) => apiFetch<{ ok: true; post: ApiBlogPost }>(`/api/blog/${encodeURIComponent(slug)}`),
 
   chatWsUrl: () => {
     const proto = window.location.protocol === "https:" ? "wss:" : "ws:";

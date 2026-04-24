@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { NetworkBackground } from "@/components/three/NetworkBackground";
+import { PageWallpaper } from "@/components/three/PageWallpaper";
 import { MouseTrail } from "@/components/effects/MouseTrail";
 import { Ticker } from "@/components/layout/Ticker";
 import { AdSlot } from "@/components/monetization/AdSlot";
@@ -30,6 +31,7 @@ export function Layout() {
 
   return (
     <div className="relative min-h-screen overflow-x-hidden">
+      <PageWallpaper routeKey={location.pathname} />
       <NetworkBackground />
       {showTrail ? <MouseTrail /> : null}
       <Navbar />

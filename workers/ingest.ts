@@ -61,6 +61,27 @@ function now() {
   return Date.now();
 }
 
+function nyDayKey(ts: number) {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/New_York",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(new Date(ts));
+  const get = (type: string) => parts.find((p) => p.type === type)?.value ?? "";
+  return `${get("year")}-${get("month")}-${get("day")}`;
+}
+
+function slugify(input: string) {
+  return input
+    .toLowerCase()
+    .trim()
+    .replace(/['"]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 90);
+}
+
 async function upsert(env: Env) {
   const ts = now();
   const owner = await env.DB.prepare(
@@ -118,6 +139,147 @@ async function upsert(env: Env) {
   }
 }
 
+type BlogVideo = {
+  src: string;
+  label: string;
+  attributionLabel: string;
+  attributionHref: string;
+};
+
+const BLOG_VIDEOS: BlogVideo[] = [
+  {
+    src: "https://cdn.coverr.co/videos/coverr-typing-on-a-laptop-9718/1080p.mp4",
+    label: "Auto-play video: typing on a laptop",
+    attributionLabel: "Video source: Coverr (free license)",
+    attributionHref: "https://coverr.co/",
+  },
+  {
+    src: "https://cdn.coverr.co/videos/coverr-a-woman-working-on-her-laptop-3419/1080p.mp4",
+    label: "Auto-play video: working on a laptop",
+    attributionLabel: "Video source: Coverr (free license)",
+    attributionHref: "https://coverr.co/",
+  },
+  {
+    src: "https://cdn.coverr.co/videos/coverr-hand-scrolling-on-a-phone-4487/1080p.mp4",
+    label: "Auto-play video: scrolling on a phone",
+    attributionLabel: "Video source: Coverr (free license)",
+    attributionHref: "https://coverr.co/",
+  },
+];
+
+async function ensureDailyBlogPost(env: Env) {
+  const ts = now();
+  const dayKey = nyDayKey(ts);
+  const existing = await env.DB.prepare("SELECT id FROM blog_posts WHERE slug=? LIMIT 1").bind(`dri-${dayKey}`).first<any>();
+  if (existing?.id) return;
+
+  const offers = await env.DB.prepare(
+    `SELECT id, title, description, url, category, tags_json, score
+     FROM ingested_offers
+     ORDER BY score DESC, updated_at DESC
+     LIMIT 6`,
+  ).all<any>();
+  const top = (offers.results ?? []).map((r: any) => ({
+    id: String(r.id),
+    title: String(r.title),
+    description: String(r.description),
+    url: String(r.url),
+    category: String(r.category),
+    tags: JSON.parse(r.tags_json ?? "[]") as string[],
+    score: Number(r.score ?? 0),
+  }));
+
+  const primary = top[0]?.category ?? "referrals";
+  const keywords = [
+    "referral programs",
+    "affiliate marketing",
+    "passive income",
+    "conversion optimization",
+    "email list building",
+    `${primary} referrals`,
+    "best referral offers",
+    "high converting landing pages",
+  ].slice(0, 8);
+
+  const titleSeed = [
+    `Daily Referral Income (DRI): ${primary.toUpperCase()} Offers + A Conversion Playbook`,
+    `DRI Daily: How to Turn Referral Traffic Into Subscribers (With ${primary} Picks)`,
+    `DRI Daily Brief: ${primary} Referral Programs, CTAs, and SEO Moves That Compound`,
+  ];
+  const title = titleSeed[Math.floor((ts / 86_400_000) % titleSeed.length)];
+  const slug = `dri-${dayKey}`;
+  const excerpt =
+    "A daily SEO-first brief that turns referral intent into compounding traffic and subscribers—plus today’s top attributed offers to link responsibly.";
+
+  const video = BLOG_VIDEOS[Math.floor((ts / 86_400_000) % BLOG_VIDEOS.length)];
+
+  const list = top.length
+    ? top
+        .map((o) => `- **${o.title}** (${o.category}) — ${o.description}  \n  Official page: ${o.url}  \n  Browse more: https://referrals.live/browse?cat=${encodeURIComponent(o.category)}`)
+        .join("\n")
+    : "- No offers are currently available. Check https://referrals.live/browse for the latest.";
+
+  const body = [
+    `# ${title}`,
+    ``,
+    `If you publish referral content, your best growth engine is a loop: **SEO intent → high-trust guide → clear CTA → subscriber capture → weekly digest → repeat clicks**.`,
+    ``,
+    `This is your DRI daily: a practical playbook + today’s top attributed offers to link responsibly.`,
+    ``,
+    `## Today’s best referral opportunities (link responsibly)`,
+    ``,
+    list,
+    ``,
+    `## The DRI content framework (what ranks and converts)`,
+    ``,
+    `1) **Pick a single intent cluster**: “best”, “review”, “bonus”, “how to”, “alternatives”, “fees”, “eligibility”.`,
+    `2) **Answer in the first 120 seconds**: what the offer is, who it’s for, and the one step that causes drop-off.`,
+    `3) **Add proof + clarity**: timelines, requirements, and disclosure. Trust is conversion.`,
+    `4) **Internal-link aggressively (but honestly)**: point readers to https://referrals.live/browse, https://referrals.live/leaderboard, and your best “how it works” guide.`,
+    `5) **Capture subscribers ethically**: the goal is a repeatable audience, not a one-off click.`,
+    ``,
+    `## 3 CTAs that increase subscribers without hurting UX`,
+    ``,
+    `- “Get the weekly top referrals” → https://referrals.live/ (homepage capture)`,
+    `- “Browse the category picks” → https://referrals.live/browse?cat=${encodeURIComponent(primary)}`,
+    `- “Submit a program we should cover” → https://referrals.live/submit`,
+    ``,
+    `## SEO checklist (fast wins)`,
+    ``,
+    `- Title uses: primary keyword + year + clear promise.`,
+    `- H2s match People Also Ask: “Is it legit?”, “How long does payout take?”, “Requirements”, “Alternatives”.`,
+    `- Add a short FAQ section and keep disclosures visible.`,
+    `- Refresh monthly; finance/crypto offers change.`,
+    ``,
+    `---`,
+    `Want more? Start at https://referrals.live/blog and publish one DRI post per day.`,
+  ].join("\n");
+
+  const id = crypto.randomUUID();
+  const publishedAt = ts;
+  await env.DB.prepare(
+    `INSERT INTO blog_posts
+     (id, slug, title, excerpt, content_md, keywords_json, hero_video_src, hero_video_label, hero_video_attribution_label, hero_video_attribution_href, published_at, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+  )
+    .bind(
+      id,
+      slug,
+      title,
+      excerpt,
+      body,
+      JSON.stringify(keywords),
+      video.src,
+      video.label,
+      video.attributionLabel,
+      video.attributionHref,
+      publishedAt,
+      ts,
+      ts,
+    )
+    .run();
+}
+
 async function attributableDiscovery(env: Env, limit = 6) {
   const rows = await env.DB.prepare(
     `SELECT i.id, i.title, i.description, i.url, i.category, i.tags_json, i.image_url, i.created_at, i.score
@@ -134,6 +296,7 @@ async function attributableDiscovery(env: Env, limit = 6) {
 export default {
   async scheduled(_event: ScheduledEvent, env: Env, ctx: ExecutionContext) {
     ctx.waitUntil(upsert(env));
+    ctx.waitUntil(ensureDailyBlogPost(env));
   },
   async fetch(request: Request, env: Env) {
     const url = new URL(request.url);
