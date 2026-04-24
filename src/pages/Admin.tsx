@@ -27,6 +27,30 @@ type Overview = {
   crawlSchedule: string;
 };
 
+type FinderItem = {
+  id: string;
+  title: string;
+  description: string;
+  url: string;
+  category: string;
+  score: number;
+  updatedAt: number;
+  domain: string;
+  configured: boolean;
+};
+
+function safeParseUrl(input: string) {
+  try {
+    return new URL(input);
+  } catch {
+    return null;
+  }
+}
+
+function normDomain(host: string) {
+  return host.replace(/^www\./i, "").toLowerCase();
+}
+
 export function Admin() {
   const user = useAppStore((s) => s.user);
   const isAdmin = Boolean(user?.isAdmin);
@@ -53,6 +77,12 @@ export function Admin() {
   const [hqSharedSecret, setHqSharedSecret] = useState("");
   const [autoFeatureAttributedFeed, setAutoFeatureAttributedFeed] = useState(true);
   const [autoFeatureLimit, setAutoFeatureLimit] = useState(4);
+  const [finder, setFinder] = useState<FinderItem[]>([]);
+  const [finderQuery, setFinderQuery] = useState("");
+  const [refLink, setRefLink] = useState("");
+  const [refDomain, setRefDomain] = useState("");
+  const [refParamsJson, setRefParamsJson] = useState('{\n  "ref": "YOUR_CODE_HERE"\n}');
+  const [refParseNote, setRefParseNote] = useState<string | null>(null);
 
   const load = async () => {
     const r = await fetch("/api/owner-attribution", { credentials: "include" });
@@ -91,10 +121,18 @@ export function Admin() {
     setAutoFeatureLimit(Number(data.overview?.automation?.autoFeatureLimit ?? 4));
   };
 
+  const loadFinder = async () => {
+    const r = await fetch("/api/admin/referral-finder", { credentials: "include" });
+    const data = await r.json();
+    if (!r.ok) throw new Error(data?.error ?? "Failed to load referral finder");
+    setFinder(data.items ?? []);
+  };
+
   useEffect(() => {
     load().catch(() => null);
     loadOwnerProfile().catch(() => null);
     loadOverview().catch(() => null);
+    loadFinder().catch(() => null);
   }, []);
 
   const note = useMemo(
@@ -102,6 +140,18 @@ export function Admin() {
       `Set query parameters per domain that should be appended to outbound tracked links.\nExample: for a partner that uses ?ref=CODE, set domain + {"ref":"{{DEFAULT_REFERRAL_CODE}}"}.\nAvailable tokens: {{OWNER_NAME}}, {{OWNER_EMAIL}}, {{PAYPAL_EMAIL}}, {{VENMO_HANDLE}}, {{STRIPE_EMAIL}}, {{DEFAULT_REFERRAL_CODE}}.\nIf a domain isn't configured, we do not add parameters (prevents false claims).`,
     [],
   );
+
+  const filteredFinder = useMemo(() => {
+    const q = finderQuery.trim().toLowerCase();
+    if (!q) return finder;
+    return finder.filter(
+      (it) =>
+        it.title.toLowerCase().includes(q) ||
+        it.description.toLowerCase().includes(q) ||
+        it.category.toLowerCase().includes(q) ||
+        it.domain.toLowerCase().includes(q),
+    );
+  }, [finder, finderQuery]);
 
   if (!isAdmin) {
     return (
@@ -375,6 +425,182 @@ export function Admin() {
             >
               Save domain params
             </button>
+          </div>
+        </div>
+
+        <div className="glass rounded-3xl border border-white/10 p-6 lg:col-span-2">
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <div>
+              <div className="text-xs font-semibold uppercase tracking-[0.25em] text-electric">Referral program finder</div>
+              <p className="mt-2 max-w-3xl text-sm text-muted">
+                Find programs to join, click through to sign up, then paste your new referral link to auto-configure cash-link params for tracked outbound links.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => loadFinder().catch(() => null)}
+              className="rounded-2xl border border-white/10 px-4 py-2 text-sm font-semibold text-white/80 hover:border-neon/40"
+            >
+              Refresh list
+            </button>
+          </div>
+
+          <div className="mt-5 grid gap-4 lg:grid-cols-3">
+            <div className="lg:col-span-2">
+              <label className="block text-xs uppercase tracking-wide text-muted">
+                Search programs
+                <input
+                  value={finderQuery}
+                  onChange={(e) => setFinderQuery(e.target.value)}
+                  placeholder="e.g. wise, shopify, hosting, crypto…"
+                  className="mt-2 w-full rounded-2xl border border-white/10 bg-black/40 px-4 py-3 text-sm outline-none ring-neon/30 focus:ring"
+                />
+              </label>
+              <div className="mt-4 grid gap-3 md:grid-cols-2">
+                {filteredFinder.slice(0, 16).map((it) => (
+                  <div key={it.id} className="rounded-3xl border border-white/10 bg-black/30 p-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <div className="truncate font-semibold text-white">{it.title}</div>
+                        <div className="mt-1 text-xs text-muted">
+                          {it.domain} · {it.category} · score {it.score}
+                        </div>
+                      </div>
+                      <span
+                        className={
+                          it.configured
+                            ? "shrink-0 rounded-full bg-neon/15 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-neon"
+                            : "shrink-0 rounded-full bg-white/5 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/60"
+                        }
+                      >
+                        {it.configured ? "configured" : "not set"}
+                      </span>
+                    </div>
+                    <p className="mt-3 line-clamp-3 text-sm text-muted">{it.description}</p>
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      <a
+                        href={it.url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="rounded-2xl bg-gradient-to-r from-electric to-neon px-4 py-2 text-xs font-semibold text-black"
+                      >
+                        Open signup
+                      </a>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setRefDomain(it.domain);
+                          setRefParamsJson('{\n  "ref": "YOUR_CODE_HERE"\n}');
+                          setRefParseNote("Tip: After you join, paste your actual referral link to auto-detect the real params.");
+                        }}
+                        className="rounded-2xl border border-white/10 px-4 py-2 text-xs font-semibold text-white/80 hover:border-neon/40"
+                      >
+                        Configure domain
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="rounded-3xl border border-white/10 bg-black/30 p-4">
+              <div className="text-xs font-semibold uppercase tracking-[0.25em] text-gold">Paste your referral link</div>
+              <p className="mt-2 text-sm text-muted">
+                After you sign up, paste your personal referral link here. We’ll extract domain + query params so the site can build tracked “cash” links.
+              </p>
+              <label className="mt-4 block text-xs uppercase tracking-wide text-muted">
+                Your referral link
+                <input
+                  value={refLink}
+                  onChange={(e) => setRefLink(e.target.value)}
+                  placeholder="https://partner.com/?ref=YOURCODE"
+                  className="mt-2 w-full rounded-2xl border border-white/10 bg-black/40 px-4 py-3 text-sm outline-none ring-neon/30 focus:ring"
+                />
+              </label>
+              <button
+                type="button"
+                onClick={() => {
+                  setRefParseNote(null);
+                  const u = safeParseUrl(refLink.trim());
+                  if (!u) {
+                    setRefParseNote("Invalid URL. Paste the full https://... referral link.");
+                    return;
+                  }
+                  const d = normDomain(u.hostname);
+                  setRefDomain(d);
+                  const params: Record<string, string> = {};
+                  u.searchParams.forEach((v, k) => {
+                    const key = String(k).trim();
+                    const val = String(v).trim();
+                    if (!key || !val) return;
+                    params[key] = val;
+                  });
+                  if (!Object.keys(params).length) {
+                    setRefParseNote("No query params detected. If your referral code is path-based, set params manually below.");
+                    setRefParamsJson('{\n  "ref": "YOUR_CODE_HERE"\n}');
+                    return;
+                  }
+                  setRefParamsJson(JSON.stringify(params, null, 2));
+                  setRefParseNote("Detected params. Replace values with tokens like {{DEFAULT_REFERRAL_CODE}} if you want.");
+                }}
+                className="mt-4 w-full rounded-2xl bg-gradient-to-r from-gold to-yellow-300 px-4 py-3 text-sm font-semibold text-black"
+              >
+                Auto-detect params
+              </button>
+
+              <label className="mt-4 block text-xs uppercase tracking-wide text-muted">
+                Domain (auto-filled)
+                <input
+                  value={refDomain}
+                  onChange={(e) => setRefDomain(e.target.value)}
+                  placeholder="e.g. wise.com"
+                  className="mt-2 w-full rounded-2xl border border-white/10 bg-black/40 px-4 py-3 text-sm outline-none ring-neon/30 focus:ring"
+                />
+              </label>
+              <label className="mt-4 block text-xs uppercase tracking-wide text-muted">
+                Params JSON to save
+                <textarea
+                  value={refParamsJson}
+                  onChange={(e) => setRefParamsJson(e.target.value)}
+                  rows={7}
+                  className="mt-2 w-full rounded-2xl border border-white/10 bg-black/40 px-4 py-3 font-mono text-xs text-white/90 outline-none ring-neon/30 focus:ring"
+                />
+              </label>
+
+              {refParseNote ? (
+                <div className="mt-3 rounded-2xl border border-white/10 bg-black/40 px-4 py-3 text-sm text-muted">
+                  {refParseNote}
+                </div>
+              ) : null}
+
+              <button
+                type="button"
+                onClick={async () => {
+                  setError(null);
+                  setSaved(false);
+                  try {
+                    const parsed = JSON.parse(refParamsJson);
+                    const r = await fetch("/api/owner-attribution", {
+                      method: "POST",
+                      credentials: "include",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ domain: refDomain.trim(), params: parsed }),
+                    });
+                    const data = await r.json();
+                    if (!r.ok) throw new Error(data?.error ?? "Failed to save domain params");
+                    await load();
+                    await loadFinder();
+                    setSaved(true);
+                    setTimeout(() => setSaved(false), 1200);
+                  } catch (e) {
+                    setError(e instanceof Error ? e.message : "Failed to save domain params");
+                  }
+                }}
+                className="mt-4 w-full rounded-2xl bg-gradient-to-r from-neon to-emerald-400 px-4 py-3 text-sm font-semibold text-black shadow-neon"
+              >
+                Save cash-link config
+              </button>
+            </div>
           </div>
         </div>
 
