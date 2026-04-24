@@ -5,6 +5,7 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { NetworkBackground } from "@/components/three/NetworkBackground";
 import { PageWallpaper } from "@/components/three/PageWallpaper";
+import { WallpaperBase } from "@/components/three/WallpaperBase";
 import { MouseTrail } from "@/components/effects/MouseTrail";
 import { Ticker } from "@/components/layout/Ticker";
 import { AdSlot } from "@/components/monetization/AdSlot";
@@ -31,12 +32,20 @@ export function Layout() {
 
   return (
     <div className="relative min-h-screen overflow-x-hidden">
-      <div className="pointer-events-none fixed inset-0 z-0" aria-hidden>
-        <PageWallpaper routeKey={location.pathname} />
-        <NetworkBackground />
+      <div className="pointer-events-none fixed inset-0 z-0 isolate" aria-hidden>
+        {/* Wallpaper (deepest) */}
+        <div className="absolute inset-0 z-0">
+          <WallpaperBase />
+        </div>
+
+        {/* 3D animation layer (above wallpaper, below UI) */}
+        <div className="absolute inset-0 z-10">
+          <PageWallpaper routeKey={location.pathname} />
+          <NetworkBackground />
+        </div>
       </div>
 
-      <div className="relative z-10">
+      <div className="relative z-20">
         {showTrail ? <MouseTrail /> : null}
         <Navbar />
         <Ticker />
