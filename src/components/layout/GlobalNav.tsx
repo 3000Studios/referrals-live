@@ -1,5 +1,4 @@
-import React from 'react';
-import { motion } from 'framer-motion';
+
 
 const properties = [
   { name: 'Referrals Live', url: 'https://referrals.live' },
