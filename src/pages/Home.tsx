@@ -26,14 +26,8 @@ export function Home() {
     const root = heroRef.current;
     if (!root) return;
     const ctx = gsap.context(() => {
-      gsap.from(".hero-line", {
-        y: 46,
-        opacity: 0,
-        stagger: 0.07,
-        duration: 0.75,
-        ease: "power3.out",
-      });
-      gsap.from(".hero-cta", { scale: 0.96, opacity: 0, duration: 0.55, delay: 0.35, ease: "power2.out" });
+      gsap.fromTo(".hero-line", { y: 46, opacity: 0 }, { y: 0, opacity: 1, stagger: 0.07, duration: 0.75, ease: "power3.out" });
+      gsap.fromTo(".hero-cta", { scale: 0.96, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.55, delay: 0.35, ease: "power2.out" });
     }, root);
     return () => ctx.revert();
   }, []);
