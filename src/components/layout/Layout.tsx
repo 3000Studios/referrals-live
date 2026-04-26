@@ -45,7 +45,7 @@ export function Layout() {
         </div>
       </div>
 
-      <div className="relative z-20">
+      <div className="relative z-20 bg-[#050508]">
         {showTrail ? <MouseTrail /> : null}
         <Navbar />
         <Ticker />
@@ -64,7 +64,7 @@ export function Layout() {
               transition={{ duration: 0.28 }}
               className="mx-auto max-w-7xl px-4 pb-24"
             >
-              <div className="page-shell rounded-[2rem] border border-white/10 px-4 py-6 shadow-[0_24px_90px_rgba(0,0,0,0.45)] md:px-6 md:py-8">
+              <div className="page-shell rounded-[2rem] border border-white/10 px-4 py-6 shadow-[0_24px_90px_rgba(0,0,0,0.45)] md:px-6 md:py-8 bg-[rgba(4,6,12,0.96)]">
                 <Suspense fallback={<PageLoader />}>
                   <Outlet />
                 </Suspense>
