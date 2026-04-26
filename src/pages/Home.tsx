@@ -26,8 +26,8 @@ export function Home() {
     const root = heroRef.current;
     if (!root) return;
     const ctx = gsap.context(() => {
-      gsap.fromTo(".hero-line", { y: 46, opacity: 0 }, { y: 0, opacity: 1, stagger: 0.07, duration: 0.75, ease: "power3.out" });
-      gsap.fromTo(".hero-cta", { scale: 0.96, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.55, delay: 0.35, ease: "power2.out" });
+      gsap.from(".hero-line", { y: 24, opacity: 0, stagger: 0.05, duration: 0.6, ease: "power2.out", clearProps: "all" });
+      gsap.from(".hero-cta", { scale: 0.98, opacity: 0, duration: 0.45, delay: 0.3, ease: "power2.out", clearProps: "all" });
     }, root);
     return () => ctx.revert();
   }, []);

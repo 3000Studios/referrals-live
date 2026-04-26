@@ -55,13 +55,13 @@ export function Layout() {
               <AdSlot variant="banner" />
             </div>
           </div>
-          <AnimatePresence mode="wait">
+          <AnimatePresence initial={false}>
             <motion.main
               key={location.pathname}
-              initial={{ opacity: 0, y: 10 }}
+              initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.28 }}
+              exit={{ opacity: 0, y: -4 }}
+              transition={{ duration: 0.22, ease: "easeOut" }}
               className="mx-auto max-w-7xl px-4 pb-24"
             >
               <div className="page-shell rounded-[2rem] border border-white/10 px-4 py-6 shadow-[0_24px_90px_rgba(0,0,0,0.45)] md:px-6 md:py-8 bg-[rgba(4,6,12,0.96)]">
