@@ -45,7 +45,7 @@ export function Layout() {
         </div>
       </div>
 
-      <div className="relative z-20 bg-[#050508]">
+      <div className="relative z-20">
         {showTrail ? <MouseTrail /> : null}
         <Navbar />
         <Ticker />
