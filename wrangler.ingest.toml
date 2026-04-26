@@ -2,6 +2,9 @@ name = "referrals-live-ingest"
 main = "workers/ingest.ts"
 compatibility_date = "2024-11-01"
 
+[vars]
+GEMINI_API_KEY = "REPLACE_ME_WITH_REAL_KEY"
+
 [triggers]
 crons = ["0 * * * *"]
 
