@@ -82,4 +82,9 @@ export const api = {
     const proto = window.location.protocol === "https:" ? "wss:" : "ws:";
     return `${proto}//referrals-live-ingest.mr-jwswain.workers.dev/chat/ws`;
   },
+  scanDiscovery: (filter: string) =>
+    apiFetch<{ ok: true; results: ApiReferral[] }>(
+      `/api/discovery/scan?filter=${encodeURIComponent(filter)}`,
+      { method: "POST" }
+    ),
 };

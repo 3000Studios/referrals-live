@@ -1,3 +1,6 @@
+@tailwind components;
+@tailwind utilities;
+
 @layer components {
   /* The Signature 3000-Card */
   .card-3000 {

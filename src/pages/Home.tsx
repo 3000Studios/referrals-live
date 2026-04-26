@@ -13,6 +13,7 @@ import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { LiveChatDock } from "@/components/community/LiveChatDock";
 import { TrustTicker } from "@/components/TrustTicker";
+import { DiscoveryScanner } from "@/components/discovery/DiscoveryScanner";
 
 export function Home() {
   const referrals = useAppStore((s) => s.referrals);
@@ -129,6 +130,10 @@ export function Home() {
       </section>
 
       <TrustTicker />
+      
+      <div className="mt-16">
+        <DiscoveryScanner />
+      </div>
 
       <div className="mt-10 lg:hidden">
         <AdSlot variant="banner" />

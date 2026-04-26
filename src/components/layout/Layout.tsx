@@ -33,11 +33,11 @@ export function Layout() {
   return (
     <div className="relative min-h-screen bg-[#04060c]">
       {/* UI Layer */}
-      <div className="relative z-10">
+      <div className="relative z-10 pb-[100px] md:pb-[300px]">
         <GlobalNav />
         <Navbar />
         <Ticker />
-        <div className="pt-28">
+        <div className="pt-8">
           <div className="mx-auto max-w-7xl px-4 pb-10">
             <div className="hidden lg:block">
               <AdSlot variant="banner" />

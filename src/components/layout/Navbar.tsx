@@ -42,7 +42,7 @@ export function Navbar() {
   return (
     <motion.header
       style={{ backgroundColor: headerBg }}
-      className={clsx("fixed inset-x-0 top-0 z-50 border-b border-white/10 backdrop-blur-xl transition-colors")}
+      className={clsx("sticky inset-x-0 top-12 z-50 border-b border-white/10 backdrop-blur-xl transition-colors")}
       onMouseMove={(e) => updatePointer(e.clientX, e.clientY, e.currentTarget.getBoundingClientRect())}
       onTouchMove={(e) => {
         const t = e.touches[0];
