@@ -11,6 +11,7 @@ import { Premium } from "@/pages/Premium";
 import { Login } from "@/pages/Login";
 import { Register } from "@/pages/Register";
 import { Dashboard } from "@/pages/Dashboard";
+import { AffiliateConsole } from "@/pages/AffiliateConsole";
 import { About } from "@/pages/About";
 import { Contact } from "@/pages/Contact";
 import { Privacy } from "@/pages/Privacy";
@@ -39,6 +40,7 @@ export default function App() {
         <Route path="login" element={<Login />} />
         <Route path="register" element={<Register />} />
         <Route path="dashboard" element={<Dashboard />} />
+        <Route path="affiliate" element={<AffiliateConsole />} />
         <Route path="about" element={<About />} />
         <Route path="contact" element={<Contact />} />
         <Route path="privacy" element={<Privacy />} />

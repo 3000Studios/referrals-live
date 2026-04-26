@@ -1,8 +1,9 @@
-import { Suspense } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { Outlet, useLocation } from "react-router-dom";
-import { AnimatePresence, motion } from "framer-motion";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
+import { GlobalNav } from "@/components/layout/GlobalNav";
+import { GlobalFooter } from "@/components/layout/GlobalFooter";
 import { NetworkBackground } from "@/components/three/NetworkBackground";
 import { PageWallpaper } from "@/components/three/PageWallpaper";
 import { WallpaperBase } from "@/components/three/WallpaperBase";
@@ -10,7 +11,6 @@ import { MouseTrail } from "@/components/effects/MouseTrail";
 import { Ticker } from "@/components/layout/Ticker";
 import { AdSlot } from "@/components/monetization/AdSlot";
 import { PageLoader } from "@/components/layout/PageLoader";
-import { useEffect, useState } from "react";
 import { useAppStore } from "@/store/useAppStore";
 
 export function Layout() {
@@ -31,22 +31,10 @@ export function Layout() {
   }, [hydrate]);
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden">
-      <div className="pointer-events-none fixed inset-0 z-0 isolate" aria-hidden>
-        {/* Wallpaper (deepest) */}
-        <div className="absolute inset-0 z-0">
-          <WallpaperBase />
-        </div>
-
-        {/* 3D animation layer (above wallpaper, below UI) */}
-        <div className="absolute inset-0 z-10">
-          <PageWallpaper routeKey={location.pathname} />
-          <NetworkBackground />
-        </div>
-      </div>
-
-      <div className="relative z-20">
-        {showTrail ? <MouseTrail /> : null}
+    <div className="relative min-h-screen bg-[#04060c]">
+      {/* UI Layer */}
+      <div className="relative z-10">
+        <GlobalNav />
         <Navbar />
         <Ticker />
         <div className="pt-28">
@@ -55,30 +43,36 @@ export function Layout() {
               <AdSlot variant="banner" />
             </div>
           </div>
-          <AnimatePresence initial={false}>
-            <motion.main
-              key={location.pathname}
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -4 }}
-              transition={{ duration: 0.22, ease: "easeOut" }}
-              className="mx-auto max-w-7xl px-4 pb-24"
-            >
-              <div className="page-shell rounded-[2rem] border border-white/10 px-4 py-6 shadow-[0_24px_90px_rgba(0,0,0,0.45)] md:px-6 md:py-8 bg-[rgba(4,6,12,0.96)]">
-                <Suspense fallback={<PageLoader />}>
-                  <Outlet />
-                </Suspense>
-              </div>
-            </motion.main>
-          </AnimatePresence>
+          
+          <main className="mx-auto max-w-7xl px-4 pb-24 animate-in fade-in slide-in-from-bottom-2 duration-500">
+            <div className="page-shell rounded-[2rem] border border-white/10 px-4 py-6 shadow-[0_24px_90px_rgba(0,0,0,0.45)] md:px-6 md:py-8 bg-[rgba(4,6,12,0.96)]">
+              <Suspense fallback={<PageLoader />}>
+                <Outlet />
+              </Suspense>
+            </div>
+          </main>
         </div>
         <Footer />
+        <GlobalFooter />
+        
         <div className="hidden md:block">
           <div className="pointer-events-none fixed bottom-6 right-6 z-40 w-[320px]">
             <AdSlot variant="rectangle" className="pointer-events-auto" />
           </div>
         </div>
         <AdSlot variant="mobile-sticky" />
+      </div>
+
+      {/* Background Layer (Moved to bottom, negative z-index) */}
+      <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden" aria-hidden>
+        <div className="absolute inset-0 z-0">
+          <WallpaperBase />
+        </div>
+        <div className="absolute inset-0 z-10 opacity-60">
+          <PageWallpaper routeKey={location.pathname} />
+          <NetworkBackground />
+        </div>
+        {showTrail ? <MouseTrail /> : null}
       </div>
     </div>
   );

@@ -88,6 +88,23 @@ export async function onRequestPost(context: { request: Request; env: Env }) {
         )
         .bind(clientRef, customerId ?? null, subscriptionId ?? null, ts + 30 * 24 * 60 * 60 * 1000)
         .run();
+
+      // --- Affiliate Conversion Logic ---
+      // Check if this user was referred
+      const conversion = await db.prepare(
+        "SELECT id, referrer_id, code FROM conversions WHERE referred_user_id = ? AND status = 'pending' LIMIT 1"
+      ).bind(clientRef).first<any>();
+
+      if (conversion) {
+        const commission = 1000; // $10.00 flat commission for this demo
+        await db.batch([
+          db.prepare("UPDATE conversions SET status = 'completed', amount_cents = ? WHERE id = ?")
+            .bind(commission, conversion.id),
+          db.prepare("UPDATE affiliate_stats SET balance_cents = balance_cents + ?, total_conversions = total_conversions + 1 WHERE user_id = ?")
+            .bind(commission, conversion.referrer_id)
+        ]);
+      }
+      // ----------------------------------
     }
   }
 

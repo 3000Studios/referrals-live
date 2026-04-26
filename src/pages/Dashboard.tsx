@@ -98,6 +98,43 @@ export function Dashboard() {
         </Link>
       </div>
 
+      <div className="mt-8 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="glass col-span-full rounded-3xl border border-white/10 p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="text-xs font-semibold uppercase tracking-[0.25em] text-neon">Success Checklist</div>
+              <h2 className="mt-2 font-display text-2xl font-bold text-white">Path to Operator Success</h2>
+            </div>
+            <div className="text-right">
+              <div className="text-3xl font-bold text-neon">
+                {Math.round((( (user.displayName ? 1 : 0) + (myReferrals.length > 0 ? 1 : 0) + (myReferrals.length >= 3 ? 1 : 0) + (premiumView ? 1 : 0) ) / 4) * 100)}%
+              </div>
+              <div className="text-[10px] uppercase tracking-wider text-muted">Completion</div>
+            </div>
+          </div>
+          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {[
+              { label: "Set display name", done: !!user.displayName, icon: "👤" },
+              { label: "Post first referral", done: myReferrals.length > 0, icon: "🔗" },
+              { label: "Add 3+ listings", done: myReferrals.length >= 3, icon: "📚" },
+              { label: "Unlock Premium", done: premiumView, icon: "💎" },
+            ].map((step, i) => (
+              <div
+                key={i}
+                className={`flex items-center gap-3 rounded-2xl border p-3 transition ${
+                  step.done ? "border-neon/30 bg-neon/5" : "border-white/5 bg-white/[0.02] grayscale opacity-60"
+                }`}
+              >
+                <div className="text-xl">{step.done ? "✅" : step.icon}</div>
+                <div className={`text-xs font-semibold ${step.done ? "text-white" : "text-muted"}`}>
+                  {step.label}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
       {isAdmin ? (
         <div className="mt-6 glass rounded-3xl border border-white/10 p-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
@@ -254,6 +291,42 @@ export function Dashboard() {
             </div>
           </div>
         </div>
+
+        <div className="glass rounded-3xl border border-neon/20 bg-neon/5 p-6 shadow-[0_0_30px_rgba(0,255,136,0.05)]">
+          <div className="text-xs font-semibold uppercase tracking-[0.25em] text-neon">Viral Loop</div>
+          <h2 className="mt-2 font-display text-2xl font-bold text-white">Boost Your Rankings</h2>
+          <p className="mt-2 text-sm text-muted">
+            Every unique visitor to your board link increases your Operator XP. Higher XP boosts all your links across the marketplace.
+          </p>
+          <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+            <button
+              onClick={() => {
+                const url = `https://referrals.live/${user?.displayName || 'me'}`;
+                navigator.clipboard.writeText(url);
+                alert("Board link copied! Share it to gain XP.");
+              }}
+              className="flex-1 rounded-2xl bg-neon px-6 py-3 text-sm font-semibold text-black shadow-neon"
+            >
+              Copy My Board Link
+            </button>
+            <button
+              onClick={() => {
+                const url = `https://referrals.live/${user?.displayName || 'me'}`;
+                const text = `Check out my referral board on @referralslive! 🚀\n\nI'm sharing all my favorite deals in one place: ${url}\n\n#AffiliateMarketing #PassiveIncome`;
+                window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`, "_blank");
+              }}
+              className="flex-1 rounded-2xl border border-white/10 bg-white/5 px-6 py-3 text-sm font-semibold text-white hover:border-neon/40"
+            >
+              Share on X
+            </button>
+            <Link
+              to="/affiliate"
+              className="flex-1 rounded-2xl border border-neon/40 px-6 py-3 text-center text-sm font-semibold text-neon hover:bg-neon/10"
+            >
+              Affiliate Console
+            </Link>
+          </div>
+        </div>
       </div>
 
       <div className="mt-6 glass rounded-3xl border border-white/10 p-6">
@@ -344,14 +417,28 @@ export function Dashboard() {
                         </button>
                       );
                     })}
+                    <Link
+                      to="/premium"
+                      className="rounded-2xl border border-gold/40 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-gold hover:bg-gold/10"
+                    >
+                      Boost Listing 🚀
+                    </Link>
                   </div>
                 ) : (
-                  <Link
-                    to="/premium"
-                    className="rounded-2xl border border-gold/40 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-gold hover:bg-gold/10"
-                  >
-                    Upgrade to feature
-                  </Link>
+                  <div className="flex gap-2">
+                    <Link
+                      to="/premium"
+                      className="rounded-2xl border border-gold/40 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-gold hover:bg-gold/10"
+                    >
+                      Upgrade to feature
+                    </Link>
+                    <Link
+                      to="/premium"
+                      className="rounded-2xl border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-white/80 hover:border-neon/40"
+                    >
+                      Boost Listing 🚀
+                    </Link>
+                  </div>
                 )}
               </div>
             ))
@@ -365,6 +452,22 @@ export function Dashboard() {
             </div>
           )}
         </div>
+      </div>
+
+      <div className="mt-16 grid gap-8 md:grid-cols-4">
+        {[
+          { label: "Active Operators", value: "2.4k+", color: "text-neon" },
+          { label: "Total Clicks", value: "1.2M", color: "text-electric" },
+          { label: "Avg. Earnings/Click", value: "$1.42", color: "text-gold" },
+          { label: "Viral Reach", value: "840k", color: "text-purple-400" },
+        ].map((stat, i) => (
+          <div key={i} className="glass rounded-3xl border border-white/10 p-5 text-center">
+            <div className={`text-2xl font-bold ${stat.color}`}>{stat.value}</div>
+            <div className="mt-1 text-[10px] font-semibold uppercase tracking-wider text-muted">
+              {stat.label}
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );

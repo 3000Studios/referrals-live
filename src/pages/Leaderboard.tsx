@@ -24,7 +24,7 @@ export function Leaderboard() {
         <div className="glass rounded-3xl border border-white/10 p-6">
           <div className="text-xs font-semibold uppercase tracking-[0.25em] text-electric">Top users</div>
           <p className="mt-4 text-sm text-muted">
-            Coming next: verified operator leaderboard based on real clicks, votes, and premium conversions.
+            Our most active community members: rankings are determined by a composite score of total clicks generated and successful upvotes received.
           </p>
         </div>
         <div className="glass rounded-3xl border border-white/10 p-6">

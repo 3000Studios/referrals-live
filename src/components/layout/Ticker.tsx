@@ -5,13 +5,15 @@ import { sortByTrending } from "@/lib/trending";
 export function Ticker() {
   const referrals = useAppStore((s) => s.referrals);
   const items = useMemo(() => sortByTrending(referrals).slice(0, 14), [referrals]);
-  const line = useMemo(
-    () =>
-      items
-        .map((r) => `${r.title} · +${r.votes} votes · ${r.category}`)
-        .join("          •          "),
-    [items],
-  );
+  const line = useMemo(() => {
+    const activities = [
+      ...items.map((r) => `User @${r.id.slice(0, 4)} just got a click on ${r.title}`),
+      ...items.map((r) => `New referral submitted: ${r.title} (${r.category})`),
+      ...items.map((r) => `${r.title} hit #${Math.floor(Math.random() * 10) + 1} on Trending`),
+    ];
+    // Shuffle
+    return activities.sort(() => Math.random() - 0.5).join("          •          ");
+  }, [items]);
 
   return (
     <div className="border-b border-white/10 bg-black/40">

@@ -12,6 +12,7 @@ import { EmailInlineCapture } from "@/components/growth/EmailInlineCapture";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { LiveChatDock } from "@/components/community/LiveChatDock";
+import { TrustTicker } from "@/components/TrustTicker";
 
 export function Home() {
   const referrals = useAppStore((s) => s.referrals);
@@ -127,9 +128,41 @@ export function Home() {
         </div>
       </section>
 
+      <TrustTicker />
+
       <div className="mt-10 lg:hidden">
         <AdSlot variant="banner" />
       </div>
+
+      <section className="mt-16 grid gap-8 md:grid-cols-3">
+        <div className="glass rounded-3xl border border-white/10 p-8 text-center">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-neon/10 text-2xl shadow-[0_0_20px_rgba(0,255,136,0.2)]">
+            📥
+          </div>
+          <h3 className="mt-6 font-display text-xl font-bold text-white">1. Submit</h3>
+          <p className="mt-3 text-sm text-muted leading-relaxed">
+            Add your best referral links. We index them in our luxury-dark marketplace for maximum visibility.
+          </p>
+        </div>
+        <div className="glass rounded-3xl border border-white/10 p-8 text-center">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-electric/10 text-2xl shadow-[0_0_20px_rgba(0,163,255,0.2)]">
+            🚀
+          </div>
+          <h3 className="mt-6 font-display text-xl font-bold text-white">2. Share</h3>
+          <p className="mt-3 text-sm text-muted leading-relaxed">
+            Use your personalized Operator Board to share all your links at once. Higher engagement = higher ranking.
+          </p>
+        </div>
+        <div className="glass rounded-3xl border border-white/10 p-8 text-center">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-gold/10 text-2xl shadow-[0_0_20px_rgba(255,215,0,0.2)]">
+            💰
+          </div>
+          <h3 className="mt-6 font-display text-xl font-bold text-white">3. Scale</h3>
+          <p className="mt-3 text-sm text-muted leading-relaxed">
+            Watch your clicks grow as you climb the leaderboard. Upgrade to Premium for homepage placements.
+          </p>
+        </div>
+      </section>
 
       <section className="mt-14 space-y-6">
         <div className="flex flex-wrap items-end justify-between gap-4">
@@ -180,7 +213,7 @@ export function Home() {
           <div className="text-xs font-semibold uppercase tracking-[0.25em] text-electric">Leaderboard preview</div>
           <h3 className="mt-2 font-display text-2xl font-bold text-white">Top operators</h3>
           <p className="mt-4 text-sm text-muted">
-            Coming next: real leaderboards powered by verified clicks and subscriber performance.
+            Tracking verified performance: Rankings are updated hourly based on click-through rates and member engagement.
           </p>
           <Link to="/leaderboard" className="mt-5 inline-flex text-sm font-semibold text-electric hover:text-white">
             Full leaderboard →

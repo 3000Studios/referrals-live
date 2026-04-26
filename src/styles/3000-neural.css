@@ -1,0 +1,60 @@
+@layer components {
+  /* The Signature 3000-Card */
+  .card-3000 {
+    @apply rounded-2xl border border-slate-200 bg-white p-6 
+           transition-all duration-500 ease-out
+           dark:border-slate-800 dark:bg-slate-900;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Hover state with Neural Depth */
+  .card-3000:hover {
+    @apply -translate-y-1 shadow-xl shadow-blue-500/5 
+           border-blue-500/20 dark:border-blue-400/20;
+  }
+
+  /* The "Neural Pulse" for Active/Pending states */
+  .neural-pulse-amber {
+    @apply border-amber-500/50 bg-amber-500/5 
+           shadow-[0_0_20px_rgba(245,158,11,0.15)] 
+           animate-pulse;
+  }
+
+  .neural-pulse-green {
+    @apply border-green-500/50 bg-green-500/5 
+           shadow-[0_0_20px_rgba(34,197,94,0.15)];
+  }
+
+  /* Dynamic Contrast Text Utility */
+  .text-neural {
+    @apply text-slate-900 dark:text-white transition-colors duration-300;
+  }
+
+  /* Premium Badge */
+  .badge-neural {
+    @apply px-2.5 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-[0.18em]
+           border border-white/10 bg-white/5 text-muted;
+  }
+
+  /* AdSense Safe-Area Sync */
+  body {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  ins.adsbygoogle {
+    z-index: 90 !important;
+  }
+
+  /* Force Readability */
+  input, textarea, select, .chat-message {
+    color: #FFFFFF !important;
+  }
+}
+
+/* AdSense Safe-Area Sync */
+body { padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); }
+ins.adsbygoogle { z-index: 90 !important; }
+/* Force Readability */
+input, textarea, select, .chat-message { color: #FFFFFF !important; }

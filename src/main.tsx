@@ -4,6 +4,7 @@ import { BrowserRouter } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import App from "./App";
 import "./styles/index.css";
+import "./styles/3000-neural.css";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
