@@ -39,6 +39,16 @@ type FinderItem = {
   configured: boolean;
 };
 
+type AdminTask = {
+  id: string;
+  type: string;
+  title: string;
+  description: string;
+  metadata_json: string;
+  status: string;
+  created_at: number;
+};
+
 function safeParseUrl(input: string) {
   try {
     return new URL(input);
@@ -83,6 +93,7 @@ export function Admin() {
   const [refDomain, setRefDomain] = useState("");
   const [refParamsJson, setRefParamsJson] = useState('{\n  "ref": "YOUR_CODE_HERE"\n}');
   const [refParseNote, setRefParseNote] = useState<string | null>(null);
+  const [tasks, setTasks] = useState<AdminTask[]>([]);
 
   const load = async () => {
     const r = await fetch("/api/owner-attribution", { credentials: "include" });
@@ -128,11 +139,28 @@ export function Admin() {
     setFinder(data.items ?? []);
   };
 
+  const loadTasks = async () => {
+    const r = await fetch("/api/admin/tasks", { credentials: "include" });
+    const data = await r.json();
+    if (r.ok) setTasks(data.tasks ?? []);
+  };
+
+  const updateTaskStatus = async (id: string, status: string) => {
+    await fetch("/api/admin/tasks", {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, status }),
+    });
+    loadTasks();
+  };
+
   useEffect(() => {
     load().catch(() => null);
     loadOwnerProfile().catch(() => null);
     loadOverview().catch(() => null);
     loadFinder().catch(() => null);
+    loadTasks().catch(() => null);
   }, []);
 
   const note = useMemo(
@@ -209,6 +237,37 @@ export function Admin() {
                 {overview?.lastIngestedAt ? new Date(overview.lastIngestedAt).toLocaleString() : "Waiting for next run"}
               </div>
             </div>
+          </div>
+        </div>
+
+        <div className="glass rounded-3xl border border-white/10 p-6 lg:col-span-2">
+          <div className="flex items-center justify-between">
+            <div className="text-xs font-semibold uppercase tracking-[0.25em] text-neon">Action required: Admin tasks</div>
+            <button onClick={loadTasks} className="text-xs font-semibold text-muted hover:text-white">Refresh tasks</button>
+          </div>
+          <p className="mt-2 text-sm text-muted">
+            The automated system discovered these programs. Join them to get your referral link and configure it below to start earning.
+          </p>
+          <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {tasks.length ? tasks.map(task => {
+              const meta = JSON.parse(task.metadata_json || "{}");
+              return (
+                <div key={task.id} className="relative rounded-3xl border border-white/10 bg-black/40 p-5">
+                  <div className="text-xs font-bold uppercase tracking-widest text-gold">{task.type}</div>
+                  <h4 className="mt-2 font-display text-lg font-bold text-white">{task.title}</h4>
+                  <p className="mt-2 text-sm text-muted leading-relaxed">{task.description}</p>
+                  <div className="mt-5 flex flex-wrap gap-2">
+                    <a href={meta.url} target="_blank" rel="noreferrer" className="rounded-xl bg-electric px-4 py-2 text-xs font-bold text-white hover:brightness-110">Open site</a>
+                    <button onClick={() => updateTaskStatus(task.id, 'dismissed')} className="rounded-xl border border-white/10 px-4 py-2 text-xs font-bold text-muted hover:text-white">Dismiss</button>
+                    <button onClick={() => updateTaskStatus(task.id, 'completed')} className="rounded-xl bg-neon px-4 py-2 text-xs font-bold text-black">Mark Joined</button>
+                  </div>
+                </div>
+              );
+            }) : (
+              <div className="py-12 text-center text-sm text-muted col-span-full border border-dashed border-white/5 rounded-3xl">
+                No pending tasks. You're all caught up!
+              </div>
+            )}
           </div>
         </div>
 

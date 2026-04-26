@@ -1,8 +1,8 @@
 import clsx from "clsx";
 import { motion, useScroll, useTransform } from "framer-motion";
-import { useMemo, useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { useAppStore } from "@/store/useAppStore";
+import { useEffect, useMemo, useState } from "react";
 
 const links = [
   { to: "/browse", label: "Browse" },
@@ -20,6 +20,16 @@ export function Navbar() {
   const [pointer, setPointer] = useState({ x: 0.5, y: 0.25 });
   const user = useAppStore((s) => s.user);
   const logout = useAppStore((s) => s.logout);
+  const [taskCount, setTaskCount] = useState(0);
+
+  useEffect(() => {
+    if (user?.isAdmin) {
+      fetch("/api/admin/tasks", { credentials: "include" })
+        .then(r => r.json())
+        .then(d => setTaskCount(d.tasks?.length ?? 0))
+        .catch(() => null);
+    }
+  }, [user]);
   const wireNodes = useMemo(
     () => [
       { x: 4, y: 28 },
@@ -124,9 +134,14 @@ export function Navbar() {
             <>
               <Link
                 to="/dashboard"
-                className="rounded-full border border-white/10 px-4 py-2 text-sm font-semibold text-white/90 hover:border-neon/40"
+                className="relative rounded-full border border-white/10 px-4 py-2 text-sm font-semibold text-white/90 hover:border-neon/40"
               >
                 Dashboard
+                {taskCount > 0 && (
+                  <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white shadow-lg">
+                    {taskCount}
+                  </span>
+                )}
               </Link>
               <button
                 type="button"

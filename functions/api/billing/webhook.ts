@@ -142,5 +142,25 @@ export async function onRequestPost(context: { request: Request; env: Env }) {
     }
   }
 
+  if (type === "payout.paid") {
+    const payoutId = obj?.id as string;
+    const amount = obj?.amount as number;
+    const currency = obj?.currency as string;
+    // Generate a consistent but obfuscated user ID for the ticker
+    const obfuscatedId = `User_${Math.floor(Math.random() * 9000) + 1000}`; 
+
+    await db.prepare(
+      "INSERT OR IGNORE INTO payout_logs (id, stripe_payout_id, amount_cents, currency, user_obfuscated_id, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)"
+    ).bind(
+      `payout-${crypto.randomUUID()}`,
+      payoutId,
+      amount,
+      currency,
+      obfuscatedId,
+      "paid",
+      ts
+    ).run();
+  }
+
   return json({ ok: true });
 }

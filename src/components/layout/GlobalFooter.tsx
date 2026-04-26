@@ -1,9 +1,10 @@
-
+import { TrustTicker } from '../TrustTicker';
 
 export const GlobalFooter = () => {
   return (
-    <footer className="w-full bg-black border-t border-white/10 py-12">
-      <div className="max-w-7xl mx-auto px-4">
+    <footer className="w-full bg-black border-t border-white/10">
+      <TrustTicker />
+      <div className="max-w-7xl mx-auto px-4 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
           <div className="space-y-4">
             <h3 className="text-white font-bold text-lg tracking-tighter">3000Studios</h3>

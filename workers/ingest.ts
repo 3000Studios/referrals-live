@@ -293,10 +293,120 @@ async function attributableDiscovery(env: Env, limit = 6) {
   return rows.results ?? [];
 }
 
+async function generateHealthReport(env: Env) {
+  const ts = now();
+  const db = env.DB;
+
+  // 1. Revenue (Sum of completed conversions in last 7 days)
+  const revenueRow = await db.prepare(
+    "SELECT SUM(amount_cents) as total FROM conversions WHERE status = 'completed' AND created_at > ?"
+  ).bind(ts - 7 * 24 * 60 * 60 * 1000).first<any>();
+  const weeklyRevenue = (revenueRow?.total ?? 0) / 100;
+
+  // 2. Leads (Count of new conversions/leads in last 7 days)
+  const leadsRow = await db.prepare(
+    "SELECT COUNT(*) as count FROM conversions WHERE created_at > ?"
+  ).bind(ts - 7 * 24 * 60 * 60 * 1000).first<any>();
+  const weeklyLeads = leadsRow?.count ?? 0;
+
+  // 3. Signups (New users in last 7 days)
+  const signupsRow = await db.prepare(
+    "SELECT COUNT(*) as count FROM users WHERE created_at > ?"
+  ).bind(ts - 7 * 24 * 60 * 60 * 1000).first<any>();
+  const weeklySignups = signupsRow?.count ?? 0;
+
+  // Golden Triangle Health Score (Simplified: Avg of growth rates or just a weighted sum)
+  const healthScore = Math.min(100, (weeklyRevenue / 100) + (weeklyLeads * 2) + (weeklySignups * 5));
+
+  const report = {
+    weeklyRevenue,
+    weeklyLeads,
+    weeklySignups,
+    healthScore: healthScore.toFixed(1),
+    timestamp: new Date(ts).toISOString()
+  };
+
+  console.info("Golden Triangle Health Report:", report);
+
+  // Send to owner if configured
+  const owner = await db.prepare("SELECT owner_email FROM owner_profile WHERE id='owner'").first<any>();
+  if (owner?.owner_email) {
+     // Trigger email via Resend/SendGrid if keys exist in env
+  }
+}
+
+async function hourlyDiscovery(env: Env) {
+  const ts = now();
+  const apiKey = (env as any).GEMINI_API_KEY;
+  if (!apiKey) return;
+
+  const prompt = `Identify one high-quality, popular referral program that is NOT in this list: Dropbox, Wise, Shopify, Airbnb, Uber, Amazon. 
+Return the result as a valid JSON object with:
+- title: Program name
+- description: Brief summary
+- url: Official program URL
+- category: finance|tech|travel|shopping|saas|crypto
+- signup_requirements: What is needed to join
+- reward_payout: What the referrer gets
+- image_url: A relevant Unsplash URL
+
+Only return JSON.`;
+
+  try {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+    });
+    const result = await response.json() as any;
+    const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (!text) return;
+    
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) return;
+    const p = JSON.parse(jsonMatch[0]);
+
+    const id = `auto-${slugify(p.title)}`;
+    
+    // Check if already exists
+    const exists = await env.DB.prepare("SELECT id FROM ingested_offers WHERE id=?").bind(id).first();
+    if (exists) return;
+
+    await env.DB.prepare(
+      `INSERT INTO ingested_offers 
+       (id, source, source_url, canonical_key, title, description, url, category, tags_json, image_url, score, created_at, updated_at)
+       VALUES (?, 'auto_discovery', ?, ?, ?, ?, ?, ?, '[]', ?, 75, ?, ?)`
+    ).bind(id, p.url, `auto:${id}`, p.title, p.description, p.url, p.category, p.image_url || "", ts, ts).run();
+
+    // Create admin task
+    await env.DB.prepare(
+      `INSERT INTO admin_tasks (id, type, title, description, metadata_json, created_at, updated_at)
+       VALUES (?, 'manual_signup', ?, ?, ?, ?, ?)`
+    ).bind(
+      crypto.randomUUID(),
+      `New Program: ${p.title}`,
+      `Please sign up for ${p.title} to get your referral link. Requirements: ${p.signup_requirements}. Reward: ${p.reward_payout}.`,
+      JSON.stringify({ url: p.url, requirements: p.signup_requirements, rewards: p.reward_payout }),
+      ts,
+      ts
+    ).run();
+
+    console.info(`Discovered new program: ${p.title}`);
+  } catch (err) {
+    console.error("Hourly discovery failed:", err);
+  }
+}
+
 export default {
-  async scheduled(_event: ScheduledEvent, env: Env, ctx: ExecutionContext) {
+  async scheduled(event: ScheduledEvent, env: Env, ctx: ExecutionContext) {
     ctx.waitUntil(upsert(env));
     ctx.waitUntil(ensureDailyBlogPost(env));
+    ctx.waitUntil(hourlyDiscovery(env));
+    
+    const date = new Date(event.scheduledTime);
+    if (date.getUTCDay() === 1 && date.getUTCHours() === 8) {
+      ctx.waitUntil(generateHealthReport(env));
+    }
   },
   async fetch(request: Request, env: Env) {
     const url = new URL(request.url);

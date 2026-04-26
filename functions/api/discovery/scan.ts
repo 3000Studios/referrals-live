@@ -27,20 +27,34 @@ Focus on high-signal programs like Dropbox, Wise, Shopify, Airbnb, etc., tailore
 Only return the JSON array, no other text.`;
 
   try {
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { response_mime_type: "application/json" }
+        contents: [{ parts: [{ text: prompt }] }]
       })
     });
 
     const result = await response.json() as any;
-    const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
-    if (!text) throw new Error("Empty AI response");
+    
+    if (result.error) {
+      throw new Error(`Gemini Error: ${result.error.message || JSON.stringify(result.error)}`);
+    }
 
-    const programs = JSON.parse(text) as any[];
+    let text = result.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (!text) {
+      console.error("Gemini Response:", JSON.stringify(result));
+      throw new Error("Empty AI response. The model might have reached a safety limit.");
+    }
+
+    // Robust JSON extraction
+    const jsonMatch = text.match(/\[\s*\{[\s\S]*\}\s*\]/);
+    if (!jsonMatch) {
+      console.error("Failed to extract JSON from:", text);
+      throw new Error("Invalid discovery data format received from AI.");
+    }
+    
+    const programs = JSON.parse(jsonMatch[0]) as any[];
     const ts = now();
     const stmts: any[] = [];
 

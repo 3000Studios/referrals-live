@@ -5,19 +5,21 @@ export const TrustTicker = () => {
   const [payouts, setPayouts] = useState<any[]>([]);
 
   useEffect(() => {
-    // In a real scenario, this would fetch from D1 via a worker endpoint
-    // For now, we simulate the last 10 'paid' events to establish proof of trust
     const fetchPayouts = async () => {
-      // Mocking the D1 fetch response for demonstration
-      const mockData = Array.from({ length: 10 }).map((_, i) => ({
-        amount: Math.floor(Math.random() * 500) + 10,
-        userId: Math.floor(Math.random() * 9000) + 1000,
-        id: i
-      }));
-      setPayouts(mockData);
+      try {
+        const response = await fetch('/api/payouts');
+        if (response.ok) {
+          const data = await response.json();
+          setPayouts(data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch payouts:', error);
+      }
     };
 
     fetchPayouts();
+    const interval = setInterval(fetchPayouts, 60000); // Refresh every minute
+    return () => clearInterval(interval);
   }, []);
 
   if (payouts.length === 0) return null;
@@ -35,9 +37,9 @@ export const TrustTicker = () => {
             transition={{ repeat: Infinity, duration: 20, ease: "linear" }}
           >
             {[...payouts, ...payouts].map((p, i) => (
-              <span key={`${p.id}-${i}`} className="inline-flex items-center text-xs font-mono uppercase tracking-wider text-slate-300 mx-8">
+              <span key={`${p.user_obfuscated_id}-${i}`} className="inline-flex items-center text-xs font-mono uppercase tracking-wider text-slate-300 mx-8">
                 <span className="text-green-400 font-bold mr-2">Recent Payout:</span>
-                ${p.amount}.00 to User_{p.userId} via Stripe
+                ${(p.amount_cents / 100).toFixed(2)} to {p.user_obfuscated_id} via Stripe
                 <span className="ml-8 text-white/20">•</span>
               </span>
             ))}
