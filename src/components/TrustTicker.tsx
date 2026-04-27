@@ -8,9 +8,12 @@ export const TrustTicker = () => {
     const fetchPayouts = async () => {
       try {
         const response = await fetch('/api/payouts');
-        if (response.ok) {
+        const contentType = response.headers.get('content-type');
+        if (response.ok && contentType && contentType.includes('application/json')) {
           const data = await response.json();
           setPayouts(data);
+        } else {
+          console.warn('API returned non-JSON response or failed. Ticker will stay hidden.');
         }
       } catch (error) {
         console.error('Failed to fetch payouts:', error);
