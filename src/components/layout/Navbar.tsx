@@ -115,7 +115,7 @@ export function Navbar() {
 
         <nav className="hidden items-center gap-6 lg:flex">
           {links.map((l) => (
-            {l.to ? (
+            l.to ? (
               <NavLink
                 key={l.to}
                 to={l.to}
@@ -136,7 +136,7 @@ export function Navbar() {
               >
                 {l.label}
               </a>
-            )}
+            )
           ))}
         </nav>
 
