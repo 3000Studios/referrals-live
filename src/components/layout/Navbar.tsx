@@ -11,6 +11,7 @@ const links = [
   { to: "/leaderboard", label: "Leaderboard" },
   { to: "/blog", label: "Blog" },
   { to: "/premium", label: "Premium" },
+  { href: "https://3000studios.vip/dashboard", label: "VIP Hub" },
 ];
 
 export function Navbar() {
@@ -114,18 +115,28 @@ export function Navbar() {
 
         <nav className="hidden items-center gap-6 lg:flex">
           {links.map((l) => (
-            <NavLink
-              key={l.to}
-              to={l.to}
-              className={({ isActive }) =>
-                clsx(
-                  "text-sm font-semibold transition",
-                  isActive ? "text-neon" : "text-white/70 hover:text-white",
-                )
-              }
-            >
-              {l.label}
-            </NavLink>
+            {l.to ? (
+              <NavLink
+                key={l.to}
+                to={l.to}
+                className={({ isActive }) =>
+                  clsx(
+                    "text-sm font-semibold transition",
+                    isActive ? "text-neon" : "text-white/70 hover:text-white",
+                  )
+                }
+              >
+                {l.label}
+              </NavLink>
+            ) : (
+              <a
+                key={l.href}
+                href={l.href}
+                className="text-sm font-semibold text-white/70 hover:text-white transition"
+              >
+                {l.label}
+              </a>
+            )}
           ))}
         </nav>
 
@@ -207,15 +218,24 @@ export function Navbar() {
         >
           <div className="flex flex-col gap-2 px-4 py-4">
             {links.map((l) => (
-              <motion.div key={l.to} initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }}>
-                <Link
-                key={l.to}
-                to={l.to}
-                onClick={() => setOpen(false)}
-                className="rounded-xl border border-white/5 px-3 py-3 text-sm font-semibold text-white/90"
-              >
-                {l.label}
-                </Link>
+              <motion.div key={l.to || l.href} initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }}>
+                {l.to ? (
+                  <Link
+                    to={l.to}
+                    onClick={() => setOpen(false)}
+                    className="block rounded-xl border border-white/5 px-3 py-3 text-sm font-semibold text-white/90"
+                  >
+                    {l.label}
+                  </Link>
+                ) : (
+                  <a
+                    href={l.href}
+                    onClick={() => setOpen(false)}
+                    className="block rounded-xl border border-white/5 px-3 py-3 text-sm font-semibold text-white/90"
+                  >
+                    {l.label}
+                  </a>
+                )}
               </motion.div>
             ))}
             <Link
