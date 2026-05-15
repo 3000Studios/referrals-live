@@ -10,3 +10,4 @@ dist
 .pages-jwt
 .pages-upload-jwt
 *.jwt.tmp
+.playwright-mcp/
