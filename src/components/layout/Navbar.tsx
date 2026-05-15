@@ -11,7 +11,6 @@ const links = [
   { to: "/leaderboard", label: "Leaderboard" },
   { to: "/blog", label: "Blog" },
   { to: "/premium", label: "Premium" },
-  { href: "https://3000studios.vip/dashboard", label: "VIP Hub" },
 ];
 
 export function Navbar() {
@@ -115,28 +114,19 @@ export function Navbar() {
 
         <nav className="hidden items-center gap-6 lg:flex">
           {links.map((l) => (
-            l.to ? (
-              <NavLink
-                key={l.to}
-                to={l.to}
-                className={({ isActive }) =>
-                  clsx(
-                    "text-sm font-semibold transition",
-                    isActive ? "text-neon" : "text-white/70 hover:text-white",
-                  )
-                }
-              >
-                {l.label}
-              </NavLink>
-            ) : (
-              <a
-                key={l.href}
-                href={l.href}
-                className="text-sm font-semibold text-white/70 hover:text-white transition"
-              >
-                {l.label}
-              </a>
-            )
+            <NavLink
+              key={l.to}
+              to={l.to}
+              className={({ isActive }) =>
+                clsx(
+                  "group relative text-sm font-semibold transition duration-200 hover:-translate-y-0.5 hover:text-white",
+                  isActive ? "text-neon" : "text-white/70",
+                )
+              }
+            >
+              {l.label}
+              <span className="absolute -bottom-1 left-0 h-px w-0 bg-gradient-to-r from-neon to-electric transition-all duration-300 group-hover:w-full" />
+            </NavLink>
           ))}
         </nav>
 
@@ -166,15 +156,15 @@ export function Navbar() {
             <>
               <Link
                 to="/login"
-                className="rounded-full border border-white/10 px-4 py-2 text-sm font-semibold text-white/90 hover:border-neon/40"
+                className="rounded-full border border-white/10 px-4 py-2 text-sm font-semibold text-white/90 transition hover:-translate-y-0.5 hover:border-neon/40"
               >
                 Login
               </Link>
               <Link
-                to="/register?mode=username"
-                className="rounded-full bg-gradient-to-r from-neon to-emerald-400 px-4 py-2 text-sm font-semibold text-black shadow-neon"
+                to="/register"
+                className="rounded-full bg-gradient-to-r from-neon to-emerald-400 px-4 py-2 text-sm font-semibold text-black shadow-neon transition hover:-translate-y-0.5 hover:brightness-110"
               >
-                Claim username
+                Create account
               </Link>
             </>
           )}
@@ -218,24 +208,14 @@ export function Navbar() {
         >
           <div className="flex flex-col gap-2 px-4 py-4">
             {links.map((l) => (
-              <motion.div key={l.to || l.href} initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }}>
-                {l.to ? (
-                  <Link
-                    to={l.to}
-                    onClick={() => setOpen(false)}
-                    className="block rounded-xl border border-white/5 px-3 py-3 text-sm font-semibold text-white/90"
-                  >
-                    {l.label}
-                  </Link>
-                ) : (
-                  <a
-                    href={l.href}
-                    onClick={() => setOpen(false)}
-                    className="block rounded-xl border border-white/5 px-3 py-3 text-sm font-semibold text-white/90"
-                  >
-                    {l.label}
-                  </a>
-                )}
+              <motion.div key={l.to} initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }}>
+                <Link
+                  to={l.to}
+                  onClick={() => setOpen(false)}
+                  className="block rounded-xl border border-white/5 px-3 py-3 text-sm font-semibold text-white/90"
+                >
+                  {l.label}
+                </Link>
               </motion.div>
             ))}
             <Link

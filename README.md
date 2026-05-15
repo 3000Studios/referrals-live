@@ -1,6 +1,6 @@
 # referrals.live
 
-Production-grade referral marketplace UI: Vite + React + TypeScript, Tailwind, Framer Motion, GSAP, Three.js (R3F), Zustand, and Cloudflare Pages deployment via Wrangler.
+Production-grade referral marketplace UI: Vite + React + TypeScript, Tailwind, Framer Motion, GSAP, Three.js (R3F), Zustand, and Cloudflare Pages deployment via Cloudflare Wrangler.
 
 ## Local development
 
@@ -44,22 +44,11 @@ If omitted, the app uses curated Unsplash URLs bundled in seed content.
 
 Canonical site URL defaults to `https://referrals.live` (`src/lib/seo.ts`) — override with `VITE_SITE_URL` if needed.
 
-## GitHub Actions (recommended deploy path)
-
-On every push to `main`, `.github/workflows/cloudflare-pages.yml` builds and deploys to Cloudflare Pages.
-
-Add these **repository secrets** in GitHub → Settings → Secrets and variables → Actions:
-
-- `CLOUDFLARE_API_TOKEN` — API token with **Account → Cloudflare Pages → Edit** (and **Account Settings → Read** if prompted).
-- `CLOUDFLARE_ACCOUNT_ID` — from Cloudflare dashboard sidebar (Account ID).
-
-The workflow runs `wrangler pages deploy dist --project-name=referrals-live`. The Pages project **`referrals-live`** is created in Cloudflare; production URL will be **`https://referrals-live.pages.dev`** after the first successful deployment.
-
-If the Cloudflare API returns **429 / rate limit** locally, wait several minutes and rerun `npm run deploy`, or rely on the GitHub Action (often less bursty than repeated CLI calls).
-
 ## Deploy to Cloudflare Pages (Wrangler)
 
-Prereqs: Node 20+, Wrangler v3 (`npm i -g wrangler` or use `npx`).
+This repo deploys only through Cloudflare Wrangler. Do not use Netlify or GitHub Actions for deployment. Keep one Pages project or Worker per domain, one repo, one domain, and one active branch for each domain.
+
+Prereqs: Node 20+ and Wrangler (`npm install` installs the pinned project dependency).
 
 ```bash
 npm run build
@@ -74,7 +63,7 @@ Or use the npm script:
 npm run deploy
 ```
 
-### Direct deploy (when `wrangler pages deploy` hits HTTP 429 on project lookup)
+### Direct Wrangler API deploy fallback
 
 `npm run deploy:direct` runs `scripts/cf-pages-deploy.mjs`: it uses the Pages **upload JWT** for assets, then your **Wrangler OAuth** (after `wrangler login`) or **`CLOUDFLARE_API_TOKEN`** for the final deployment POST. This avoids the `GET .../pages/projects/...` call that often rate-limits.
 
@@ -108,10 +97,8 @@ npm run deploy:direct
 ```bash
 git init
 git branch -M main
-git remote add origin https://github.com/<YOUR_GITHUB_USERNAME>/referrals-live.git
 git add .
 git commit -m "Initial full build of referrals.live"
-git push -u origin main
 ```
 
 ## License

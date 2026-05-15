@@ -6,6 +6,7 @@ export type Env = {
   STRIPE_SECRET_KEY?: string;
   STRIPE_PRICE_ID?: string;
   STRIPE_WEBHOOK_SECRET?: string;
+  LEAD_WEBHOOK_URL?: string;
 };
 
 export function json(data: unknown, init: ResponseInit = {}) {
@@ -161,4 +162,22 @@ export async function verifyPassword(password: string, stored: string) {
   let diff = 0;
   for (let i = 0; i < derived.length; i += 1) diff |= derived[i] ^ expected[i];
   return diff === 0;
+}
+
+export function safeOrigin(env: Env, fallback: string) {
+  const origin = (env.APP_ORIGIN || fallback || "https://referrals.live").replace(/\/+$/, "");
+  return origin === "https://referrals.live" || origin === "https://www.referrals.live" ? origin : "https://referrals.live";
+}
+
+export async function sendLead(env: Env, payload: Record<string, unknown>) {
+  if (!env.LEAD_WEBHOOK_URL) return;
+  await fetch(env.LEAD_WEBHOOK_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json; charset=utf-8" },
+    body: JSON.stringify({
+      site: "referrals.live",
+      capturedAt: new Date().toISOString(),
+      ...payload,
+    }),
+  }).catch(() => null);
 }

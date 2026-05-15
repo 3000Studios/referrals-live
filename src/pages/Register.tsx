@@ -16,7 +16,7 @@ export function Register() {
     () =>
       mode === "username"
         ? "Pick a name people will recognize when you share referrals."
-        : "Local profile + gamification hooks activate instantly.",
+        : "Create your referral profile with an email, password, and public display name.",
     [mode],
   );
 
@@ -68,8 +68,11 @@ export function Register() {
           type="submit"
           className="w-full rounded-2xl bg-gradient-to-r from-neon to-emerald-400 px-4 py-3 text-sm font-semibold text-black shadow-neon"
         >
-          Start earning
+          Create account
         </button>
+        <p className="text-xs leading-relaxed text-muted">
+          By creating an account, you agree to receive account and marketplace messages from referrals.live. You can opt out of marketing messages anytime.
+        </p>
         <div className="text-center text-sm text-muted">
           Already have an account?{" "}
           <Link className="text-electric hover:text-white" to="/login">

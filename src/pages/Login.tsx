@@ -21,7 +21,7 @@ export function Login() {
       <Seo title="Login — referrals.live" description="Access your referrals.live dashboard." path="/login" />
       <div className="text-xs font-semibold uppercase tracking-[0.25em] text-neon">Account</div>
       <h1 className="font-display text-4xl font-extrabold text-white">Login</h1>
-      <p className="mt-3 text-sm text-muted">Demo auth stores session locally — swap for Supabase/Auth0/Clerk.</p>
+      <p className="mt-3 text-sm text-muted">Log in with your email and password to manage referrals, Pro placement, and chat access.</p>
       <form onSubmit={onSubmit} className="mt-8 glass space-y-4 rounded-3xl border border-white/10 p-6">
         <label className="block text-xs uppercase tracking-wide text-muted">
           Email

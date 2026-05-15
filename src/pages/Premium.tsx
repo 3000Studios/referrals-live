@@ -6,7 +6,7 @@ import { Link } from "react-router-dom";
 
 const plan = {
   name: "Premium",
-  price: "$7.99 / 30 days",
+  price: "$7.99 / month",
   perks: [
     "Post and manage referrals in your dashboard",
     "Unlock live chat posting (read-only stays free)",
@@ -52,8 +52,7 @@ export function Premium() {
             ))}
           </ul>
           <div className="mt-12 grid gap-8 lg:grid-cols-2">
-            {/* Stripe / Card Option */}
-            <div className="group relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-white/[0.02] p-8 transition-all hover:border-electric/50 hover:bg-white/[0.04]">
+            <div className="group relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-white/[0.02] p-8 transition-all hover:-translate-y-1 hover:border-electric/50 hover:bg-white/[0.04] lg:col-span-2">
               <div className="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-electric/10 blur-3xl transition-all group-hover:bg-electric/20" />
               <div className="relative flex h-14 w-14 items-center justify-center rounded-2xl bg-electric/10 text-3xl">💳</div>
               <h3 className="mt-6 font-display text-xl font-bold text-white">Credit / Debit Card</h3>
@@ -99,34 +98,9 @@ export function Premium() {
                   Login to upgrade
                 </Link>
               )}
-            </div>
-
-            {/* PayPal Option */}
-            <div className="group relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-white/[0.02] p-8 transition-all hover:border-gold/50 hover:bg-white/[0.04]">
-              <div className="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-gold/10 blur-3xl transition-all group-hover:bg-gold/20" />
-              <div className="relative flex h-14 w-14 items-center justify-center rounded-2xl bg-gold/10 text-3xl">🅿️</div>
-              <h3 className="mt-6 font-display text-xl font-bold text-white">PayPal Checkout</h3>
-              <p className="mt-2 text-sm text-muted">Pay with your PayPal balance, linked bank account, or PayPal Credit.</p>
-              
-              <ul className="mt-6 space-y-2 text-xs text-muted/80">
-                <li className="flex items-center gap-2">✓ Verified Business Account</li>
-                <li className="flex items-center gap-2">✓ Buyer Protection</li>
-                <li className="flex items-center gap-2">✓ Faster Checkout</li>
-              </ul>
-
-              {user ? (
-                <a
-                  href={`https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=payments@myappai.net&item_name=Referrals.live%20Premium%20Subscription&amount=7.99&currency_code=USD&return=${encodeURIComponent(window.location.origin + '/dashboard?billing=success')}&cancel_return=${encodeURIComponent(window.location.origin + '/premium?billing=cancel')}&custom=${user.id}`}
-                  onClick={() => trackEvent("premium_click", { plan: plan.name, method: "paypal" })}
-                  className="mt-8 block w-full rounded-2xl bg-[#ffc439] px-6 py-4 text-center text-sm font-bold text-[#003087] transition-transform active:scale-95"
-                >
-                  Pay with PayPal
-                </a>
-              ) : (
-                <Link to="/login" className="mt-8 block w-full rounded-2xl border border-white/10 bg-white/5 px-6 py-4 text-center text-sm font-bold text-white hover:bg-white/10">
-                  Login to upgrade
-                </Link>
-              )}
+              <p className="mt-5 rounded-2xl border border-gold/20 bg-gold/10 p-4 text-xs leading-relaxed text-gold/90">
+                Pro is a recurring subscription. Access starts after Stripe confirms payment. All sales are final and non-refundable except where required by law.
+              </p>
             </div>
           </div>
 
@@ -161,7 +135,7 @@ export function Premium() {
 
           <div className="glass rounded-3xl border border-neon/10 p-6 text-xs text-muted">
             <div className="font-bold text-white mb-2">Need assistance?</div>
-            Our support team is available 24/7. Contact <a href="mailto:mr.jwswain@gmail.com" className="text-neon hover:underline">support@referrals.live</a> for billing inquiries.
+            Contact <a href="mailto:mr.jwswain@gmail.com" className="text-neon hover:underline">support@referrals.live</a> for billing inquiries.
           </div>
         </div>
       </div>

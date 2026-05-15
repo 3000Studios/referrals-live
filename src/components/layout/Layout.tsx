@@ -45,7 +45,7 @@ export function Layout() {
           </div>
           
           <main className="mx-auto max-w-7xl px-4 pb-24 animate-in fade-in slide-in-from-bottom-2 duration-500">
-            <div className="page-shell rounded-[2rem] border border-white/10 px-4 py-6 shadow-[0_24px_90px_rgba(0,0,0,0.45)] md:px-6 md:py-8 bg-[rgba(4,6,12,0.96)]">
+            <div className="page-shell rounded-[2rem] border border-white/10 bg-[rgba(4,6,12,0.91)] px-4 py-6 shadow-[0_24px_90px_rgba(0,0,0,0.55)] backdrop-blur-sm md:px-6 md:py-8">
               <Suspense fallback={<PageLoader />}>
                 <Outlet />
               </Suspense>

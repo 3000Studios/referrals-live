@@ -2,24 +2,24 @@ import { TrustTicker } from '../TrustTicker';
 
 export const GlobalFooter = () => {
   return (
-    <footer className="w-full bg-black border-t border-white/10">
+    <footer className="w-full overflow-hidden bg-black border-t border-white/10">
       <TrustTicker />
-      <div className="max-w-7xl mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
+      <div className="relative max-w-7xl mx-auto px-4 py-12">
+        <div className="pointer-events-none absolute inset-x-4 top-0 h-px bg-gradient-to-r from-transparent via-neon/70 to-transparent" />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
           <div className="space-y-4">
-            <h3 className="text-white font-bold text-lg tracking-tighter">3000Studios</h3>
+            <h3 className="text-white font-bold text-lg tracking-tighter">referrals.live</h3>
             <p className="text-slate-500 text-xs leading-relaxed">
-              Universal Technical Partner and Lead Architect for the next generation of 
-              AI-driven revenue engines. Built for speed, scaled for profit.
+              A live referral marketplace for creators, operators, and side hustlers who want tracked links, public rankings, and premium placement.
             </p>
           </div>
           
           <div>
-            <h4 className="text-white text-xs font-bold uppercase tracking-widest mb-4">Ecosystem</h4>
+            <h4 className="text-white text-xs font-bold uppercase tracking-widest mb-4">Marketplace</h4>
             <ul className="space-y-2">
-              <li><a href="https://referrals.live" className="text-slate-400 text-xs hover:text-white transition-colors">Referrals Live</a></li>
-              <li><a href="https://voicetowebsite.com" className="text-slate-400 text-xs hover:text-white transition-colors">VoiceToWebsite</a></li>
-              <li><a href="https://findmerates.com" className="text-slate-400 text-xs hover:text-white transition-colors">FindMeRates</a></li>
+              <li><a href="/browse" className="text-slate-400 text-xs hover:text-white transition-colors">Browse referrals</a></li>
+              <li><a href="/submit" className="text-slate-400 text-xs hover:text-white transition-colors">Submit a program</a></li>
+              <li><a href="/premium" className="text-slate-400 text-xs hover:text-white transition-colors">Upgrade to Pro</a></li>
             </ul>
           </div>
 
@@ -31,21 +31,14 @@ export const GlobalFooter = () => {
               <li><a href="/disclosure" className="text-slate-400 text-xs hover:text-white transition-colors">Affiliate Disclosure</a></li>
             </ul>
           </div>
-
-          <div className="space-y-4">
-            <h4 className="text-white text-xs font-bold uppercase tracking-widest mb-4">AdSense Partner</h4>
-            <div className="p-4 rounded-xl border border-white/5 bg-white/[0.02] text-[10px] text-slate-500 font-mono">
-              PUB-ID: ca-pub-5800977493749262
-            </div>
-          </div>
         </div>
         
         <div className="mt-12 pt-8 border-t border-white/5 flex flex-wrap items-center justify-between gap-4">
           <p className="text-[10px] text-slate-600 uppercase tracking-widest">
-            © {new Date().getFullYear()} 3000Studios. All Rights Reserved.
+            © {new Date().getFullYear()} referrals.live. All sales final where permitted by law.
           </p>
           <div className="flex items-center gap-6">
-             <span className="text-[10px] text-blue-500 font-bold uppercase">Build 2026.04.26</span>
+             <span className="text-[10px] text-blue-500 font-bold uppercase">Live on Cloudflare</span>
           </div>
         </div>
       </div>

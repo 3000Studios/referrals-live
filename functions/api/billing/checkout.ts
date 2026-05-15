@@ -1,5 +1,5 @@
 import type { Env } from "../_lib";
-import { json } from "../_lib";
+import { json, safeOrigin } from "../_lib";
 import { requireUser } from "../_session";
 
 function formEncode(body: Record<string, string>) {
@@ -30,7 +30,7 @@ export async function onRequestPost(context: { request: Request; env: Env }) {
   if (!priceId) return json({ ok: false, error: "Billing not configured" }, { status: 503 });
 
   const origin = new URL(context.request.url).origin;
-  const appOrigin = context.env.APP_ORIGIN || origin;
+  const appOrigin = safeOrigin(context.env, origin);
 
   const db = context.env.DB;
   const sub = await db.prepare("SELECT stripe_customer_id FROM subscriptions WHERE user_id=? LIMIT 1").bind(user.id).first<any>();

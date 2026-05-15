@@ -1,6 +1,7 @@
 export type Env = {
   DB: D1Database;
   CHAT: DurableObjectNamespace;
+  GEMINI_API_KEY?: string;
 };
 
 type ChatStoredMessage = {
@@ -337,7 +338,7 @@ async function generateHealthReport(env: Env) {
 
 async function hourlyDiscovery(env: Env) {
   const ts = now();
-  const apiKey = (env as any).GEMINI_API_KEY;
+  const apiKey = env.GEMINI_API_KEY;
   if (!apiKey) return;
 
   const prompt = `Identify one high-quality, popular referral program that is NOT in this list: Dropbox, Wise, Shopify, Airbnb, Uber, Amazon. 

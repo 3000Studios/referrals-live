@@ -1,5 +1,5 @@
 import type { Env } from "./_lib";
-import { badRequest, json, now, parseJson, uid } from "./_lib";
+import { badRequest, json, now, parseJson, sendLead, uid } from "./_lib";
 
 type Body = { email: string; source: string };
 
@@ -12,6 +12,7 @@ export async function onRequestPost(context: { request: Request; env: Env }) {
   await context.env.DB.prepare("INSERT INTO email_captures (id, email, source, created_at) VALUES (?, ?, ?, ?)")
     .bind(uid("em"), email, source, now())
     .run();
+  await sendLead(context.env, { type: "email_capture", email, source });
 
   return json({ ok: true });
 }

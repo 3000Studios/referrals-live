@@ -1,5 +1,5 @@
 import type { Env } from "../_lib";
-import { badRequest, hashPassword, json, now, parseJson, setCookie, uid } from "../_lib";
+import { badRequest, hashPassword, json, now, parseJson, sendLead, setCookie, uid } from "../_lib";
 
 type Body = { email: string; password: string; displayName: string };
 
@@ -46,6 +46,13 @@ export async function onRequestPost(context: { request: Request; env: Env }) {
       expiresAt,
       ts,
     ).run();
+    await sendLead(context.env, {
+      type: "account_signup",
+      email: cleanEmail,
+      displayName: cleanName,
+      userId,
+      source: "register",
+    });
 
     const headers = new Headers();
     headers.set("Set-Cookie", setCookie("rl_session", sessionId, { maxAgeSeconds }));
