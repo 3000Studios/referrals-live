@@ -33,7 +33,7 @@ const curated: Curated[] = [
     url: "https://www.dropbox.com/referrals",
     category: "saas",
     tags: ["storage", "referrals", "productivity"],
-    imageUrl: "https://logo.clearbit.com/dropbox.com",
+    imageUrl: "https://cdn.simpleicons.org/dropbox/0061FF",
     score: 90,
   },
   {
@@ -43,7 +43,7 @@ const curated: Curated[] = [
     url: "https://wise.com/help/articles/2978044/invite-friends-to-wise",
     category: "fintech",
     tags: ["money", "international", "invite"],
-    imageUrl: "https://logo.clearbit.com/wise.com",
+    imageUrl: "https://cdn.simpleicons.org/wise/9FE870",
     score: 86,
   },
   {
@@ -53,7 +53,7 @@ const curated: Curated[] = [
     url: "https://www.shopify.com/affiliates",
     category: "ecommerce",
     tags: ["ecommerce", "affiliate", "saas"],
-    imageUrl: "https://logo.clearbit.com/shopify.com",
+    imageUrl: "https://cdn.simpleicons.org/shopify/7AB55C",
     score: 92,
   },
 ];
@@ -593,7 +593,7 @@ export class ChatRoom {
           "If you’ve got a good referral program page, drop it after you upgrade—mods keep it clean and high-signal.",
           "Pro tip: upvote the offers that actually convert for your niche so they stay on top.",
         ];
-    const pick = botLines[Math.floor(Math.random() * botLines.length)]!;
+    const pick = botLines[Math.floor(ts / 2_700_000) % botLines.length]!;
     const message = { id: crypto.randomUUID(), ts, user: "CommunityBot (BOT)", role: "bot", text: pick, avatar: "spark", color: "neon" };
     const existing = ((await this.state.storage.get<ChatStoredMessage[]>("messages")) ?? []);
     const next = [...existing, message].slice(-200);
