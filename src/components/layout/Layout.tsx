@@ -1,7 +1,7 @@
 import { Suspense, useEffect, useState } from "react";
 import { Outlet, useLocation } from "react-router-dom";
+import { motion } from "framer-motion";
 import { Navbar } from "@/components/layout/Navbar";
-import { Footer } from "@/components/layout/Footer";
 import { GlobalNav } from "@/components/layout/GlobalNav";
 import { GlobalFooter } from "@/components/layout/GlobalFooter";
 import { NetworkBackground } from "@/components/three/NetworkBackground";
@@ -44,15 +44,21 @@ export function Layout() {
             </div>
           </div>
           
-          <main className="mx-auto max-w-7xl px-4 pb-24 animate-in fade-in slide-in-from-bottom-2 duration-500">
+          <motion.main
+            initial={{ opacity: 0, y: 42, rotateX: -10 }}
+            whileInView={{ opacity: 1, y: 0, rotateX: 0 }}
+            animate={{ opacity: 1 }}
+            viewport={{ amount: 0.08 }}
+            transition={{ duration: 0.45, ease: "easeOut" }}
+            className="mx-auto max-w-7xl px-4 pb-24 [transform-style:preserve-3d]"
+          >
             <div className="page-shell rounded-[2rem] border border-white/10 bg-[rgba(4,6,12,0.91)] px-4 py-6 shadow-[0_24px_90px_rgba(0,0,0,0.55)] backdrop-blur-sm md:px-6 md:py-8">
               <Suspense fallback={<PageLoader />}>
                 <Outlet />
               </Suspense>
             </div>
-          </main>
+          </motion.main>
         </div>
-        <Footer />
         <GlobalFooter />
         
         <div className="hidden md:block">

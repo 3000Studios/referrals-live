@@ -6,13 +6,10 @@ export function Ticker() {
   const referrals = useAppStore((s) => s.referrals);
   const items = useMemo(() => sortByTrending(referrals).slice(0, 14), [referrals]);
   const line = useMemo(() => {
-    const activities = [
-      ...items.map((r) => `User @${r.id.slice(0, 4)} just got a click on ${r.title}`),
-      ...items.map((r) => `New referral submitted: ${r.title} (${r.category})`),
-      ...items.map((r) => `${r.title} hit #${Math.floor(Math.random() * 10) + 1} on Trending`),
-    ];
-    // Shuffle
-    return activities.sort(() => Math.random() - 0.5).join("          •          ");
+    if (!items.length) return "Real referral rankings update as members submit, vote, and click offers.";
+    return items
+      .map((r, index) => `#${index + 1} ${r.title}: ${r.votes.toLocaleString()} votes, ${r.clicks.toLocaleString()} clicks`)
+      .join("          •          ");
   }, [items]);
 
   return (

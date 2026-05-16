@@ -8,12 +8,12 @@ export function Privacy() {
       <p className="text-sm text-muted">Last updated: April 16, 2026</p>
       <h2 className="font-display text-2xl font-bold text-white">What we collect</h2>
       <p className="text-muted">
-        This demo may store information locally in your browser (for example: account details you enter, referral submissions, and
-        email addresses you provide to signup forms). When you connect a backend, define your own data processing agreement.
+        We collect account details you submit, referral listings, email capture form submissions, session cookies, billing status,
+        and marketplace activity such as votes and tracked outbound clicks.
       </p>
       <h2 className="font-display text-2xl font-bold text-white">Analytics</h2>
       <p className="text-muted">
-        The site includes integration points for analytics and advertising. Third-party services (such as Google AdSense) may collect
+        The site uses analytics and advertising integrations. Third-party services such as Google AdSense may collect
         information pursuant to their own policies.
       </p>
       <h2 className="font-display text-2xl font-bold text-white">Contact</h2>

@@ -33,7 +33,7 @@ const curated: Curated[] = [
     url: "https://www.dropbox.com/referrals",
     category: "saas",
     tags: ["storage", "referrals", "productivity"],
-    imageUrl: "https://images.unsplash.com/photo-1527430253228-e93688616381?auto=format&fit=crop&w=1200&q=80",
+    imageUrl: "https://logo.clearbit.com/dropbox.com",
     score: 90,
   },
   {
@@ -43,7 +43,7 @@ const curated: Curated[] = [
     url: "https://wise.com/help/articles/2978044/invite-friends-to-wise",
     category: "fintech",
     tags: ["money", "international", "invite"],
-    imageUrl: "https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=1200&q=80",
+    imageUrl: "https://logo.clearbit.com/wise.com",
     score: 86,
   },
   {
@@ -53,7 +53,7 @@ const curated: Curated[] = [
     url: "https://www.shopify.com/affiliates",
     category: "ecommerce",
     tags: ["ecommerce", "affiliate", "saas"],
-    imageUrl: "https://images.unsplash.com/photo-1556742502-ec7c0e9f34b1?auto=format&fit=crop&w=1200&q=80",
+    imageUrl: "https://logo.clearbit.com/shopify.com",
     score: 92,
   },
 ];

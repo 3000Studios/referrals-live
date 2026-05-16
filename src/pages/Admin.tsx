@@ -18,6 +18,7 @@ type Overview = {
   emailCaptures: number;
   activeFeaturedSlots: number;
   ingestedOffers: number;
+  completedRevenueCents: number;
   lastIngestedAt: number;
   stripeConfigured: boolean;
   adsTxtUrl: string;
@@ -47,6 +48,15 @@ type AdminTask = {
   metadata_json: string;
   status: string;
   created_at: number;
+};
+
+type AdminUser = {
+  id: string;
+  email: string;
+  displayName: string;
+  createdAt: number;
+  subscriptionStatus: string;
+  currentPeriodEnd: number;
 };
 
 function safeParseUrl(input: string) {
@@ -94,6 +104,7 @@ export function Admin() {
   const [refParamsJson, setRefParamsJson] = useState('{\n  "ref": "YOUR_CODE_HERE"\n}');
   const [refParseNote, setRefParseNote] = useState<string | null>(null);
   const [tasks, setTasks] = useState<AdminTask[]>([]);
+  const [users, setUsers] = useState<AdminUser[]>([]);
 
   const load = async () => {
     const r = await fetch("/api/owner-attribution", { credentials: "include" });
@@ -145,6 +156,12 @@ export function Admin() {
     if (r.ok) setTasks(data.tasks ?? []);
   };
 
+  const loadUsers = async () => {
+    const r = await fetch("/api/admin/users", { credentials: "include" });
+    const data = await r.json();
+    if (r.ok) setUsers(data.users ?? []);
+  };
+
   const updateTaskStatus = async (id: string, status: string) => {
     await fetch("/api/admin/tasks", {
       method: "POST",
@@ -161,6 +178,7 @@ export function Admin() {
     loadOverview().catch(() => null);
     loadFinder().catch(() => null);
     loadTasks().catch(() => null);
+    loadUsers().catch(() => null);
   }, []);
 
   const note = useMemo(
@@ -206,8 +224,9 @@ export function Admin() {
               ["Public referrals", overview?.publicReferrals ?? 0],
               ["Active premium", overview?.activePremium ?? 0],
               ["Email captures", overview?.emailCaptures ?? 0],
+              ["Signed-up users", users.length],
+              ["Revenue", `$${((overview?.completedRevenueCents ?? 0) / 100).toFixed(2)}`],
               ["Featured slots live", overview?.activeFeaturedSlots ?? 0],
-              ["Ingested offers", overview?.ingestedOffers ?? 0],
             ].map(([label, value]) => (
               <div key={String(label)} className="rounded-2xl border border-white/10 bg-black/30 p-4">
                 <div className="text-[11px] uppercase tracking-[0.2em] text-muted">{label}</div>
@@ -268,6 +287,41 @@ export function Admin() {
                 No pending tasks. You're all caught up!
               </div>
             )}
+          </div>
+        </div>
+
+        <div className="glass rounded-3xl border border-white/10 p-6 lg:col-span-2">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <div className="text-xs font-semibold uppercase tracking-[0.25em] text-electric">Real users</div>
+              <p className="mt-2 text-sm text-muted">Live accounts from the production D1 database. Only production accounts are listed.</p>
+            </div>
+            <button onClick={loadUsers} className="rounded-2xl border border-white/10 px-4 py-2 text-xs font-semibold text-white/80 hover:border-neon/40">
+              Refresh users
+            </button>
+          </div>
+          <div className="mt-5 overflow-x-auto">
+            <table className="w-full min-w-[720px] text-left text-sm">
+              <thead className="text-xs uppercase tracking-[0.18em] text-muted">
+                <tr>
+                  <th className="border-b border-white/10 py-3 pr-4">Email</th>
+                  <th className="border-b border-white/10 py-3 pr-4">Display name</th>
+                  <th className="border-b border-white/10 py-3 pr-4">Plan</th>
+                  <th className="border-b border-white/10 py-3 pr-4">Created</th>
+                </tr>
+              </thead>
+              <tbody>
+                {users.map((item) => (
+                  <tr key={item.id} className="text-white/85">
+                    <td className="border-b border-white/5 py-3 pr-4">{item.email}</td>
+                    <td className="border-b border-white/5 py-3 pr-4">{item.displayName || "Creator"}</td>
+                    <td className="border-b border-white/5 py-3 pr-4">{item.subscriptionStatus}</td>
+                    <td className="border-b border-white/5 py-3 pr-4">{item.createdAt ? new Date(item.createdAt).toLocaleString() : "Unknown"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {!users.length ? <div className="rounded-2xl border border-white/10 bg-black/30 p-4 text-sm text-muted">No user accounts yet.</div> : null}
           </div>
         </div>
 

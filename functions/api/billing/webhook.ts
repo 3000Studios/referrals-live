@@ -89,14 +89,12 @@ export async function onRequestPost(context: { request: Request; env: Env }) {
         .bind(clientRef, customerId ?? null, subscriptionId ?? null, ts + 30 * 24 * 60 * 60 * 1000)
         .run();
 
-      // --- Affiliate Conversion Logic ---
-      // Check if this user was referred
       const conversion = await db.prepare(
         "SELECT id, referrer_id, code FROM conversions WHERE referred_user_id = ? AND status = 'pending' LIMIT 1"
       ).bind(clientRef).first<any>();
 
       if (conversion) {
-        const commission = 1000; // $10.00 flat commission for this demo
+        const commission = 1000;
         await db.batch([
           db.prepare("UPDATE conversions SET status = 'completed', amount_cents = ? WHERE id = ?")
             .bind(commission, conversion.id),
@@ -104,7 +102,6 @@ export async function onRequestPost(context: { request: Request; env: Env }) {
             .bind(commission, conversion.referrer_id)
         ]);
       }
-      // ----------------------------------
     }
   }
 
@@ -146,8 +143,7 @@ export async function onRequestPost(context: { request: Request; env: Env }) {
     const payoutId = obj?.id as string;
     const amount = obj?.amount as number;
     const currency = obj?.currency as string;
-    // Generate a consistent but obfuscated user ID for the ticker
-    const obfuscatedId = `User_${Math.floor(Math.random() * 9000) + 1000}`; 
+    const obfuscatedId = `Stripe_${String(payoutId ?? "").slice(-8)}`;
 
     await db.prepare(
       "INSERT OR IGNORE INTO payout_logs (id, stripe_payout_id, amount_cents, currency, user_obfuscated_id, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)"

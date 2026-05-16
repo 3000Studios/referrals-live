@@ -34,7 +34,7 @@ export type Provider = {
 
 export type OwnerReferralProfile = {
   providerId: string;
-  // Stored obfuscated for local demo persistence.
+  // Stored obfuscated before persistence.
   encryptedParams: Record<string, string>;
   updatedBy: string;
   updatedAt: number;

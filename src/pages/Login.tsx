@@ -8,12 +8,20 @@ export function Login() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   const onSubmit = (e: FormEvent) => {
     e.preventDefault();
+    setError(null);
+    setLoading(true);
     login(email.trim(), password)
-      .then(() => navigate("/dashboard"))
-      .catch(() => null);
+      .then(() => {
+        const user = useAppStore.getState().user;
+        navigate(user?.isAdmin ? "/admin" : "/dashboard");
+      })
+      .catch((err) => setError(err instanceof Error ? err.message : "Login failed."))
+      .finally(() => setLoading(false));
   };
 
   return (
@@ -45,10 +53,12 @@ export function Login() {
         </label>
         <button
           type="submit"
-          className="w-full rounded-2xl bg-gradient-to-r from-neon to-emerald-400 px-4 py-3 text-sm font-semibold text-black shadow-neon"
+          disabled={loading}
+          className="w-full rounded-2xl bg-gradient-to-r from-neon to-emerald-400 px-4 py-3 text-sm font-semibold text-black shadow-neon disabled:cursor-not-allowed disabled:opacity-60"
         >
-          Continue
+          {loading ? "Signing in..." : "Continue"}
         </button>
+        {error ? <div className="rounded-2xl border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-100">{error}</div> : null}
         <div className="text-center text-sm text-muted">
           New here?{" "}
           <Link className="text-electric hover:text-white" to="/register">

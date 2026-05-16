@@ -15,19 +15,27 @@ export function DiscoveryScanner() {
     try {
       const res = await api.scanDiscovery(filter);
       // Map discovered items to ApiReferral format
-      const mapped = res.results.map((r: any) => ({
-        id: r.id || `scanned-${Math.random()}`,
-        title: r.title,
-        description: r.description,
-        url: r.url,
-        category: r.category,
-        tags: r.tags || [],
-        image: "https://images.unsplash.com/photo-1556742502-ec7c0e9f34b1?auto=format&fit=crop&w=800&q=80",
-        votes: 0,
-        clicks: 0,
-        createdAt: Date.now(),
-        source: "discovery"
-      }));
+      const mapped = res.results.map((r: any, index: number) => {
+        const titleKey = String(r.title || r.url || "referral")
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/^-|-$/g, "")
+          .slice(0, 48);
+
+        return {
+          id: r.id || `scanned-${index}-${titleKey}`,
+          title: r.title,
+          description: r.description,
+          url: r.url,
+          category: r.category,
+          tags: r.tags || [],
+          image: "https://images.unsplash.com/photo-1556742502-ec7c0e9f34b1?auto=format&fit=crop&w=800&q=80",
+          votes: 0,
+          clicks: 0,
+          createdAt: Date.now(),
+          source: "discovery"
+        };
+      });
       setResults(mapped);
     } catch (err: any) {
       setError(err.message);

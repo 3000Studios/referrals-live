@@ -1,25 +1,22 @@
-import { Env, json, now } from "./_lib";
+import { Env, json } from "./_lib";
+import { requireUser } from "./_session";
 
 export async function onRequestGet(context: { request: Request; env: Env }) {
   const db = context.env.DB;
-  
-  // 1. Get user session (mocked for this demo, usually from session cookie)
-  // In a real app, you'd verify the JWT/Session here.
-  const userId = "user-123"; // Replace with real auth
+  const user = await requireUser(context.request, context.env);
+  if (!user) return json({ ok: false, error: "Unauthorized" }, { status: 401 });
 
   try {
-    // 2. Fetch Stats
     const stats = await db.prepare(
       "SELECT * FROM affiliate_stats WHERE user_id = ?"
-    ).bind(userId).first<any>();
+    ).bind(user.id).first<any>();
 
-    // 3. Fetch Recent Transactions
     const transactions = await db.prepare(
       "SELECT * FROM conversions WHERE referrer_id = ? ORDER BY created_at DESC LIMIT 10"
-    ).bind(userId).all<any>();
+    ).bind(user.id).all<any>();
 
     return json({
-      referralCode: stats?.referral_code || "OFFER20",
+      referralCode: stats?.referral_code || "",
       stats: {
         clicks: stats?.total_clicks || 0,
         referrals: stats?.total_conversions || 0,

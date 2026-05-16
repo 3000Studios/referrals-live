@@ -17,10 +17,22 @@ export function Navbar() {
   const { scrollY } = useScroll();
   const headerBg = useTransform(scrollY, [0, 120], ["rgba(5, 5, 8, 0.55)", "rgba(5, 5, 8, 0.94)"]);
   const [open, setOpen] = useState(false);
+  const [hidden, setHidden] = useState(false);
   const [pointer, setPointer] = useState({ x: 0.5, y: 0.25 });
   const user = useAppStore((s) => s.user);
   const logout = useAppStore((s) => s.logout);
   const [taskCount, setTaskCount] = useState(0);
+
+  useEffect(() => {
+    let previous = window.scrollY || 0;
+    const unsubscribe = scrollY.on("change", (latest) => {
+      const delta = latest - previous;
+      if (Math.abs(delta) < 8) return;
+      setHidden(delta > 0 && latest > 160 && !open);
+      previous = latest;
+    });
+    return unsubscribe;
+  }, [open, scrollY]);
 
   useEffect(() => {
     if (user?.isAdmin) {
@@ -52,6 +64,8 @@ export function Navbar() {
   return (
     <motion.header
       style={{ backgroundColor: headerBg }}
+      animate={hidden ? { y: -86, opacity: 0, rotateX: -14 } : { y: 0, opacity: 1, rotateX: 0 }}
+      transition={{ duration: 0.28, ease: "easeOut" }}
       className={clsx("sticky inset-x-0 top-12 z-50 border-b border-white/10 backdrop-blur-xl transition-colors")}
       onMouseMove={(e) => updatePointer(e.clientX, e.clientY, e.currentTarget.getBoundingClientRect())}
       onTouchMove={(e) => {

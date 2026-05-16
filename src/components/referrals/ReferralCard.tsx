@@ -55,7 +55,7 @@ export function ReferralCard({ referral, index = 0, variant = "default" }: Props
           <img
             src={referral.image}
             alt=""
-            className={clsx("w-full object-cover", variant === "trending" ? "h-56" : "h-44")}
+            className={clsx("w-full bg-white/95 object-contain p-8", variant === "trending" ? "h-56" : "h-44")}
             loading="lazy"
             decoding="async"
           />

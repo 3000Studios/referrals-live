@@ -45,7 +45,7 @@ export async function onRequestGet(context: { request: Request; env: Env; params
 
   const tags = JSON.parse(row.tags_json ?? "[]");
   const category = String(row.category ?? "general");
-  const votes = Number(row.votes ?? Math.max(Number(row.score ?? 0), 0));
+  const votes = Number(row.votes ?? 0);
   const clicks = Number(row.clicks ?? 0);
 
   const relatedRows = await context.env.DB.prepare(
@@ -71,7 +71,7 @@ export async function onRequestGet(context: { request: Request; env: Env; params
       createdAt: Number(row.created_at ?? ts),
       votes,
       clicks,
-      verified: votes >= 25 || clicks >= 150 || Boolean(ingested),
+      verified: votes >= 25 || clicks >= 150,
       pros: prosForCategory(category),
       cons: consForCategory(category),
       howToJoin: [

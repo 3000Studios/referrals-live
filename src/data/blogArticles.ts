@@ -119,7 +119,7 @@ export const blogArticles: BlogArticle[] = [
       {
         heading: "App distribution that works",
         body: [
-          "Short-form video excels at demoing app flows. Pair clips with a written checklist for people who prefer reading.",
+          "Short-form video excels at showing app flows. Pair clips with a written checklist for people who prefer reading.",
           "Deep links reduce drop-off. If the merchant provides them, use them.",
           "Rotate creatives when click-through declines; ad fatigue hits referral pages too.",
         ],
@@ -382,7 +382,7 @@ export const blogArticles: BlogArticle[] = [
       {
         heading: "Curate, don’t dump",
         body: [
-          "Pick subcategories you can photograph or demo. Authenticity lifts conversion.",
+          "Pick subcategories you can photograph or show directly. Authenticity lifts conversion.",
           "Bundle recommendations into kits: starter, pro, and budget.",
           "Track return rates indirectly via audience feedback and merchant communications.",
         ],
