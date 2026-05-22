@@ -84,10 +84,13 @@ export function Dashboard() {
 
       <div className="flex flex-wrap items-start justify-between gap-6">
         <div>
-          <div className="text-xs font-semibold uppercase tracking-[0.25em] text-neon">Operator desk</div>
-          <h1 className="font-display text-4xl font-extrabold text-white">Dashboard</h1>
-          <p className="mt-2 text-sm text-muted">
-            Premium: <span className="text-white">{premiumView ? "active" : "not active"}</span>
+          <div className="text-xs font-semibold uppercase tracking-[0.25em] text-neon">Your control panel</div>
+          <h1 className="font-display text-4xl font-extrabold text-white">Welcome{user.displayName ? `, ${user.displayName}` : ""}</h1>
+          <p className="mt-2 max-w-2xl text-sm text-muted">
+            This is where you manage everything: your profile, billing status, the referral links you've posted, and your share-and-earn board. Each card below is one thing you can do.
+          </p>
+          <p className="mt-1 text-xs text-muted">
+            Premium status: <span className={premiumView ? "text-neon font-semibold" : "text-white"}>{premiumView ? "Active" : "Not active"}</span>
           </p>
         </div>
         <Link
@@ -102,14 +105,17 @@ export function Dashboard() {
         <div className="glass col-span-full rounded-3xl border border-white/10 p-6">
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-xs font-semibold uppercase tracking-[0.25em] text-neon">Success Checklist</div>
-              <h2 className="mt-2 font-display text-2xl font-bold text-white">Path to Operator Success</h2>
+              <div className="text-xs font-semibold uppercase tracking-[0.25em] text-neon">Getting started</div>
+              <h2 className="mt-2 font-display text-2xl font-bold text-white">Your setup progress</h2>
+              <p className="mt-2 max-w-xl text-sm text-muted">
+                Four quick steps to start earning. Complete them in order — each unlocks the next.
+              </p>
             </div>
             <div className="text-right">
               <div className="text-3xl font-bold text-neon">
                 {Math.round((( (user.displayName ? 1 : 0) + (myReferrals.length > 0 ? 1 : 0) + (myReferrals.length >= 3 ? 1 : 0) + (premiumView ? 1 : 0) ) / 4) * 100)}%
               </div>
-              <div className="text-[10px] uppercase tracking-wider text-muted">Completion</div>
+              <div className="text-[10px] uppercase tracking-wider text-muted">Complete</div>
             </div>
           </div>
           <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -179,10 +185,14 @@ export function Dashboard() {
       <div className="mt-6 glass rounded-3xl border border-white/10 p-6">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <div className="text-xs font-semibold uppercase tracking-[0.25em] text-electric">Profile</div>
-            <div className="mt-2 text-sm text-muted">
-              Avatar: <span className="text-white">{profile.avatar ?? "—"}</span> · Color:{" "}
-              <span className="text-white">{profile.color ?? "—"}</span>
+            <div className="text-xs font-semibold uppercase tracking-[0.25em] text-electric">Your profile</div>
+            <h2 className="mt-2 font-display text-xl font-bold text-white">How you appear in chat and on your board</h2>
+            <p className="mt-2 max-w-xl text-sm text-muted">
+              Pick a display name, an avatar icon, and the color your messages show in live chat. Takes 10 seconds.
+            </p>
+            <div className="mt-2 text-xs text-muted">
+              Current: <span className="text-white">{profile.avatar ?? "—"}</span> avatar ·{" "}
+              <span className="text-white">{profile.color ?? "—"}</span> color
             </div>
           </div>
           {isAdmin ? (
@@ -257,12 +267,13 @@ export function Dashboard() {
       <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_1fr]">
         <div className="glass rounded-3xl border border-white/10 p-6">
           <div className="text-xs font-semibold uppercase tracking-[0.25em] text-gold">Billing status</div>
-          <div className="mt-2 text-2xl font-bold text-white">{billing?.status ?? "inactive"}</div>
+          <h2 className="mt-2 font-display text-xl font-bold text-white">Your subscription</h2>
+          <div className="mt-3 text-2xl font-bold text-white">{billing?.status ?? "inactive"}</div>
           <div className="mt-2 text-sm text-muted">
-            {billing?.activeUntil ? `Active until ${new Date(billing.activeUntil).toLocaleString()}` : "No active Premium subscription recorded."}
+            {billing?.activeUntil ? `Active until ${new Date(billing.activeUntil).toLocaleString()}` : "Free plan — upgrade to feature homepage links and post in live chat."}
           </div>
           <div className="mt-2 text-xs text-muted">
-            Stripe customer: <span className="text-white/80">{billing?.stripeCustomerId ?? "not created yet"}</span>
+            Stripe customer: <span className="text-white/80">{billing?.stripeCustomerId ?? "not created yet — appears after first upgrade"}</span>
           </div>
           <div className="mt-4 flex flex-wrap gap-3">
             <Link to="/premium" className="rounded-2xl border border-gold/40 px-4 py-2 text-sm font-semibold text-gold hover:bg-gold/10">
@@ -272,9 +283,10 @@ export function Dashboard() {
         </div>
 
         <div className="glass rounded-3xl border border-white/10 p-6">
-          <div className="text-xs font-semibold uppercase tracking-[0.25em] text-neon">Premium controls</div>
+          <div className="text-xs font-semibold uppercase tracking-[0.25em] text-neon">Premium perks</div>
+          <h2 className="mt-2 font-display text-xl font-bold text-white">What Premium unlocks</h2>
           <div className="mt-2 text-sm text-muted">
-            Premium users can feature 2 homepage links, post in live chat, and track outbound performance.
+            Feature 2 homepage links · post in live chat · react/typing/emoji · click analytics on every outbound link.
           </div>
           <div className="mt-4 grid gap-3 md:grid-cols-3">
             <div className="rounded-2xl border border-white/10 bg-black/30 p-4">
@@ -375,10 +387,15 @@ export function Dashboard() {
       ) : null}
 
       <div className="mt-10">
-        <div className="mb-4 flex items-center justify-between gap-4">
-          <h2 className="font-display text-2xl font-bold text-white">Your referrals</h2>
+        <div className="mb-4 flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <h2 className="font-display text-2xl font-bold text-white">Your referrals</h2>
+            <p className="mt-1 text-sm text-muted">
+              Links you've added. Premium members can promote 2 of them to the homepage with the slot buttons.
+            </p>
+          </div>
           <Link to="/submit" className="text-sm font-semibold text-electric hover:text-white">
-            New referral →
+            + Add new referral
           </Link>
         </div>
 

@@ -41,18 +41,27 @@ export function AffiliateConsole() {
         path="/affiliate"
       />
       
-      <div className="flex flex-wrap items-end justify-between gap-6 mb-12">
+      <div className="flex flex-wrap items-end justify-between gap-6 mb-6">
         <div>
           <span className="text-xs font-semibold uppercase tracking-[0.25em] text-neon">
-            Partner Network
+            Affiliate console
           </span>
           <h1 className="text-4xl font-extrabold text-white mt-2">
-            referrals.live <span className="text-neon">Affiliates</span>
+            Your <span className="text-neon">share-and-earn</span> board
           </h1>
+          <p className="mt-3 max-w-2xl text-sm text-slate-400">
+            This page shows your personal referral code, your earnings to date, and the growth tactics that consistently work for top affiliates. Copy your link from the right column, share it anywhere, and any new Premium subscribers you refer earn you a commission.
+          </p>
         </div>
         <p className="text-sm text-slate-400">
           Last updated: {new Date().toLocaleTimeString()}
         </p>
+      </div>
+
+      <div className="mb-10 rounded-2xl border border-white/10 bg-black/30 p-4 text-sm text-white/80">
+        <div>
+          <span className="font-semibold text-white">How this works:</span> Every visitor who clicks your referral link and upgrades to Premium triggers a commission for you. The stats below auto-update as clicks and conversions land. Payouts go to whatever destination you set in your reward profile.
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

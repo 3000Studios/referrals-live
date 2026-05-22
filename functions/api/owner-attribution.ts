@@ -36,3 +36,14 @@ export async function onRequestPost(context: { request: Request; env: Env }) {
     .run();
   return json({ ok: true });
 }
+
+export async function onRequestDelete(context: { request: Request; env: Env }) {
+  const user = await requireUser(context.request, context.env);
+  if (!user) return json({ ok: false, error: "Unauthorized" }, { status: 401 });
+  if (!user.isAdmin) return json({ ok: false, error: "Forbidden" }, { status: 403 });
+  const url = new URL(context.request.url);
+  const domain = (url.searchParams.get("domain") ?? "").trim().toLowerCase();
+  if (!domain) return json({ ok: false, error: "Missing domain" }, { status: 400 });
+  await context.env.DB.prepare("DELETE FROM owner_attribution WHERE domain=?").bind(domain).run();
+  return json({ ok: true });
+}
