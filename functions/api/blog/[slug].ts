@@ -3,7 +3,7 @@ import { json } from "../_lib";
 
 export async function onRequestGet(context: { env: Env; params: { slug?: string } }) {
   const slug = String(context.params.slug ?? "").trim();
-  if (!slug) return json({ ok: false, error: "Missing slug" }, 400);
+  if (!slug) return json({ ok: false, error: "Missing slug" }, { status: 400 });
 
   const row = await context.env.DB.prepare(
     `SELECT slug, title, excerpt, content_md, keywords_json, hero_video_src, hero_video_label, hero_video_attribution_label, hero_video_attribution_href, published_at
@@ -14,7 +14,7 @@ export async function onRequestGet(context: { env: Env; params: { slug?: string 
     .bind(slug)
     .first<any>();
 
-  if (!row) return json({ ok: false, error: "Not found" }, 404);
+  if (!row) return json({ ok: false, error: "Not found" }, { status: 404 });
 
   const post = {
     slug: String(row.slug),

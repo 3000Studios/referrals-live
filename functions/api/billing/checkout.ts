@@ -47,6 +47,8 @@ export async function onRequestPost(context: { request: Request; env: Env }) {
         .run();
     }
 
+    if (!customerId) throw new Error("Stripe customer was not provisioned.");
+
     const session = await stripePost(context.env, "/v1/checkout/sessions", {
       mode: "subscription",
       customer: customerId,

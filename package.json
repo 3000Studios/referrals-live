@@ -5,12 +5,13 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc --noEmit && vite build",
+    "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p tsconfig.functions.json",
+    "build": "npm run typecheck && vite build",
     "preview": "vite preview",
     "deploy": "npm run build && wrangler pages deploy dist --project-name=referrals-live && npm run deploy:ingest",
     "deploy:direct": "npm run build && node scripts/cf-pages-deploy.mjs",
     "deploy:ingest": "wrangler deploy --config wrangler.ingest.toml",
-    "lint": "tsc --noEmit"
+    "lint": "npm run typecheck"
   },
   "dependencies": {
     "@react-three/drei": "^9.117.3",
@@ -27,6 +28,7 @@
     "zustand": "^5.0.2"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^4.20260522.1",
     "@types/node": "^22.10.2",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",

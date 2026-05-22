@@ -15,6 +15,6 @@ export async function requireUser(request: Request, env: Env): Promise<SessionUs
   if (!row) return null;
   const premium = row.sub_status === "active" && (!row.current_period_end || Number(row.current_period_end) > ts);
   const adminEmail = (env.OWNER_ADMIN_EMAIL ?? "").trim().toLowerCase();
-  const isAdmin = adminEmail && row.email?.toLowerCase() === adminEmail;
+  const isAdmin = Boolean(adminEmail) && row.email?.toLowerCase() === adminEmail;
   return { id: row.id, email: row.email, displayName: row.display_name, premium, isAdmin };
 }
