@@ -1,5 +1,5 @@
 import { lazy, Suspense } from "react";
-import { Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 import { Layout } from "@/components/layout/Layout";
 
 // Lazy load pages
@@ -58,6 +58,14 @@ export default function App() {
           <Route path="disclosure" element={<Disclosure />} />
           <Route path="disclaimer" element={<Disclaimer />} />
           <Route path="admin" element={<Admin />} />
+          <Route path="chat" element={<Navigate to="/dashboard#live-chat" replace />} />
+          <Route path="lounge" element={<Navigate to="/dashboard#live-chat" replace />} />
+          <Route path="community" element={<Navigate to="/dashboard#live-chat" replace />} />
+          <Route path="featured" element={<Navigate to="/browse" replace />} />
+          <Route path="signup" element={<Navigate to="/register" replace />} />
+          <Route path="profile" element={<Navigate to="/dashboard" replace />} />
+          <Route path="payouts" element={<Navigate to="/affiliate" replace />} />
+          <Route path="referrals" element={<Navigate to="/browse" replace />} />
           <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>

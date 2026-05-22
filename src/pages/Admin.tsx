@@ -59,6 +59,31 @@ type AdminUser = {
   currentPeriodEnd: number;
 };
 
+type ClickTotals = {
+  curatedClicks: number;
+  ingestedClicks: number;
+  affiliateClicks: number;
+  attributionDomains: number;
+};
+
+type TopLink = {
+  id: string;
+  title: string;
+  url: string;
+  domain: string;
+  clicks: number;
+  lastClickAt: number;
+  source: string;
+  attributed: boolean;
+};
+
+type AffiliateClick = {
+  code: string;
+  userId: string | null;
+  userAgent: string;
+  createdAt: number;
+};
+
 function safeParseUrl(input: string) {
   try {
     return new URL(input);
@@ -105,6 +130,9 @@ export function Admin() {
   const [refParseNote, setRefParseNote] = useState<string | null>(null);
   const [tasks, setTasks] = useState<AdminTask[]>([]);
   const [users, setUsers] = useState<AdminUser[]>([]);
+  const [clickTotals, setClickTotals] = useState<ClickTotals | null>(null);
+  const [topLinks, setTopLinks] = useState<TopLink[]>([]);
+  const [affiliateClicks, setAffiliateClicks] = useState<AffiliateClick[]>([]);
 
   const load = async () => {
     const r = await fetch("/api/owner-attribution", { credentials: "include" });
@@ -162,6 +190,16 @@ export function Admin() {
     if (r.ok) setUsers(data.users ?? []);
   };
 
+  const loadClicks = async () => {
+    const r = await fetch("/api/admin/clicks", { credentials: "include" });
+    const data = await r.json();
+    if (r.ok) {
+      setClickTotals(data.totals ?? null);
+      setTopLinks(data.topLinks ?? []);
+      setAffiliateClicks(data.recentAffiliateClicks ?? []);
+    }
+  };
+
   const updateTaskStatus = async (id: string, status: string) => {
     await fetch("/api/admin/tasks", {
       method: "POST",
@@ -179,6 +217,7 @@ export function Admin() {
     loadFinder().catch(() => null);
     loadTasks().catch(() => null);
     loadUsers().catch(() => null);
+    loadClicks().catch(() => null);
   }, []);
 
   const note = useMemo(
@@ -287,6 +326,110 @@ export function Admin() {
                 No pending tasks. You're all caught up!
               </div>
             )}
+          </div>
+        </div>
+
+        <div className="glass rounded-3xl border border-white/10 p-6 lg:col-span-2">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <div className="text-xs font-semibold uppercase tracking-[0.25em] text-gold">Click tracking & owner attribution</div>
+              <p className="mt-2 text-sm text-muted">
+                Every outbound click goes through <code className="text-electric">/go/:id</code>, which appends your owner params for any domain you have configured. Use this to verify clicks are routing through your codes.
+              </p>
+            </div>
+            <button onClick={loadClicks} className="rounded-2xl border border-white/10 px-4 py-2 text-xs font-semibold text-white/80 hover:border-neon/40">
+              Refresh clicks
+            </button>
+          </div>
+
+          <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            {[
+              ["Curated clicks", clickTotals?.curatedClicks ?? 0],
+              ["Auto-discovered clicks", clickTotals?.ingestedClicks ?? 0],
+              ["Affiliate code clicks", clickTotals?.affiliateClicks ?? 0],
+              ["Domains attributed", clickTotals?.attributionDomains ?? 0],
+            ].map(([label, value]) => (
+              <div key={String(label)} className="rounded-2xl border border-white/10 bg-black/30 p-4">
+                <div className="text-[11px] uppercase tracking-[0.2em] text-muted">{label}</div>
+                <div className="mt-2 font-display text-3xl font-bold text-white">{String(value)}</div>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-6 grid gap-6 lg:grid-cols-[1.4fr_1fr]">
+            <div className="rounded-3xl border border-white/10 bg-black/25 p-4">
+              <div className="text-xs font-semibold uppercase tracking-[0.25em] text-neon">Top earning links</div>
+              <p className="mt-1 text-xs text-muted">
+                A “configured” badge means the domain has owner params saved — clicks already carry your code.
+              </p>
+              {topLinks.length ? (
+                <div className="mt-4 overflow-x-auto">
+                  <table className="w-full min-w-[640px] text-left text-sm">
+                    <thead className="text-xs uppercase tracking-[0.18em] text-muted">
+                      <tr>
+                        <th className="border-b border-white/10 py-2 pr-3">Program</th>
+                        <th className="border-b border-white/10 py-2 pr-3">Domain</th>
+                        <th className="border-b border-white/10 py-2 pr-3 text-right">Clicks</th>
+                        <th className="border-b border-white/10 py-2 pr-3">Attribution</th>
+                        <th className="border-b border-white/10 py-2 pr-3">Last click</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {topLinks.map((link) => (
+                        <tr key={`${link.source}-${link.id}`} className="text-white/85">
+                          <td className="border-b border-white/5 py-2 pr-3 align-top">
+                            <div className="font-semibold text-white">{link.title || link.id}</div>
+                            <div className="text-[11px] uppercase tracking-wide text-muted">{link.source}</div>
+                          </td>
+                          <td className="border-b border-white/5 py-2 pr-3 align-top text-muted">{link.domain || "—"}</td>
+                          <td className="border-b border-white/5 py-2 pr-3 align-top text-right font-semibold text-white">{link.clicks.toLocaleString()}</td>
+                          <td className="border-b border-white/5 py-2 pr-3 align-top">
+                            <span
+                              className={
+                                link.attributed
+                                  ? "rounded-full bg-neon/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-neon"
+                                  : "rounded-full bg-amber-400/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-amber-300"
+                              }
+                            >
+                              {link.attributed ? "Earning" : "No params"}
+                            </span>
+                          </td>
+                          <td className="border-b border-white/5 py-2 pr-3 align-top text-muted">
+                            {link.lastClickAt ? new Date(link.lastClickAt).toLocaleString() : "—"}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="mt-4 rounded-2xl border border-dashed border-white/10 p-6 text-center text-sm text-muted">
+                  No outbound clicks yet. Visit a card from the homepage to start populating this table.
+                </div>
+              )}
+            </div>
+
+            <div className="rounded-3xl border border-white/10 bg-black/25 p-4">
+              <div className="text-xs font-semibold uppercase tracking-[0.25em] text-electric">Recent referral-code clicks</div>
+              <p className="mt-1 text-xs text-muted">When subscribers share their code, each hit is logged here.</p>
+              <div className="mt-4 space-y-2">
+                {affiliateClicks.length ? (
+                  affiliateClicks.slice(0, 12).map((click, idx) => (
+                    <div key={`${click.code}-${click.createdAt}-${idx}`} className="rounded-2xl border border-white/10 bg-black/30 px-3 py-2 text-xs text-white/80">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="font-semibold text-neon">{click.code}</span>
+                        <span className="text-muted">{click.createdAt ? new Date(click.createdAt).toLocaleString() : "—"}</span>
+                      </div>
+                      <div className="mt-1 truncate text-[11px] text-muted">{click.userAgent || "unknown UA"}</div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="rounded-2xl border border-dashed border-white/10 p-4 text-center text-xs text-muted">
+                    No affiliate code clicks yet.
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </div>
 

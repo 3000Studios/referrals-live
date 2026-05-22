@@ -12,7 +12,10 @@ type ChatStoredMessage = {
   text: string;
   avatar?: string;
   color?: string;
+  reactions?: Record<string, string[]>;
 };
+
+const ALLOWED_REACTIONS = ["👍", "❤️", "🔥", "🎉", "💸", "👀", "🙌", "🚀"];
 
 type Curated = {
   id: string;
@@ -516,14 +519,62 @@ export class ChatRoom {
       server.addEventListener("message", (evt) => {
         try {
           const data = JSON.parse(String((evt as MessageEvent).data));
-          if (data?.type !== "msg") return;
-          if (!this.socketCanPost.get(server)) return;
+          if (!data?.type) return;
+          const canPost = this.socketCanPost.get(server);
+
+          if (data.type === "typing") {
+            if (!canPost) return;
+            const user = String(data.user ?? "anon").slice(0, 32);
+            if (!user) return;
+            const payload = JSON.stringify({ type: "typing", user });
+            for (const ws of this.sockets) {
+              if (ws === server) continue;
+              try {
+                ws.send(payload);
+              } catch {}
+            }
+            return;
+          }
+
+          if (data.type === "react") {
+            if (!canPost) return;
+            const msgId = String(data.messageId ?? "");
+            const emoji = String(data.emoji ?? "");
+            const user = String(data.user ?? "anon").slice(0, 32);
+            if (!msgId || !emoji || !user) return;
+            if (!ALLOWED_REACTIONS.includes(emoji)) return;
+            this.state.blockConcurrencyWhile(async () => {
+              const existing = (await this.state.storage.get<ChatStoredMessage[]>("messages")) ?? [];
+              const idx = existing.findIndex((m) => m.id === msgId);
+              if (idx < 0) return;
+              const target = { ...existing[idx]! };
+              const reactions = { ...(target.reactions ?? {}) } as Record<string, string[]>;
+              const list = reactions[emoji] ?? [];
+              const has = list.includes(user);
+              reactions[emoji] = has ? list.filter((u) => u !== user) : [...list, user].slice(0, 99);
+              if (!reactions[emoji].length) delete reactions[emoji];
+              target.reactions = reactions;
+              const next = [...existing];
+              next[idx] = target;
+              await this.state.storage.put("messages", next);
+              const payload = JSON.stringify({ type: "react", messageId: msgId, reactions });
+              for (const ws of this.sockets) {
+                try {
+                  ws.send(payload);
+                } catch {}
+              }
+            }).catch(() => null);
+            return;
+          }
+
+          if (data.type !== "msg") return;
+          if (!canPost) return;
           // Basic per-socket rate limit
           const now = Date.now();
           const last = this.socketLastSent.get(server) ?? 0;
           if (now - last < 800) return;
           this.socketLastSent.set(server, now);
-          const message = {
+          const message: ChatStoredMessage = {
             id: crypto.randomUUID(),
             ts: now,
             user: String(data.user ?? "anon").slice(0, 32),
