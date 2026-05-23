@@ -11,3 +11,4 @@ dist
 .pages-upload-jwt
 *.jwt.tmp
 .playwright-mcp/
+.claude/
