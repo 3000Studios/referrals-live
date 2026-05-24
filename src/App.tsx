@@ -1,6 +1,6 @@
+import { Layout } from "@/components/layout/Layout";
 import { lazy, Suspense } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
-import { Layout } from "@/components/layout/Layout";
 
 // Lazy load pages
 const Home = lazy(() => import("@/pages/Home").then(m => ({ default: m.Home })));
@@ -8,6 +8,8 @@ const Browse = lazy(() => import("@/pages/Browse").then(m => ({ default: m.Brows
 const Categories = lazy(() => import("@/pages/Categories").then(m => ({ default: m.Categories })));
 const Submit = lazy(() => import("@/pages/Submit").then(m => ({ default: m.Submit })));
 const Leaderboard = lazy(() => import("@/pages/Leaderboard").then(m => ({ default: m.Leaderboard })));
+const Analytics = lazy(() => import("@/pages/Analytics").then(m => ({ default: m.Analytics })));
+const Testimonials = lazy(() => import("@/pages/Testimonials").then(m => ({ default: m.Testimonials })));
 const Blog = lazy(() => import("@/pages/Blog").then(m => ({ default: m.Blog })));
 const BlogPost = lazy(() => import("@/pages/BlogPost").then(m => ({ default: m.BlogPost })));
 const Premium = lazy(() => import("@/pages/Premium").then(m => ({ default: m.Premium })));
@@ -42,6 +44,8 @@ export default function App() {
           <Route path="categories" element={<Categories />} />
           <Route path="submit" element={<Submit />} />
           <Route path="leaderboard" element={<Leaderboard />} />
+          <Route path="analytics" element={<Analytics />} />
+          <Route path="testimonials" element={<Testimonials />} />
           <Route path="blog" element={<Blog />} />
           <Route path="blog/:slug" element={<BlogPost />} />
           <Route path="premium" element={<Premium />} />

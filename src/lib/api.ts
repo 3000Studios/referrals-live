@@ -87,4 +87,20 @@ export const api = {
       `/api/discovery/scan?filter=${encodeURIComponent(filter)}`,
       { method: "POST" }
     ),
+
+  // Leaderboard & Analytics APIs
+  leaderboard: (limit = 50, offset = 0) =>
+    apiFetch<{ ok: true; creators: any[] }>(`/api/leaderboard?limit=${limit}&offset=${offset}`),
+  myAnalytics: () =>
+    apiFetch<{ ok: true; leaderboard: any; referrals: any[]; badges: any[]; earnedRewards: any[]; earningsHistory: any[] }>("/api/my/analytics"),
+  myRewards: (status = "all") =>
+    apiFetch<{ ok: true; rewards: any[] }>(`/api/my/rewards?status=${status}`),
+  testimonials: (limit = 20, offset = 0) =>
+    apiFetch<{ ok: true; testimonials: any[] }>(`/api/testimonials?limit=${limit}&offset=${offset}`),
+  submitTestimonial: (input: { referralId: string; title: string; story: string; earnings?: number; timePeriod?: string; imageUrl?: string }) =>
+    apiFetch<{ ok: true; testimonialId: string }>("/api/testimonials", { method: "POST", body: JSON.stringify(input) }),
+  autoPrograms: (includeDismissed = false) =>
+    apiFetch<{ ok: true; programs: any[] }>(`/api/my/auto-programs?includeDismissed=${includeDismissed}`),
+  actionAutoProgram: (action: "dismiss" | "quick_submit", programId?: string, referralData?: any) =>
+    apiFetch<{ ok: true; referralId?: string }>("/api/my/auto-programs", { method: "POST", body: JSON.stringify({ action, programId, referralData }) }),
 };
