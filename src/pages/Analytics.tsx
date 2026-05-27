@@ -141,17 +141,93 @@ export function Analytics() {
         </div>
       )}
 
-      {/* Earnings History Chart Placeholder */}
       {earningsHistory.length > 0 && (
         <div className="mt-10">
-          <div className="mb-4 text-lg font-semibold text-white">Earnings History (Last 30 Days)</div>
-          <div className="glass rounded-2xl border border-white/10 p-6">
-            <div className="h-64 flex items-center justify-center text-muted">
-              Chart visualization: {earningsHistory.length} data points
+          <div className="mb-4 flex items-end justify-between">
+            <div className="text-lg font-semibold text-white">Earnings History (Last 30 Days)</div>
+            <div className="text-xs text-muted">
+              Total: <span className="text-gold font-semibold">
+                ${earningsHistory.reduce((s: number, h: any) => s + (h.earnings ?? 0), 0).toFixed(2)}
+              </span>
             </div>
+          </div>
+          <div className="glass rounded-2xl border border-white/10 p-6">
+            <EarningsChart points={[...earningsHistory].reverse()} />
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+function EarningsChart({ points }: { points: Array<{ date: string; clicks: number; earnings: number }> }) {
+  const width = 720;
+  const height = 220;
+  const padX = 36;
+  const padY = 18;
+  const innerW = width - padX * 2;
+  const innerH = height - padY * 2;
+
+  const maxEarnings = Math.max(0.01, ...points.map((p) => p.earnings));
+  const barW = innerW / points.length;
+  const gap = Math.max(1, barW * 0.18);
+
+  const yTicks = 4;
+  const tickVals = Array.from({ length: yTicks + 1 }, (_, i) => (maxEarnings * (yTicks - i)) / yTicks);
+
+  return (
+    <div className="w-full overflow-x-auto">
+      <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-64" role="img" aria-label="Daily earnings, last 30 days">
+        {tickVals.map((v, i) => {
+          const y = padY + (innerH * i) / yTicks;
+          return (
+            <g key={i}>
+              <line x1={padX} x2={width - padX} y1={y} y2={y} stroke="rgba(255,255,255,0.08)" strokeWidth={1} />
+              <text x={padX - 6} y={y + 3} textAnchor="end" fontSize={10} fill="rgba(255,255,255,0.45)">
+                ${v.toFixed(v >= 10 ? 0 : 2)}
+              </text>
+            </g>
+          );
+        })}
+
+        {points.map((p, i) => {
+          const h = (p.earnings / maxEarnings) * innerH;
+          const x = padX + i * barW + gap / 2;
+          const y = padY + innerH - h;
+          const showLabel = points.length <= 30 && (i === 0 || i === points.length - 1 || i % Math.ceil(points.length / 6) === 0);
+          const dateLabel = (() => {
+            const d = new Date(p.date);
+            if (Number.isNaN(d.getTime())) return p.date;
+            return `${d.getMonth() + 1}/${d.getDate()}`;
+          })();
+          return (
+            <g key={p.date + i}>
+              <rect
+                x={x}
+                y={y}
+                width={Math.max(1, barW - gap)}
+                height={Math.max(0, h)}
+                fill="url(#earningsGrad)"
+                rx={2}
+              >
+                <title>{`${p.date}: $${p.earnings.toFixed(2)} · ${p.clicks} clicks`}</title>
+              </rect>
+              {showLabel && (
+                <text x={x + (barW - gap) / 2} y={height - 4} textAnchor="middle" fontSize={10} fill="rgba(255,255,255,0.45)">
+                  {dateLabel}
+                </text>
+              )}
+            </g>
+          );
+        })}
+
+        <defs>
+          <linearGradient id="earningsGrad" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stopColor="#facc15" stopOpacity="0.95" />
+            <stop offset="100%" stopColor="#22d3ee" stopOpacity="0.55" />
+          </linearGradient>
+        </defs>
+      </svg>
     </div>
   );
 }
