@@ -16,6 +16,11 @@ const plan = {
   ],
 };
 
+// Static payment fallbacks — set these in Cloudflare Pages env so checkout works
+// even before the backend Stripe API keys/webhook are configured.
+const STRIPE_PAYMENT_LINK = import.meta.env.VITE_STRIPE_PAYMENT_LINK as string | undefined;
+const PAYPAL_LINK = import.meta.env.VITE_PAYPAL_LINK as string | undefined;
+
 export function Premium() {
   const user = useAppStore((s) => s.user);
   const [loading, setLoading] = useState(false);
@@ -24,6 +29,50 @@ export function Premium() {
   useEffect(() => {
     trackPremiumView("premium_page");
   }, []);
+
+  function startCardCheckout() {
+    setLoading(true);
+    setError(null);
+    trackEvent("premium_click", { plan: plan.name, method: "stripe" });
+
+    if (!user) {
+      if (STRIPE_PAYMENT_LINK) {
+        window.location.href = STRIPE_PAYMENT_LINK;
+        return;
+      }
+      window.location.href = "/login?next=/premium";
+      return;
+    }
+
+    fetch("/api/billing/checkout", { method: "POST", credentials: "include" })
+      .then(async (r) => {
+        const d = await r.json().catch(() => null) as { url?: string; error?: string } | null;
+        if (r.ok && d?.url) {
+          window.location.href = d.url;
+          return;
+        }
+        if (STRIPE_PAYMENT_LINK) {
+          window.location.href = STRIPE_PAYMENT_LINK;
+          return;
+        }
+        const reason = d?.error ?? `Checkout server returned ${r.status}`;
+        throw new Error(
+          PAYPAL_LINK
+            ? `${reason}. Try PayPal below, or contact support.`
+            : `${reason}. Please email support@referrals.live so we can complete your upgrade.`,
+        );
+      })
+      .catch((err) => {
+        if (STRIPE_PAYMENT_LINK) {
+          window.location.href = STRIPE_PAYMENT_LINK;
+          return;
+        }
+        setError(err instanceof Error ? err.message : "Unable to start checkout");
+        setLoading(false);
+      });
+  }
+
+  const cardCheckoutAvailable = Boolean(user) || Boolean(STRIPE_PAYMENT_LINK);
 
   return (
     <div>
@@ -64,25 +113,10 @@ export function Premium() {
                 <li className="flex items-center gap-2">✓ Encrypted & Secure</li>
               </ul>
 
-              {user ? (
+              {cardCheckoutAvailable ? (
                 <button
                   type="button"
-                  onClick={() => {
-                    setLoading(true);
-                    setError(null);
-                    trackEvent("premium_click", { plan: plan.name, method: "stripe" });
-                    fetch("/api/billing/checkout", { method: "POST", credentials: "include" })
-                      .then((r) => r.json())
-                      .then((d) => {
-                        if (d?.url) {
-                          window.location.href = d.url;
-                          return;
-                        }
-                        throw new Error(d?.error ?? "Stripe checkout is currently unavailable. Please try PayPal.");
-                      })
-                      .catch((err) => setError(err instanceof Error ? err.message : "Unable to start checkout"))
-                      .finally(() => setLoading(false));
-                  }}
+                  onClick={startCardCheckout}
                   className="mt-8 flex w-full items-center justify-center gap-2 rounded-2xl bg-white px-6 py-4 text-sm font-bold text-black transition-transform active:scale-95 disabled:opacity-40"
                   disabled={loading}
                 >
@@ -94,10 +128,20 @@ export function Premium() {
                   ) : "Pay with Card"}
                 </button>
               ) : (
-                <Link to="/login" className="mt-8 block w-full rounded-2xl border border-white/10 bg-white/5 px-6 py-4 text-center text-sm font-bold text-white hover:bg-white/10">
+                <Link to="/login?next=/premium" className="mt-8 block w-full rounded-2xl border border-white/10 bg-white/5 px-6 py-4 text-center text-sm font-bold text-white hover:bg-white/10">
                   Login to upgrade
                 </Link>
               )}
+
+              {PAYPAL_LINK ? (
+                <a
+                  href={PAYPAL_LINK}
+                  onClick={() => trackEvent("premium_click", { plan: plan.name, method: "paypal" })}
+                  className="mt-3 flex w-full items-center justify-center gap-2 rounded-2xl bg-[#ffc439] px-6 py-4 text-sm font-bold text-[#003087] transition-transform active:scale-95"
+                >
+                  Pay with PayPal
+                </a>
+              ) : null}
               <p className="mt-5 rounded-2xl border border-gold/20 bg-gold/10 p-4 text-xs leading-relaxed text-gold/90">
                 Pro is a recurring subscription. Access starts after Stripe confirms payment. All sales are final and non-refundable except where required by law.
               </p>
