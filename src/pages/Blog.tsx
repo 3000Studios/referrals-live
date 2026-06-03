@@ -48,10 +48,10 @@ export function Blog() {
         description="SEO-first guides on referral programs, affiliate strategy, passive income systems, and conversion-focused publishing."
         path="/blog"
       />
-      <div className="text-xs font-semibold uppercase tracking-[0.25em] text-neon">SEO engine</div>
-      <h1 className="font-display text-4xl font-extrabold text-white">Blog</h1>
-      <p className="mt-3 max-w-2xl text-sm text-muted">
-        Daily DRI briefs and SEO-first guides designed for search intent clusters around referrals, monetization, and subscriber growth.
+      <div className="text-[10px] font-bold uppercase tracking-[0.3em] text-neon/80">SEO engine</div>
+      <h1 className="font-display text-4xl font-extrabold text-white md:text-5xl">Blog</h1>
+      <p className="mt-3 max-w-2xl text-[13px] leading-relaxed text-muted">
+        SEO-first guides on referral programs, affiliate strategy, passive income systems, and conversion-focused publishing.
       </p>
 
       <div className="mt-10 grid gap-6 md:grid-cols-2">
@@ -60,22 +60,30 @@ export function Blog() {
             {idx === 4 ? <AdSlot variant="in-feed" className="md:col-span-2" /> : null}
             <Link
               to={`/blog/${a.slug}`}
-              className="glass group rounded-3xl border border-white/10 p-6 transition hover:border-neon/40"
+              className="glass group relative overflow-hidden rounded-3xl border border-white/7 p-6 transition-all duration-300 hover:border-neon/30 hover:[box-shadow:0_0_30px_rgba(0,255,136,0.06)]"
             >
-            <div className="text-xs text-muted">
-              <span className="mr-2 inline-flex h-6 w-6 items-center justify-center rounded-full border border-white/10 bg-white/[0.03] text-[11px] font-semibold text-white/80">
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-neon/15 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="flex items-center gap-3 text-[11px] text-muted">
+              <span className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-[10px] font-bold text-white/60">
                 {idx + 1}
               </span>
-              {new Date(a.publishedAt).toISOString().slice(0, 10)}
+              <time dateTime={new Date(a.publishedAt).toISOString().slice(0, 10)} className="text-white/35">
+                {new Date(a.publishedAt).toISOString().slice(0, 10)}
+              </time>
             </div>
-            <div className="mt-3 font-display text-xl font-bold text-white group-hover:text-neon">{a.title}</div>
-            <p className="mt-3 text-sm text-muted">{a.excerpt}</p>
-            <div className="mt-4 flex flex-wrap gap-2">
+            <div className="mt-3 font-display text-[1.1rem] font-bold leading-snug text-white/90 group-hover:text-white transition-colors">
+              {a.title}
+            </div>
+            <p className="mt-2.5 text-[13px] leading-relaxed text-muted line-clamp-2">{a.excerpt}</p>
+            <div className="mt-4 flex flex-wrap gap-1.5">
               {a.keywords.slice(0, 4).map((k) => (
-                <span key={k} className="rounded-full bg-white/5 px-2 py-0.5 text-[11px] text-neon/90">
+                <span key={k} className="rounded-full border border-neon/15 bg-neon/5 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-neon/70">
                   {k}
                 </span>
               ))}
+            </div>
+            <div className="mt-4 text-[11px] font-semibold text-electric/60 group-hover:text-electric transition-colors">
+              Read article →
             </div>
             </Link>
           </Fragment>

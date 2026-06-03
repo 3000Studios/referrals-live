@@ -15,7 +15,7 @@ const links = [
 
 export function Navbar() {
   const { scrollY } = useScroll();
-  const headerBg = useTransform(scrollY, [0, 120], ["rgba(5, 5, 8, 0.55)", "rgba(5, 5, 8, 0.94)"]);
+  const headerBg = useTransform(scrollY, [0, 120], ["rgba(3,4,9,0.6)", "rgba(3,4,9,0.97)"]);
   const [open, setOpen] = useState(false);
   const [hidden, setHidden] = useState(false);
   const [pointer, setPointer] = useState({ x: 0.5, y: 0.25 });
@@ -66,7 +66,7 @@ export function Navbar() {
       style={{ backgroundColor: headerBg }}
       animate={hidden ? { y: -86, opacity: 0, rotateX: -14 } : { y: 0, opacity: 1, rotateX: 0 }}
       transition={{ duration: 0.28, ease: "easeOut" }}
-      className={clsx("sticky inset-x-0 top-12 z-50 border-b border-white/10 backdrop-blur-xl transition-colors")}
+      className={clsx("sticky inset-x-0 top-10 z-50 border-b border-white/8 backdrop-blur-2xl transition-colors [box-shadow:0_4px_24px_rgba(0,0,0,0.5),0_1px_0_rgba(255,255,255,0.04)]")}
       onMouseMove={(e) => updatePointer(e.clientX, e.clientY, e.currentTarget.getBoundingClientRect())}
       onTouchMove={(e) => {
         const t = e.touches[0];
@@ -79,9 +79,9 @@ export function Navbar() {
         <svg viewBox="0 0 100 40" preserveAspectRatio="none" className="h-full w-full">
           <defs>
             <linearGradient id="wireGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="rgba(120,80,255,0.35)" />
-              <stop offset="50%" stopColor="rgba(0,204,255,0.35)" />
-              <stop offset="100%" stopColor="rgba(0,255,136,0.35)" />
+              <stop offset="0%" stopColor="rgba(124,58,237,0.5)" />
+              <stop offset="45%" stopColor="rgba(0,204,255,0.45)" />
+              <stop offset="100%" stopColor="rgba(0,255,136,0.5)" />
             </linearGradient>
           </defs>
           {wireNodes.map((node, idx) => {
@@ -118,10 +118,10 @@ export function Navbar() {
       </div>
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4">
         <Link to="/" className="group flex items-center gap-2">
-          <span className="logo-animated font-display text-xl font-extrabold tracking-tight text-white">
-            referrals<span className="text-neon">.live</span>
+          <span className="logo-animated font-display text-[1.35rem] font-extrabold tracking-tight text-white">
+            referrals<span className="text-gradient-neon">.live</span>
           </span>
-          <span className="hidden rounded-full border border-neon/30 px-2 py-0.5 text-[10px] uppercase tracking-[0.2em] text-neon/90 sm:inline">
+          <span className="hidden rounded-full border border-neon/25 bg-neon/5 px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.25em] text-neon/80 sm:inline">
             marketplace
           </span>
         </Link>
@@ -133,13 +133,15 @@ export function Navbar() {
               to={l.to}
               className={({ isActive }) =>
                 clsx(
-                  "group relative text-sm font-semibold transition duration-200 hover:-translate-y-0.5 hover:text-white",
-                  isActive ? "text-neon" : "text-white/70",
+                  "group relative text-[13px] font-semibold tracking-wide transition-all duration-200 hover:-translate-y-0.5",
+                  isActive
+                    ? "text-neon [text-shadow:0_0_12px_rgba(0,255,136,0.6)]"
+                    : "text-white/60 hover:text-white",
                 )
               }
             >
               {l.label}
-              <span className="absolute -bottom-1 left-0 h-px w-0 bg-gradient-to-r from-neon to-electric transition-all duration-300 group-hover:w-full" />
+              <span className="absolute -bottom-1 left-0 h-px w-0 bg-gradient-to-r from-neon via-electric to-cyber transition-all duration-300 group-hover:w-full" />
             </NavLink>
           ))}
         </nav>
@@ -218,7 +220,7 @@ export function Navbar() {
           animate={{ height: "auto", opacity: 1, y: 0 }}
           exit={{ height: 0, opacity: 0, y: -8 }}
           transition={{ duration: 0.28, ease: "easeOut" }}
-          className="border-t border-white/10 bg-void/95 lg:hidden"
+          className="border-t border-white/8 bg-[#030407]/98 backdrop-blur-2xl lg:hidden"
         >
           <div className="flex flex-col gap-2 px-4 py-4">
             {links.map((l) => (

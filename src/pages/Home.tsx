@@ -53,35 +53,48 @@ export function Home() {
         path="/"
       />
 
-      <section ref={heroRef} className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-gradient-to-br from-white/[0.04] via-transparent to-electric/10 px-6 py-16 md:px-14 md:py-24">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_0%,rgba(0,255,136,0.18),transparent_45%)]" />
+      <section ref={heroRef} className="relative overflow-hidden rounded-[2rem] border border-white/8 px-6 py-18 md:px-14 md:py-28">
+        {/* Layered cinematic background */}
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-[rgba(0,255,136,0.06)] via-transparent to-[rgba(0,204,255,0.04)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_50%_at_20%_0%,rgba(0,255,136,0.12),transparent_55%)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_50%_40%_at_80%_100%,rgba(124,58,237,0.1),transparent_55%)]" />
+        {/* Scan line overlay for cinematic depth */}
+        <div className="pointer-events-none absolute inset-x-0 h-px bg-gradient-to-r from-transparent via-neon/20 to-transparent" style={{ top: "38%" }} />
+
         <div className="relative mx-auto max-w-3xl text-center">
-          <div className="hero-line font-display text-4xl font-extrabold leading-tight text-white md:text-6xl">
-            Turn Your Links Into Money
+          <div className="hero-line mb-4 inline-flex items-center gap-2 rounded-full border border-neon/20 bg-neon/6 px-4 py-1.5">
+            <span className="h-1.5 w-1.5 rounded-full bg-neon animate-glow-pulse" />
+            <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-neon/80">Live marketplace</span>
           </div>
-          <p className="hero-line mt-5 text-lg text-muted md:text-xl">
-            A luxury-dark marketplace for referral programs: vote, share, and scale what actually converts — with{" "}
-            <span className="text-neon">transparent rankings</span> and{" "}
-            <span className="text-gold">monetization-ready</span> placements.
+          <div className="hero-line font-display text-5xl font-extrabold leading-[1.08] text-white md:text-7xl">
+            Turn Your Links
+            <br />
+            <span className="text-gradient-neon">Into Money</span>
+          </div>
+          <p className="hero-line mt-6 text-[1.05rem] leading-relaxed text-muted md:text-xl">
+            The cinematic dark marketplace for referral programs — vote, share, and scale what actually converts with{" "}
+            <span className="font-semibold text-white/80">transparent rankings</span> and{" "}
+            <span className="text-gold font-semibold">monetization-ready</span> placements.
           </p>
-          <div className="hero-cta mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
+          <div className="hero-cta mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <Link
               to="/submit"
-              className="inline-flex rounded-2xl bg-gradient-to-r from-neon to-emerald-400 px-8 py-4 text-sm font-semibold text-black shadow-neon"
+              className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-neon to-emerald-400 px-8 py-4 text-sm font-bold text-black shadow-neon transition hover:brightness-110 hover:shadow-[0_0_32px_rgba(0,255,136,0.55)] active:scale-95"
             >
               Submit referral
             </Link>
             <Link
               to="/browse"
-              className="inline-flex rounded-2xl border border-white/15 px-8 py-4 text-sm font-semibold text-white hover:border-neon/40"
+              className="inline-flex items-center gap-2 rounded-2xl border border-white/12 bg-white/4 px-8 py-4 text-sm font-semibold text-white backdrop-blur-sm transition hover:border-electric/40 hover:bg-white/[0.07]"
             >
               Browse marketplace
             </Link>
           </div>
-          <div className="mt-10 flex flex-wrap justify-center gap-3 text-xs uppercase tracking-[0.2em] text-muted">
-            <span className="rounded-full border border-white/10 px-3 py-1">AdSense-ready</span>
-            <span className="rounded-full border border-white/10 px-3 py-1">Viral sharing</span>
-            <span className="rounded-full border border-white/10 px-3 py-1">Gamified ranks</span>
+          <div className="mt-8 flex flex-wrap justify-center gap-2 text-[10px] uppercase tracking-[0.22em] text-muted">
+            <span className="rounded-full border border-white/8 bg-white/3 px-3 py-1">AdSense-ready</span>
+            <span className="rounded-full border border-white/8 bg-white/3 px-3 py-1">Viral sharing</span>
+            <span className="rounded-full border border-white/8 bg-white/3 px-3 py-1">Gamified ranks</span>
+            <span className="rounded-full border border-white/8 bg-white/3 px-3 py-1">Live leaderboard</span>
           </div>
           <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <div className="w-full max-w-xl">
@@ -139,34 +152,50 @@ export function Home() {
         <AdSlot variant="banner" />
       </div>
 
-      <section className="mt-16 grid gap-8 md:grid-cols-3">
-        <div className="glass rounded-3xl border border-white/10 p-8 text-center">
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-neon/10 text-2xl shadow-[0_0_20px_rgba(0,255,136,0.2)]">
-            📥
+      <section className="mt-16 grid gap-5 md:grid-cols-3">
+        {[
+          {
+            icon: "📥",
+            color: "neon",
+            glow: "rgba(0,255,136,0.25)",
+            bg: "bg-neon/8 border-neon/15",
+            step: "01",
+            title: "Submit",
+            desc: "Add your best referral links. We index them in our cinematic marketplace for maximum visibility.",
+          },
+          {
+            icon: "🚀",
+            color: "electric",
+            glow: "rgba(0,204,255,0.25)",
+            bg: "bg-electric/8 border-electric/15",
+            step: "02",
+            title: "Share",
+            desc: "Use your personalized Operator Board. Higher engagement = higher ranking across all categories.",
+          },
+          {
+            icon: "💰",
+            color: "gold",
+            glow: "rgba(255,215,0,0.25)",
+            bg: "bg-gold/8 border-gold/15",
+            step: "03",
+            title: "Scale",
+            desc: "Climb the leaderboard and earn rewards. Upgrade to Premium for homepage placements.",
+          },
+        ].map((item) => (
+          <div key={item.step} className="glass group relative overflow-hidden rounded-3xl border border-white/7 p-8 text-center transition-all duration-300 hover:border-white/12">
+            <div className="pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 h-32 w-32 rounded-full blur-3xl opacity-40 group-hover:opacity-70 transition-opacity"
+                 style={{ background: item.glow }} />
+            <div className="pointer-events-none absolute right-4 top-4 font-display text-4xl font-extrabold text-white/4 select-none">
+              {item.step}
+            </div>
+            <div className={`mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border ${item.bg} text-2xl`}
+                 style={{ boxShadow: `0 0 24px ${item.glow}` }}>
+              {item.icon}
+            </div>
+            <h3 className="mt-6 font-display text-xl font-bold text-white">{item.step.replace("0", "")}. {item.title}</h3>
+            <p className="mt-3 text-[13px] text-muted leading-relaxed">{item.desc}</p>
           </div>
-          <h3 className="mt-6 font-display text-xl font-bold text-white">1. Submit</h3>
-          <p className="mt-3 text-sm text-muted leading-relaxed">
-            Add your best referral links. We index them in our luxury-dark marketplace for maximum visibility.
-          </p>
-        </div>
-        <div className="glass rounded-3xl border border-white/10 p-8 text-center">
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-electric/10 text-2xl shadow-[0_0_20px_rgba(0,163,255,0.2)]">
-            🚀
-          </div>
-          <h3 className="mt-6 font-display text-xl font-bold text-white">2. Share</h3>
-          <p className="mt-3 text-sm text-muted leading-relaxed">
-            Use your personalized Operator Board to share all your links at once. Higher engagement = higher ranking.
-          </p>
-        </div>
-        <div className="glass rounded-3xl border border-white/10 p-8 text-center">
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-gold/10 text-2xl shadow-[0_0_20px_rgba(255,215,0,0.2)]">
-            💰
-          </div>
-          <h3 className="mt-6 font-display text-xl font-bold text-white">3. Scale</h3>
-          <p className="mt-3 text-sm text-muted leading-relaxed">
-            Watch your clicks grow as you climb the leaderboard. Upgrade to Premium for homepage placements.
-          </p>
-        </div>
+        ))}
       </section>
 
       <section className="mt-14 space-y-6">

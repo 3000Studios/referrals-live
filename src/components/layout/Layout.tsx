@@ -31,28 +31,26 @@ export function Layout() {
   }, [hydrate]);
 
   return (
-    <div className="relative min-h-screen bg-[#04060c]">
+    <div className="relative min-h-screen bg-void">
       {/* UI Layer */}
       <div className="relative z-10 pb-[100px] md:pb-[300px]">
         <GlobalNav />
         <Navbar />
         <Ticker />
-        <div className="pt-8">
-          <div className="mx-auto max-w-7xl px-4 pb-10">
+        <div className="pt-6">
+          <div className="mx-auto max-w-7xl px-4 pb-8">
             <div className="hidden lg:block">
               <AdSlot variant="banner" />
             </div>
           </div>
-          
+
           <motion.main
-            initial={{ opacity: 0, y: 42, rotateX: -10 }}
-            whileInView={{ opacity: 1, y: 0, rotateX: 0 }}
-            animate={{ opacity: 1 }}
-            viewport={{ amount: 0.08 }}
-            transition={{ duration: 0.45, ease: "easeOut" }}
+            initial={{ opacity: 0, y: 32, rotateX: -6 }}
+            animate={{ opacity: 1, y: 0, rotateX: 0 }}
+            transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
             className="mx-auto max-w-7xl px-4 pb-24 [transform-style:preserve-3d]"
           >
-            <div className="page-shell rounded-[2rem] border border-white/10 bg-[rgba(4,6,12,0.91)] px-4 py-6 shadow-[0_24px_90px_rgba(0,0,0,0.55)] backdrop-blur-sm md:px-6 md:py-8">
+            <div className="page-shell rounded-[2rem] border border-white/6 px-4 py-7 md:px-8 md:py-10">
               <Suspense fallback={<PageLoader />}>
                 <Outlet />
               </Suspense>
@@ -60,7 +58,7 @@ export function Layout() {
           </motion.main>
         </div>
         <GlobalFooter />
-        
+
         <div className="hidden md:block">
           <div className="pointer-events-none fixed bottom-6 right-6 z-40 w-[320px]">
             <AdSlot variant="rectangle" className="pointer-events-auto" />
