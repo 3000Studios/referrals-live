@@ -53,7 +53,7 @@ export function Home() {
         path="/"
       />
 
-      <section ref={heroRef} className="relative overflow-hidden rounded-[2rem] border border-white/8 px-6 py-18 md:px-14 md:py-28">
+      <section ref={heroRef} className="relative overflow-hidden rounded-[2rem] border border-white/8 px-6 py-16 md:px-14 md:py-28">
         {/* Layered cinematic background */}
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-[rgba(0,255,136,0.06)] via-transparent to-[rgba(0,204,255,0.04)]" />
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_50%_at_20%_0%,rgba(0,255,136,0.12),transparent_55%)]" />

@@ -32,6 +32,13 @@ export function Layout() {
 
   return (
     <div className="relative min-h-screen bg-void">
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[200] focus:rounded-xl focus:border focus:border-neon/40 focus:bg-void focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white"
+      >
+        Skip to main content
+      </a>
+
       {/* UI Layer */}
       <div className="relative z-10 pb-[100px] md:pb-[300px]">
         <GlobalNav />
@@ -45,6 +52,7 @@ export function Layout() {
           </div>
 
           <motion.main
+            id="main-content"
             initial={{ opacity: 0, y: 32, rotateX: -6 }}
             animate={{ opacity: 1, y: 0, rotateX: 0 }}
             transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}

@@ -179,7 +179,7 @@ export function Premium() {
 
           <div className="glass rounded-3xl border border-neon/10 p-6 text-xs text-muted">
             <div className="font-bold text-white mb-2">Need assistance?</div>
-            Contact <a href="mailto:mr.jwswain@gmail.com" className="text-neon hover:underline">support@referrals.live</a> for billing inquiries.
+            Contact <a href="mailto:support@referrals.live" className="text-neon hover:underline">support@referrals.live</a> for billing inquiries.
           </div>
         </div>
       </div>

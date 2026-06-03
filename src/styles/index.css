@@ -266,6 +266,15 @@ body {
   to   { transform: translateY(0); opacity: 1; }
 }
 
+.slide-in-from-top-2 {
+  animation-name: slideInFromTop2;
+}
+
+@keyframes slideInFromTop2 {
+  from { transform: translateY(-8px); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+
 /* ─────────────────────────────────────────
    SCAN LINE — cinematic effect
 ───────────────────────────────────────── */
