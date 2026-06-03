@@ -29,6 +29,15 @@ npm run preview
 
 Until slots are set, ad regions render a labeled placeholder that explains how to activate live ads (keeps layout honest and reviewer-friendly).
 
+## Payments (Premium upgrade)
+
+Two ways to accept money for the $7.99/mo Premium plan — use either or both:
+
+1. **Tracked Stripe Checkout (recommended).** Set these in **Cloudflare Pages** env: `STRIPE_SECRET_KEY`, `STRIPE_PRICE_ID` (the recurring price), and `STRIPE_WEBHOOK_SECRET` (point the webhook at `/api/billing/webhook`). Logged-in users get a Checkout session that records the subscription and credits the referring affiliate.
+2. **Zero-backend fallback.** If you haven't wired the API keys yet, create a **Stripe Payment Link** and/or a **PayPal** link and set `VITE_STRIPE_PAYMENT_LINK` / `VITE_PAYPAL_LINK`. The "Pay with Card" / "Pay with PayPal" buttons then work immediately for everyone (no login or webhook required).
+
+The Premium page tries the tracked checkout first for logged-in users and automatically falls back to the payment link if the backend isn't configured.
+
 ## Stock imagery APIs (optional)
 
 - `VITE_UNSPLASH_ACCESS_KEY`

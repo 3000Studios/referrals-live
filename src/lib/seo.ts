@@ -47,3 +47,15 @@ export function jsonLdArticle(title: string, slug: string, date: string, excerpt
     mainEntityOfPage: absoluteUrl(`/blog/${slug}`),
   };
 }
+
+export function jsonLdFaq(faq: { q: string; a: string }[]) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faq.map((item) => ({
+      "@type": "Question",
+      name: item.q,
+      acceptedAnswer: { "@type": "Answer", text: item.a },
+    })),
+  };
+}

@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { TrustTicker } from '../TrustTicker';
 
 export const GlobalFooter = () => {
@@ -17,18 +18,18 @@ export const GlobalFooter = () => {
           <div>
             <h4 className="text-white text-xs font-bold uppercase tracking-widest mb-4">Marketplace</h4>
             <ul className="space-y-2">
-              <li><a href="/browse" className="text-slate-400 text-xs hover:text-white transition-colors">Browse referrals</a></li>
-              <li><a href="/submit" className="text-slate-400 text-xs hover:text-white transition-colors">Submit a program</a></li>
-              <li><a href="/premium" className="text-slate-400 text-xs hover:text-white transition-colors">Upgrade to Pro</a></li>
+              <li><Link to="/browse" className="text-slate-400 text-xs hover:text-white transition-colors">Browse referrals</Link></li>
+              <li><Link to="/submit" className="text-slate-400 text-xs hover:text-white transition-colors">Submit a program</Link></li>
+              <li><Link to="/premium" className="text-slate-400 text-xs hover:text-white transition-colors">Upgrade to Pro</Link></li>
             </ul>
           </div>
 
           <div>
             <h4 className="text-white text-xs font-bold uppercase tracking-widest mb-4">Legal</h4>
             <ul className="space-y-2">
-              <li><a href="/privacy" className="text-slate-400 text-xs hover:text-white transition-colors">Privacy Policy</a></li>
-              <li><a href="/terms" className="text-slate-400 text-xs hover:text-white transition-colors">Terms of Service</a></li>
-              <li><a href="/disclosure" className="text-slate-400 text-xs hover:text-white transition-colors">Affiliate Disclosure</a></li>
+              <li><Link to="/privacy" className="text-slate-400 text-xs hover:text-white transition-colors">Privacy Policy</Link></li>
+              <li><Link to="/terms" className="text-slate-400 text-xs hover:text-white transition-colors">Terms of Service</Link></li>
+              <li><Link to="/disclosure" className="text-slate-400 text-xs hover:text-white transition-colors">Affiliate Disclosure</Link></li>
             </ul>
           </div>
         </div>

@@ -26,16 +26,17 @@ const slots: Record<NonNullable<Props["variant"]>, string | undefined> = {
 export function AdSlot({ variant = "banner", className, label = "Advertisement" }: Props) {
   const ref = useRef<HTMLModElement>(null);
   const slot = slots[variant];
-  if (!slot) return null;
 
   useEffect(() => {
-    if (!ref.current) return;
+    if (!slot || !ref.current) return;
     try {
       (window.adsbygoogle = window.adsbygoogle || []).push({});
     } catch {
       /* ignore */
     }
   }, [slot, variant]);
+
+  if (!slot) return null;
 
   const heights: Record<typeof variant, string> = {
     banner: "min-h-[90px] md:min-h-[100px]",

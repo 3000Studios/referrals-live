@@ -232,13 +232,6 @@ export function Navbar() {
                 </Link>
               </motion.div>
             ))}
-            <Link
-              to="/dashboard"
-              onClick={() => setOpen(false)}
-              className="rounded-xl border border-neon/30 px-3 py-3 text-sm font-semibold text-neon"
-            >
-              Dashboard
-            </Link>
             <div className="mt-2 flex gap-2">
               {user ? (
                 <>

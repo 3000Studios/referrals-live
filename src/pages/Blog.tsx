@@ -2,7 +2,8 @@ import { Link } from "react-router-dom";
 import { Seo } from "@/components/seo/Seo";
 import { blogArticles } from "@/data/blogArticles";
 import { api } from "@/lib/api";
-import { useEffect, useMemo, useState } from "react";
+import { AdSlot } from "@/components/monetization/AdSlot";
+import { Fragment, useEffect, useMemo, useState } from "react";
 
 export function Blog() {
   const [remote, setRemote] = useState<Array<{ slug: string; title: string; excerpt: string; keywords: string[]; publishedAt: number }> | null>(null);
@@ -25,14 +26,19 @@ export function Blog() {
   }, []);
 
   const ordered = useMemo(() => {
-    if (remote && remote.length) return [...remote].sort((a, b) => Number(b.publishedAt) - Number(a.publishedAt));
-    return [...blogArticles].sort((a, b) => b.date.localeCompare(a.date)).map((a) => ({
+    // Merge DB-backed posts with the bundled evergreen library so every article
+    // stays navigable regardless of database state (matters for SEO + AdSense review).
+    const staticPosts = blogArticles.map((a) => ({
       slug: a.slug,
       title: a.title,
       excerpt: a.excerpt,
       keywords: a.keywords,
       publishedAt: Date.parse(a.date),
     }));
+    const bySlug = new Map<string, { slug: string; title: string; excerpt: string; keywords: string[]; publishedAt: number }>();
+    for (const p of staticPosts) bySlug.set(p.slug, p);
+    for (const p of remote ?? []) bySlug.set(p.slug, p); // remote wins on slug collisions
+    return [...bySlug.values()].sort((a, b) => Number(b.publishedAt) - Number(a.publishedAt));
   }, [remote]);
 
   return (
@@ -50,11 +56,12 @@ export function Blog() {
 
       <div className="mt-10 grid gap-6 md:grid-cols-2">
         {ordered.map((a, idx) => (
-          <Link
-            key={a.slug}
-            to={`/blog/${a.slug}`}
-            className="glass group rounded-3xl border border-white/10 p-6 transition hover:border-neon/40"
-          >
+          <Fragment key={a.slug}>
+            {idx === 4 ? <AdSlot variant="in-feed" className="md:col-span-2" /> : null}
+            <Link
+              to={`/blog/${a.slug}`}
+              className="glass group rounded-3xl border border-white/10 p-6 transition hover:border-neon/40"
+            >
             <div className="text-xs text-muted">
               <span className="mr-2 inline-flex h-6 w-6 items-center justify-center rounded-full border border-white/10 bg-white/[0.03] text-[11px] font-semibold text-white/80">
                 {idx + 1}
@@ -70,7 +77,8 @@ export function Blog() {
                 </span>
               ))}
             </div>
-          </Link>
+            </Link>
+          </Fragment>
         ))}
       </div>
     </div>

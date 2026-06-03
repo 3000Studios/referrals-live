@@ -1,15 +1,20 @@
 import { FormEvent, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Seo } from "@/components/seo/Seo";
 import { useAppStore } from "@/store/useAppStore";
 
 export function Login() {
   const login = useAppStore((s) => s.login);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  // Only honor same-site relative paths to avoid open-redirects.
+  const nextParam = searchParams.get("next");
+  const safeNext = nextParam && nextParam.startsWith("/") && !nextParam.startsWith("//") ? nextParam : null;
 
   const onSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -18,7 +23,7 @@ export function Login() {
     login(email.trim(), password)
       .then(() => {
         const user = useAppStore.getState().user;
-        navigate(user?.isAdmin ? "/admin" : "/dashboard");
+        navigate(safeNext ?? (user?.isAdmin ? "/admin" : "/dashboard"));
       })
       .catch((err) => setError(err instanceof Error ? err.message : "Login failed."))
       .finally(() => setLoading(false));

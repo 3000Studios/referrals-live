@@ -95,6 +95,7 @@ export type BlogArticle = {
   readTime: string;
   keywords: string[];
   sections: { heading: string; body: string[] }[];
+  faq?: { q: string; a: string }[];
   embeds?: { label: string; href: string }[];
   video?: {
     src: string;

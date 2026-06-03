@@ -1,5 +1,5 @@
 import { Helmet } from "react-helmet-async";
-import { absoluteUrl, jsonLdArticle, jsonLdOrganization, jsonLdWebSite, SITE_URL } from "@/lib/seo";
+import { absoluteUrl, jsonLdArticle, jsonLdFaq, jsonLdOrganization, jsonLdWebSite, SITE_URL } from "@/lib/seo";
 import type { BlogArticle } from "@/types";
 
 type Props = {
@@ -19,6 +19,7 @@ export function Seo({ title, description, path, image = DEFAULT_OG, article }: P
   const org = JSON.stringify(jsonLdOrganization());
   const site = JSON.stringify(jsonLdWebSite());
   const articleLd = article ? JSON.stringify(jsonLdArticle(article.title, article.slug, article.date, article.excerpt)) : null;
+  const faqLd = article?.faq?.length ? JSON.stringify(jsonLdFaq(article.faq)) : null;
 
   return (
     <Helmet>
@@ -38,6 +39,7 @@ export function Seo({ title, description, path, image = DEFAULT_OG, article }: P
       <script type="application/ld+json">{org}</script>
       <script type="application/ld+json">{site}</script>
       {articleLd ? <script type="application/ld+json">{articleLd}</script> : null}
+      {faqLd ? <script type="application/ld+json">{faqLd}</script> : null}
       <link rel="sitemap" type="application/xml" title="Sitemap" href={`${SITE_URL}/sitemap.xml`} />
     </Helmet>
   );

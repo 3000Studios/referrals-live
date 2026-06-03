@@ -3,6 +3,7 @@ import { Seo } from "@/components/seo/Seo";
 import { getArticleBySlug } from "@/data/blogArticles";
 import { NotFound } from "@/pages/NotFound";
 import { AffiliateBlock } from "@/components/monetization/AffiliateBlock";
+import { AdSlot } from "@/components/monetization/AdSlot";
 import { api, type ApiBlogPost } from "@/lib/api";
 import { useEffect, useState } from "react";
 import { MarkdownLite } from "@/components/seo/MarkdownLite";
@@ -65,6 +66,7 @@ export function BlogPost() {
           readTime: "8 min",
           keywords,
           sections: article?.sections ?? [{ heading: "Read", body: [excerpt] }],
+          faq: article?.faq,
           video: video ?? undefined,
         }}
       />
@@ -115,6 +117,22 @@ export function BlogPost() {
           </div>
         )}
       </div>
+
+      <AdSlot variant="in-feed" className="mt-10" label="Advertisement" />
+
+      {article?.faq?.length ? (
+        <section className="mt-10">
+          <h2 className="font-display text-2xl font-bold text-white">Frequently asked questions</h2>
+          <div className="mt-4 space-y-3">
+            {article.faq.map((item) => (
+              <details key={item.q} className="glass rounded-2xl border border-white/10 p-5 [&_summary]:cursor-pointer">
+                <summary className="font-semibold text-white marker:text-neon">{item.q}</summary>
+                <p className="mt-3 text-sm leading-relaxed text-muted">{item.a}</p>
+              </details>
+            ))}
+          </div>
+        </section>
+      ) : null}
 
       {embeds?.length ? (
         <div className="mt-10 glass rounded-3xl border border-white/10 p-6">
