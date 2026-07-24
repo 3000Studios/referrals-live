@@ -29,11 +29,27 @@ export function AdSlot({ variant = "banner", className, label = "Advertisement" 
 
   useEffect(() => {
     if (!slot || !ref.current) return;
-    try {
-      (window.adsbygoogle = window.adsbygoogle || []).push({});
-    } catch {
-      /* ignore */
+    const existing = document.querySelector<HTMLScriptElement>('script[data-adsense-loader="true"]');
+    const load = () => {
+      try {
+        (window.adsbygoogle = window.adsbygoogle || []).push({});
+      } catch {
+        /* AdSense may reject an unapproved site or an invalid unit. */
+      }
+    };
+
+    if (existing) {
+      load();
+      return;
     }
+
+    const script = document.createElement("script");
+    script.async = true;
+    script.crossOrigin = "anonymous";
+    script.dataset.adsenseLoader = "true";
+    script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${client}`;
+    script.addEventListener("load", load, { once: true });
+    document.head.appendChild(script);
   }, [slot, variant]);
 
   if (!slot) return null;

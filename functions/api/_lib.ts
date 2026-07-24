@@ -170,8 +170,8 @@ export function safeOrigin(env: Env, fallback: string) {
 }
 
 export async function sendLead(env: Env, payload: Record<string, unknown>) {
-  if (!env.LEAD_WEBHOOK_URL) return;
-  await fetch(env.LEAD_WEBHOOK_URL, {
+  if (!env.LEAD_WEBHOOK_URL) return false;
+  return fetch(env.LEAD_WEBHOOK_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json; charset=utf-8" },
     body: JSON.stringify({
@@ -179,5 +179,5 @@ export async function sendLead(env: Env, payload: Record<string, unknown>) {
       capturedAt: new Date().toISOString(),
       ...payload,
     }),
-  }).catch(() => null);
+  }).then((response) => response.ok).catch(() => false);
 }

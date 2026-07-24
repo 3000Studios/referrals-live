@@ -79,8 +79,8 @@ export function Navbar() {
         <svg viewBox="0 0 100 40" preserveAspectRatio="none" className="h-full w-full">
           <defs>
             <linearGradient id="wireGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="rgba(124,58,237,0.5)" />
-              <stop offset="45%" stopColor="rgba(0,204,255,0.45)" />
+              <stop offset="0%" stopColor="rgba(5,150,105,0.5)" />
+              <stop offset="45%" stopColor="rgba(52,211,153,0.45)" />
               <stop offset="100%" stopColor="rgba(0,255,136,0.5)" />
             </linearGradient>
           </defs>
@@ -110,7 +110,7 @@ export function Navbar() {
                 cx={node.x + pullX}
                 cy={node.y + pullY}
                 r="1.2"
-                fill={idx % 2 === 0 ? "rgba(0,255,136,0.45)" : "rgba(128,94,255,0.45)"}
+                fill={idx % 2 === 0 ? "rgba(0,255,136,0.45)" : "rgba(5,150,105,0.45)"}
               />
             );
           })}

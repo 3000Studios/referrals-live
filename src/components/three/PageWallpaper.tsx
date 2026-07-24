@@ -119,8 +119,8 @@ export function PageWallpaper({ routeKey }: { routeKey: string }) {
         ctx.fill();
       };
       blob(w * (0.18 + 0.05 * Math.sin(time + seed)), h * (0.22 + 0.05 * Math.cos(time * 1.2)), "rgba(0,255,136,0.12)", Math.max(w, h) * 0.32);
-      blob(w * (0.78 + 0.04 * Math.sin(time * 1.1 + 2)), h * (0.18 + 0.05 * Math.cos(time + 1)), "rgba(0,204,255,0.10)", Math.max(w, h) * 0.28);
-      blob(w * (0.52 + 0.06 * Math.cos(time * 0.9 + 3)), h * (0.80 + 0.05 * Math.sin(time * 1.3)), "rgba(120,80,255,0.10)", Math.max(w, h) * 0.30);
+      blob(w * (0.78 + 0.04 * Math.sin(time * 1.1 + 2)), h * (0.18 + 0.05 * Math.cos(time + 1)), "rgba(52,211,153,0.10)", Math.max(w, h) * 0.28);
+      blob(w * (0.52 + 0.06 * Math.cos(time * 0.9 + 3)), h * (0.80 + 0.05 * Math.sin(time * 1.3)), "rgba(5,150,105,0.10)", Math.max(w, h) * 0.30);
 
       // Perspective grid + nodes (wireframe feel)
       ctx.save();
@@ -129,7 +129,7 @@ export function PageWallpaper({ routeKey }: { routeKey: string }) {
       const gridShiftY = parY * 14;
       const horizon = h * (0.38 + 0.05 * Math.sin(scrollPhase));
       const gridColor = "rgba(0,255,136,0.08)";
-      const gridColor2 = "rgba(0,204,255,0.06)";
+      const gridColor2 = "rgba(52,211,153,0.06)";
 
       for (let i = 0; i < 22; i++) {
         const p = i / 21;
@@ -165,7 +165,7 @@ export function PageWallpaper({ routeKey }: { routeKey: string }) {
         const x = cx + (n.x - 0.5) * w * 1.05 * depth + Math.sin(time * 2 + i) * 6;
         const y = cy + (n.y - 0.5) * h * 0.85 * depth + Math.cos(time * 2.2 + i * 0.7) * 6;
         const r = n.r * (0.8 + (1 - depth) * 0.6);
-        ctx.fillStyle = i % 3 === 0 ? "rgba(0,255,136,0.22)" : i % 3 === 1 ? "rgba(0,204,255,0.18)" : "rgba(120,80,255,0.16)";
+        ctx.fillStyle = i % 3 === 0 ? "rgba(0,255,136,0.22)" : i % 3 === 1 ? "rgba(52,211,153,0.18)" : "rgba(5,150,105,0.16)";
         ctx.beginPath();
         ctx.arc(x, y, r, 0, Math.PI * 2);
         ctx.fill();

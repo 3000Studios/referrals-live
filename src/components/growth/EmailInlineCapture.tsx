@@ -18,7 +18,7 @@ export function EmailInlineCapture() {
   };
 
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-white/8 bg-gradient-to-br from-[rgba(0,255,136,0.04)] via-[rgba(3,4,9,0.92)] to-[rgba(0,204,255,0.03)] p-px">
+    <div className="relative overflow-hidden rounded-3xl border border-white/8 bg-gradient-to-br from-[rgba(0,255,136,0.05)] via-[rgba(3,4,9,0.92)] to-[rgba(52,211,153,0.04)] p-px">
       {/* Outer glow border */}
       <div className="pointer-events-none absolute inset-0 rounded-3xl ring-1 ring-inset ring-white/5" />
       <div className="relative rounded-3xl p-8 md:flex md:items-center md:justify-between md:gap-10 bg-[rgba(3,4,9,0.88)] backdrop-blur-xl">

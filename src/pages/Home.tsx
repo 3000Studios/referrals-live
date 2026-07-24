@@ -55,9 +55,9 @@ export function Home() {
 
       <section ref={heroRef} className="relative overflow-hidden rounded-[2rem] border border-white/8 px-6 py-16 md:px-14 md:py-28">
         {/* Layered cinematic background */}
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-[rgba(0,255,136,0.06)] via-transparent to-[rgba(0,204,255,0.04)]" />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-[rgba(0,255,136,0.08)] via-transparent to-[rgba(52,211,153,0.05)]" />
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_50%_at_20%_0%,rgba(0,255,136,0.12),transparent_55%)]" />
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_50%_40%_at_80%_100%,rgba(124,58,237,0.1),transparent_55%)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_50%_40%_at_80%_100%,rgba(5,150,105,0.1),transparent_55%)]" />
         {/* Scan line overlay for cinematic depth */}
         <div className="pointer-events-none absolute inset-x-0 h-px bg-gradient-to-r from-transparent via-neon/20 to-transparent" style={{ top: "38%" }} />
 
@@ -166,7 +166,7 @@ export function Home() {
           {
             icon: "🚀",
             color: "electric",
-            glow: "rgba(0,204,255,0.25)",
+            glow: "rgba(52,211,153,0.25)",
             bg: "bg-electric/8 border-electric/15",
             step: "02",
             title: "Share",
