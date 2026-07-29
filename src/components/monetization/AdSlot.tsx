@@ -50,7 +50,7 @@ export function AdSlot({ variant = "banner", className, label = "Advertisement" 
     script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${client}`;
     script.addEventListener("load", load, { once: true });
     document.head.appendChild(script);
-  }, [slot, variant]);
+  }, [client, slot, variant]);
 
   if (!slot) return null;
 
