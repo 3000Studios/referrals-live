@@ -6,6 +6,7 @@ import { useEffect, useMemo, useState } from "react";
 
 const links = [
   { to: "/browse", label: "Browse" },
+  { to: "/stack", label: "My stack" },
   { to: "/categories", label: "Categories" },
   { to: "/submit", label: "Submit" },
   { to: "/leaderboard", label: "Leaderboard" },
