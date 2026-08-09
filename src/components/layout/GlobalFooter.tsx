@@ -21,7 +21,7 @@ export const GlobalFooter = () => {
               <span className="text-gradient-neon">.live</span>
             </div>
             <p className="text-[13px] text-muted leading-relaxed max-w-xs">
-              A live referral marketplace for creators, operators, and side hustlers who want tracked links, public rankings, and premium placement.
+              A referral marketplace for people researching useful programs and program owners who want transparent, trackable visibility.
             </p>
             <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.25em]">
               <span className="relative flex h-2 w-2">
@@ -90,7 +90,7 @@ export const GlobalFooter = () => {
         {/* Bottom bar */}
         <div className="mt-14 pt-6 border-t border-white/5 flex flex-wrap items-center justify-between gap-4">
           <p className="text-[10px] text-white/20 uppercase tracking-[0.22em]">
-            © {new Date().getFullYear()} referrals.live — All sales final where permitted by law.
+            © {new Date().getFullYear()} referrals.live
           </p>
           <div className="flex items-center gap-4">
             <Link to="/blog" className="text-[10px] text-white/25 uppercase tracking-[0.2em] hover:text-white/50 transition-colors">
