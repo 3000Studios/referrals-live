@@ -5,6 +5,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 // Lazy load pages
 const Home = lazy(() => import("@/pages/Home").then(m => ({ default: m.Home })));
 const Browse = lazy(() => import("@/pages/Browse").then(m => ({ default: m.Browse })));
+const Stack = lazy(() => import("@/pages/Stack").then(m => ({ default: m.Stack })));
 const Categories = lazy(() => import("@/pages/Categories").then(m => ({ default: m.Categories })));
 const Submit = lazy(() => import("@/pages/Submit").then(m => ({ default: m.Submit })));
 const Leaderboard = lazy(() => import("@/pages/Leaderboard").then(m => ({ default: m.Leaderboard })));
@@ -41,6 +42,7 @@ export default function App() {
         <Route element={<Layout />}>
           <Route index element={<Home />} />
           <Route path="browse" element={<Browse />} />
+          <Route path="stack" element={<Stack />} />
           <Route path="categories" element={<Categories />} />
           <Route path="submit" element={<Submit />} />
           <Route path="leaderboard" element={<Leaderboard />} />

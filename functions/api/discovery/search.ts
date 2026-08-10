@@ -27,8 +27,9 @@ export async function onRequestGet(context: { request: Request; env: Env }) {
        LIMIT 200`,
     ).all<any>(),
     context.env.DB.prepare(
-      `SELECT id, title, description, url, category, tags_json, image_url, created_at, score
+      `SELECT id, title, description, url, category, tags_json, image_url, created_at, score, verified_at
        FROM ingested_offers
+       WHERE review_status='approved'
        ORDER BY score DESC, updated_at DESC
        LIMIT 200`,
     ).all<any>(),
@@ -61,6 +62,7 @@ export async function onRequestGet(context: { request: Request; env: Env }) {
       clicks: 0,
       createdAt: Number(row.created_at ?? 0),
       source: "discovery",
+      verifiedAt: Number(row.verified_at ?? 0),
       rawScore: Number(row.score ?? 0),
     })),
   ];

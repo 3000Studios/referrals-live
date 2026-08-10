@@ -25,7 +25,7 @@ async function resolveTargetUrl(env: Env, id: string, ts: number): Promise<strin
   }
 
   const ingested = await env.DB
-    .prepare("SELECT url FROM ingested_offers WHERE id=? LIMIT 1")
+    .prepare("SELECT url FROM ingested_offers WHERE id=? AND review_status='approved' LIMIT 1")
     .bind(id)
     .first<any>();
   if (ingested?.url) {

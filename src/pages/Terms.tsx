@@ -1,6 +1,9 @@
+import { Seo } from "@/components/seo/Seo";
+
 export function Terms() {
   return (
     <div className="container mx-auto px-4 py-20">
+      <Seo title="Terms of Service — referrals.live" description="Terms governing use of the referrals.live marketplace." path="/terms" />
       <div className="glass-card p-12 max-w-4xl mx-auto">
         <span className="eyebrow text-gold">Legal Framework</span>
         <h1 className="text-4xl font-black mb-8">Terms of Service</h1>
@@ -12,8 +15,8 @@ export function Terms() {
           </section>
 
           <section className="p-8 bg-red-500/5 border border-red-500/20 rounded-3xl">
-            <h2 className="text-2xl font-bold text-red-500 mb-4">2. NO REFUND POLICY</h2>
-            <p className="font-bold text-white">All sales are final and non-refundable except where a refund is required by applicable law. This includes premium placements, subscriptions, and any other paid services inside referrals.live.</p>
+            <h2 className="text-2xl font-bold text-red-500 mb-4">2. Billing, cancellations, and refunds</h2>
+            <p className="font-bold text-white">Current price, renewal, cancellation, and any refund terms are presented by the payment provider before purchase. Nothing in these terms limits rights that cannot be waived under applicable law.</p>
           </section>
 
           <section className="p-8 bg-gold/5 border border-gold/20 rounded-3xl">

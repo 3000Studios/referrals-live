@@ -54,7 +54,7 @@ export function Program() {
           <h1 className="mt-3 font-display text-4xl font-extrabold text-white">{program.title}</h1>
           <div className="mt-3 flex flex-wrap items-center gap-3 text-sm text-muted">
             <span className="rounded-full border border-white/10 px-3 py-1">{program.category}</span>
-            {program.verified ? <span className="rounded-full border border-neon/30 bg-neon/10 px-3 py-1 text-neon">Verified</span> : null}
+            {program.verified ? <span className="rounded-full border border-neon/30 bg-neon/10 px-3 py-1 text-neon">Source checked</span> : null}
             <span>{program.votes} votes</span>
             <span>{program.clicks} clicks</span>
           </div>
@@ -120,6 +120,7 @@ export function Program() {
                 <div className="mt-2 text-sm text-muted">{review.text}</div>
               </div>
             ))}
+            {!program.reviews.length ? <div className="rounded-2xl border border-dashed border-white/10 p-4 text-sm text-muted">No published community reviews yet.</div> : null}
           </div>
         </div>
         <div className="glass rounded-3xl border border-white/10 p-6">

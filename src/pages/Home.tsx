@@ -6,14 +6,10 @@ import { useAppStore } from "@/store/useAppStore";
 import { ReferralCard } from "@/components/referrals/ReferralCard";
 import { sortByTrending, sortByPopular } from "@/lib/trending";
 import { categories } from "@/data/categories";
-import { SponsoredStrip } from "@/components/monetization/SponsoredStrip";
-import { AdSlot } from "@/components/monetization/AdSlot";
 import { EmailInlineCapture } from "@/components/growth/EmailInlineCapture";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { LiveChatDock } from "@/components/community/LiveChatDock";
-import { TrustTicker } from "@/components/TrustTicker";
-import { DiscoveryScanner } from "@/components/discovery/DiscoveryScanner";
+import { useReferralStack } from "@/store/useReferralStack";
 
 export function Home() {
   const referrals = useAppStore((s) => s.referrals);
@@ -22,6 +18,8 @@ export function Home() {
   const [featured, setFeatured] = useState<typeof referrals>([]);
   const [q, setQ] = useState("");
   const navigate = useNavigate();
+  const savedIds = useReferralStack((s) => s.savedIds);
+  const hydrateStack = useReferralStack((s) => s.hydrate);
   const suggestedTags = ["SaaS", "Crypto", "Travel", "Cashback", "Hosting", "AI"];
 
   useEffect(() => {
@@ -33,6 +31,10 @@ export function Home() {
     }, root);
     return () => ctx.revert();
   }, []);
+
+  useEffect(() => {
+    hydrateStack();
+  }, [hydrateStack]);
 
   useEffect(() => {
     fetch("/api/home")
@@ -48,16 +50,16 @@ export function Home() {
   return (
     <div>
       <Seo
-        title="referrals.live — Turn Your Links Into Money"
-        description="Discover trending referral programs, submit your best links, and climb leaderboards. Built for creators, operators, and side hustlers."
+        title="referrals.live — Find referral programs worth sharing"
+        description="Compare referral programs, save a practical shortlist, and publish transparent listings for people looking for useful offers."
         path="/"
       />
 
       <section ref={heroRef} className="relative overflow-hidden rounded-[2rem] border border-white/8 px-6 py-16 md:px-14 md:py-28">
         {/* Layered cinematic background */}
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-[rgba(0,255,136,0.06)] via-transparent to-[rgba(0,204,255,0.04)]" />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-[rgba(0,255,136,0.08)] via-transparent to-[rgba(52,211,153,0.05)]" />
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_50%_at_20%_0%,rgba(0,255,136,0.12),transparent_55%)]" />
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_50%_40%_at_80%_100%,rgba(124,58,237,0.1),transparent_55%)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_50%_40%_at_80%_100%,rgba(5,150,105,0.1),transparent_55%)]" />
         {/* Scan line overlay for cinematic depth */}
         <div className="pointer-events-none absolute inset-x-0 h-px bg-gradient-to-r from-transparent via-neon/20 to-transparent" style={{ top: "38%" }} />
 
@@ -67,34 +69,32 @@ export function Home() {
             <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-neon/80">Live marketplace</span>
           </div>
           <div className="hero-line font-display text-5xl font-extrabold leading-[1.08] text-white md:text-7xl">
-            Turn Your Links
+            Find programs
             <br />
-            <span className="text-gradient-neon">Into Money</span>
+            <span className="text-gradient-neon">worth sharing.</span>
           </div>
           <p className="hero-line mt-6 text-[1.05rem] leading-relaxed text-muted md:text-xl">
-            The cinematic dark marketplace for referral programs — vote, share, and scale what actually converts with{" "}
-            <span className="font-semibold text-white/80">transparent rankings</span> and{" "}
-            <span className="text-gold font-semibold">monetization-ready</span> placements.
+            Compare programs, save the ones you would genuinely recommend, and check the provider’s current terms before you share. For program owners, the marketplace offers a clear route to paid visibility.
           </p>
           <div className="hero-cta mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <Link
-              to="/submit"
+              to="/stack"
               className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-neon to-emerald-400 px-8 py-4 text-sm font-bold text-black shadow-neon transition hover:brightness-110 hover:shadow-[0_0_32px_rgba(0,255,136,0.55)] active:scale-95"
             >
-              Submit referral
+              Build your stack{savedIds.length ? ` (${savedIds.length})` : ""}
             </Link>
             <Link
               to="/browse"
               className="inline-flex items-center gap-2 rounded-2xl border border-white/12 bg-white/4 px-8 py-4 text-sm font-semibold text-white backdrop-blur-sm transition hover:border-electric/40 hover:bg-white/[0.07]"
             >
-              Browse marketplace
+              Explore programs
             </Link>
           </div>
           <div className="mt-8 flex flex-wrap justify-center gap-2 text-[10px] uppercase tracking-[0.22em] text-muted">
-            <span className="rounded-full border border-white/8 bg-white/3 px-3 py-1">AdSense-ready</span>
-            <span className="rounded-full border border-white/8 bg-white/3 px-3 py-1">Viral sharing</span>
-            <span className="rounded-full border border-white/8 bg-white/3 px-3 py-1">Gamified ranks</span>
-            <span className="rounded-full border border-white/8 bg-white/3 px-3 py-1">Live leaderboard</span>
+            <span className="rounded-full border border-white/8 bg-white/3 px-3 py-1">Compare programs</span>
+            <span className="rounded-full border border-white/8 bg-white/3 px-3 py-1">Save your research</span>
+            <span className="rounded-full border border-white/8 bg-white/3 px-3 py-1">Check current terms</span>
+            <span className="rounded-full border border-white/8 bg-white/3 px-3 py-1">Share transparently</span>
           </div>
           <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <div className="w-full max-w-xl">
@@ -116,13 +116,6 @@ export function Home() {
             >
               Search
             </button>
-            <button
-              type="button"
-              onClick={() => document.getElementById("live-chat")?.scrollIntoView({ behavior: "smooth" })}
-              className="w-full max-w-xl rounded-2xl bg-gradient-to-r from-electric/60 to-neon/60 px-6 py-3 text-sm font-semibold text-white hover:brightness-110 sm:w-auto"
-            >
-              Jump to chat ↓
-            </button>
           </div>
           <div className="mt-4 flex flex-wrap justify-center gap-2">
             {suggestedTags.map((tag) => (
@@ -137,20 +130,10 @@ export function Home() {
             ))}
           </div>
           <div className="mt-6 text-[11px] text-muted">
-            Outbound clicks use tracked redirects. Owner-attribution parameters are applied only for domains you’ve configured.
+            Community signals help you prioritize research; they are not a promise of eligibility, approval, or earnings.
           </div>
         </div>
       </section>
-
-      <TrustTicker />
-      
-      <div className="mt-16">
-        <DiscoveryScanner />
-      </div>
-
-      <div className="mt-10 lg:hidden">
-        <AdSlot variant="banner" />
-      </div>
 
       <section className="mt-16 grid gap-5 md:grid-cols-3">
         {[
@@ -160,17 +143,17 @@ export function Home() {
             glow: "rgba(0,255,136,0.25)",
             bg: "bg-neon/8 border-neon/15",
             step: "01",
-            title: "Submit",
-            desc: "Add your best referral links. We index them in our cinematic marketplace for maximum visibility.",
+            title: "Discover",
+            desc: "Search by goal and save a shortlist of programs worth researching before you recommend anything.",
           },
           {
             icon: "🚀",
             color: "electric",
-            glow: "rgba(0,204,255,0.25)",
+            glow: "rgba(52,211,153,0.25)",
             bg: "bg-electric/8 border-electric/15",
             step: "02",
-            title: "Share",
-            desc: "Use your personalized Operator Board. Higher engagement = higher ranking across all categories.",
+            title: "Publish",
+            desc: "Program owners can submit a clear offer page so the right audience can find it through useful category browsing.",
           },
           {
             icon: "💰",
@@ -178,8 +161,8 @@ export function Home() {
             glow: "rgba(255,215,0,0.25)",
             bg: "bg-gold/8 border-gold/15",
             step: "03",
-            title: "Scale",
-            desc: "Climb the leaderboard and earn rewards. Upgrade to Premium for homepage placements.",
+            title: "Promote",
+            desc: "When a listing is ready, Premium opens featured homepage placement and tracked outbound visibility.",
           },
         ].map((item) => (
           <div key={item.step} className="glass group relative overflow-hidden rounded-3xl border border-white/7 p-8 text-center transition-all duration-300 hover:border-white/12">
@@ -216,14 +199,10 @@ export function Home() {
         </div>
       </section>
 
-      <div className="mt-12">
-        <SponsoredStrip />
-      </div>
-
       <section className="mt-14 grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
         <div className="space-y-4">
-          <div className="text-xs font-semibold uppercase tracking-[0.25em] text-gold">Top earning links</div>
-          <h3 className="font-display text-2xl font-bold text-white">High signal, high intent</h3>
+          <div className="text-xs font-semibold uppercase tracking-[0.25em] text-gold">Research queue</div>
+          <h3 className="font-display text-2xl font-bold text-white">Programs people are exploring</h3>
           <div className="space-y-3">
             {earning.map((r) => (
               <motion.div
@@ -244,13 +223,13 @@ export function Home() {
           </div>
         </div>
         <div className="glass rounded-3xl border border-white/10 p-6">
-          <div className="text-xs font-semibold uppercase tracking-[0.25em] text-electric">Leaderboard preview</div>
-          <h3 className="mt-2 font-display text-2xl font-bold text-white">Top operators</h3>
+          <div className="text-xs font-semibold uppercase tracking-[0.25em] text-electric">For program owners</div>
+          <h3 className="mt-2 font-display text-2xl font-bold text-white">A clearer path to paid visibility</h3>
           <p className="mt-4 text-sm text-muted">
-            Tracking verified performance: Rankings are updated hourly based on click-through rates and member engagement.
+            Start with a transparent listing. When your offer is ready for broader reach, use Premium to request featured homepage placement and review tracked outbound activity in your dashboard.
           </p>
-          <Link to="/leaderboard" className="mt-5 inline-flex text-sm font-semibold text-electric hover:text-white">
-            Full leaderboard →
+          <Link to="/premium" className="mt-5 inline-flex text-sm font-semibold text-electric hover:text-white">
+            See promotion options →
           </Link>
         </div>
       </section>
@@ -274,10 +253,6 @@ export function Home() {
           </div>
         </section>
       ) : null}
-
-      <div className="mt-12">
-        <AdSlot variant="in-feed" />
-      </div>
 
       <section className="mt-14">
         <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
@@ -303,9 +278,9 @@ export function Home() {
 
       <section className="mt-14">
         <div className="mb-6">
-          <div className="text-xs font-semibold uppercase tracking-[0.25em] text-gold">Infinite discovery</div>
-          <h2 className="font-display text-3xl font-bold text-white">Live feed</h2>
-          <p className="mt-2 text-sm text-muted">Auto-rotating engagement keeps the marketplace feeling alive.</p>
+          <div className="text-xs font-semibold uppercase tracking-[0.25em] text-gold">Keep researching</div>
+          <h2 className="font-display text-3xl font-bold text-white">New and rising programs</h2>
+          <p className="mt-2 text-sm text-muted">Use votes, clicks, and recency as starting points—then verify the provider’s current details yourself.</p>
         </div>
         <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
           {feed.map((r, i) => (
@@ -329,16 +304,6 @@ export function Home() {
         <EmailInlineCapture />
       </section>
 
-      <section id="live-chat" className="mt-16">
-        <div className="mb-6 text-center">
-          <div className="text-xs font-semibold uppercase tracking-[0.25em] text-electric">Community</div>
-          <h2 className="font-display text-3xl font-bold text-white">Live chat</h2>
-          <p className="mt-2 text-sm text-muted">Everyone can read. Premium members can post.</p>
-        </div>
-        <div className="mx-auto max-w-3xl">
-          <LiveChatDock defaultOpen className="w-full" />
-        </div>
-      </section>
     </div>
   );
 }

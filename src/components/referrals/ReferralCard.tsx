@@ -1,7 +1,8 @@
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { TiltCard } from "@/components/effects/TiltCard";
 import { useAppStore } from "@/store/useAppStore";
+import { useReferralStack } from "@/store/useReferralStack";
 import { trackOutboundClick, trackVote } from "@/lib/analytics";
 import { ShareButtons } from "@/components/social/ShareButtons";
 import clsx from "clsx";
@@ -14,7 +15,15 @@ export function ReferralCard({ referral, index = 0, variant = "default" }: Props
   const track = useAppStore((s) => s.trackClick);
   const votedIds = useAppStore((s) => s.votedIds);
   const voted = Boolean(votedIds[referral.id]);
+  const savedIds = useReferralStack((s) => s.savedIds);
+  const toggleSaved = useReferralStack((s) => s.toggle);
+  const hydrateStack = useReferralStack((s) => s.hydrate);
   const [copied, setCopied] = useState(false);
+  const saved = savedIds.includes(referral.id);
+
+  useEffect(() => {
+    hydrateStack();
+  }, [hydrateStack]);
 
   const onVisit = () => {
     track(referral.id);
@@ -37,7 +46,8 @@ export function ReferralCard({ referral, index = 0, variant = "default" }: Props
     }
   };
 
-  const verified = referral.votes >= 25 || referral.clicks >= 150 || referral.source === "automation";
+  const communitySignal = referral.votes >= 25 || referral.clicks >= 150 || referral.source === "automation";
+  const sourceChecked = referral.source === "verified_source";
   const isTrending = variant === "trending";
 
   return (
@@ -87,11 +97,16 @@ export function ReferralCard({ referral, index = 0, variant = "default" }: Props
             </div>
           ) : null}
 
-          {/* Verified badge in image overlay */}
-          {verified ? (
+          {/* Community signal is deliberately not a merchant verification claim. */}
+          {communitySignal ? (
             <div className="absolute right-3 top-3 flex items-center gap-1 rounded-full border border-neon/30 bg-black/70 px-2 py-0.5 backdrop-blur-sm">
               <span className="h-1.5 w-1.5 rounded-full bg-neon animate-glow-pulse" />
-              <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-neon">Verified</span>
+              <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-neon">Community signal</span>
+            </div>
+          ) : null}
+          {sourceChecked ? (
+            <div className="absolute right-3 top-3 rounded-full border border-neon/30 bg-black/70 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.14em] text-neon backdrop-blur-sm">
+              Source checked
             </div>
           ) : null}
         </div>
@@ -182,9 +197,16 @@ export function ReferralCard({ referral, index = 0, variant = "default" }: Props
           <div className="flex flex-wrap gap-2 pt-0.5">
             <button
               type="button"
-              className="rounded-full border border-gold/25 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-gold/70 transition hover:border-gold/50 hover:bg-gold/8 hover:text-gold"
+              onClick={() => toggleSaved(referral.id)}
+              aria-pressed={saved}
+              className={clsx(
+                "rounded-full border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] transition",
+                saved
+                  ? "border-neon/40 bg-neon/10 text-neon"
+                  : "border-gold/25 text-gold/70 hover:border-gold/50 hover:bg-gold/8 hover:text-gold",
+              )}
             >
-              ⚡ Boost
+              {saved ? "✓ In stack" : "+ Save to stack"}
             </button>
             <a
               href={`/program/${referral.id}`}

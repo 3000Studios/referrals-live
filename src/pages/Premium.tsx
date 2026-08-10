@@ -17,31 +17,11 @@ const PAYPAL_CLIENT_ID    = import.meta.env.VITE_PAYPAL_CLIENT_ID as string | un
 const PAYPAL_PLAN_ID      = import.meta.env.VITE_PAYPAL_PLAN_ID as string | undefined;
 
 const perks = [
-  { icon: "🔥", text: "Post & manage referrals from your dashboard" },
-  { icon: "💬", text: "Live chat posting (free tier = read-only)" },
-  { icon: "⭐", text: "2 featured links on the homepage — 3× more clicks" },
-  { icon: "📊", text: "Tracked outbound redirects with performance stats" },
-  { icon: "🏆", text: "Priority ranking on public listings" },
-  { icon: "🤝", text: "$10 affiliate commission per referral you bring in" },
+  { icon: "✦", text: "Manage your listings from one dashboard" },
+  { icon: "★", text: "Request up to two featured homepage placements" },
+  { icon: "↗", text: "Use tracked outbound redirects for your published links" },
+  { icon: "◎", text: "Submit public listing candidates for review" },
 ];
-
-const testimonials = [
-  { name: "Marcus T.", avatar: "M", text: "Featured placement got me 4× more clicks within the first week. Paid for itself fast.", stars: 5 },
-  { name: "Deja R.", avatar: "D", text: "The affiliate payout alone covered 3 months. No brainer.", stars: 5 },
-  { name: "Chris K.", avatar: "C", text: "Live chat access alone is worth it. The community is actually active.", stars: 5 },
-];
-
-const stats = [
-  { value: "3×", label: "avg. more clicks" },
-  { value: "$10", label: "per referral earned" },
-  { value: "500+", label: "active members" },
-];
-
-function StarRating({ count }: { count: number }) {
-  return (
-    <span className="text-gold text-xs">{"★".repeat(count)}</span>
-  );
-}
 
 function PayPalButton() {
   const ref = useRef<HTMLDivElement>(null);
@@ -102,7 +82,6 @@ export function Premium() {
   const user = useAppStore((s) => s.user);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [spotsLeft] = useState(() => Math.floor(Math.random() * 8) + 3);
 
   useEffect(() => {
     trackPremiumView("premium_page");
@@ -143,35 +122,14 @@ export function Premium() {
     <div>
       <Seo
         title="Premium — referrals.live"
-        description="Upgrade to Premium for homepage featuring, live chat posting, $10 affiliate commissions, and priority placement."
+        description="Upgrade to Premium to manage listings, request featured homepage placement, and use tracked outbound redirects."
         path="/premium"
       />
 
       {/* Header */}
       <div className="text-xs font-semibold uppercase tracking-[0.25em] text-gold">Upgrade</div>
       <h1 className="font-display text-4xl font-extrabold text-white">Go Premium</h1>
-      <p className="mt-2 max-w-xl text-sm text-muted">
-        One flat price. Everything unlocked. Cancel anytime.
-      </p>
-
-      {/* Scarcity bar */}
-      <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-gold/30 bg-gold/10 px-4 py-1.5 text-xs font-semibold text-gold">
-        <span className="relative flex h-2 w-2">
-          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-gold opacity-75" />
-          <span className="relative inline-flex h-2 w-2 rounded-full bg-gold" />
-        </span>
-        Only {spotsLeft} featured slots open this week
-      </div>
-
-      {/* Stats row */}
-      <div className="mt-8 grid grid-cols-3 gap-4">
-        {stats.map((s) => (
-          <div key={s.label} className="glass rounded-2xl border border-white/10 p-4 text-center">
-            <div className="font-display text-2xl font-extrabold text-gold">{s.value}</div>
-            <div className="mt-1 text-xs text-muted">{s.label}</div>
-          </div>
-        ))}
-      </div>
+      <p className="mt-2 max-w-xl text-sm text-muted">For program owners who want a clear, accountable path to additional marketplace visibility. Current pricing and billing terms are confirmed at checkout.</p>
 
       <div className="mt-10 grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
 
@@ -182,13 +140,10 @@ export function Premium() {
           <div className="glass rounded-3xl border border-white/10 p-6">
             <div className="flex items-start justify-between">
               <div>
-                <div className="text-[10px] font-semibold uppercase tracking-[0.25em] text-neon">Most popular</div>
-                <div className="mt-1 font-display text-2xl font-bold text-white">Premium Monthly</div>
+                <div className="text-[10px] font-semibold uppercase tracking-[0.25em] text-neon">Listing promotion</div>
+                <div className="mt-1 font-display text-2xl font-bold text-white">Premium membership</div>
               </div>
-              <div className="text-right">
-                <div className="font-display text-3xl font-extrabold text-gold">$7.99</div>
-                <div className="text-xs text-muted">/ month</div>
-              </div>
+              <div className="max-w-32 text-right text-xs leading-relaxed text-muted">Pricing and renewal terms are shown by the payment provider.</div>
             </div>
 
             <ul className="mt-6 space-y-3">
@@ -221,7 +176,7 @@ export function Premium() {
                   ) : (
                     <>
                       <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor"><path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
-                      Pay with Card — $7.99/mo
+                      Continue to secure checkout
                     </>
                   )}
                 </button>
@@ -249,9 +204,7 @@ export function Premium() {
             )}
 
             {/* Trust line */}
-            <p className="mt-5 rounded-2xl border border-gold/20 bg-gold/10 p-4 text-xs leading-relaxed text-gold/90">
-              Recurring subscription — cancel anytime from your dashboard. Access activates instantly after payment confirms. All sales final except where required by law.
-            </p>
+            <p className="mt-5 rounded-2xl border border-gold/20 bg-gold/10 p-4 text-xs leading-relaxed text-gold/90">Membership availability, pricing, renewal terms, and cancellation options are shown before payment. Featured placement is subject to listing review and availability.</p>
 
             {/* Payment logos */}
             <div className="mt-6 flex items-center justify-center gap-6 opacity-40 grayscale hover:opacity-80 hover:grayscale-0 transition-all">
@@ -262,23 +215,6 @@ export function Premium() {
             </div>
           </div>
 
-          {/* Testimonials */}
-          <div className="space-y-3">
-            {testimonials.map((t) => (
-              <div key={t.name} className="glass rounded-2xl border border-white/10 p-4">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-electric/20 text-xs font-bold text-electric">
-                    {t.avatar}
-                  </div>
-                  <div>
-                    <div className="text-xs font-bold text-white">{t.name}</div>
-                    <StarRating count={t.stars} />
-                  </div>
-                </div>
-                <p className="mt-2 text-xs text-muted leading-relaxed">"{t.text}"</p>
-              </div>
-            ))}
-          </div>
         </div>
 
         {/* Right: sidebar */}
@@ -292,17 +228,17 @@ export function Premium() {
             </div>
             {!user?.premium && (
               <div className="mt-3 rounded-xl bg-white/5 p-3 text-xs leading-relaxed">
-                <span className="text-gold font-semibold">★ Tip:</span> Premium members average 3× more profile clicks thanks to featured placement.
+                <span className="text-gold font-semibold">★ Note:</span> Featured placement can increase discovery, but results depend on your offer, audience fit, and current marketplace activity.
               </div>
             )}
           </div>
 
-          {/* Affiliate earnings box */}
+          {/* Listing guidance */}
           <div className="glass rounded-3xl border border-neon/20 p-5">
-            <div className="text-xs font-semibold uppercase tracking-[0.25em] text-neon">Earn it back</div>
-            <div className="mt-2 font-display text-xl font-bold text-white">$10 per referral</div>
+            <div className="text-xs font-semibold uppercase tracking-[0.25em] text-neon">Before you promote</div>
+            <div className="mt-2 font-display text-xl font-bold text-white">Make the offer useful</div>
             <p className="mt-2 text-xs text-muted leading-relaxed">
-              Refer one friend and your first month is covered. Refer two and you're in profit. Your unique referral link is in your dashboard.
+              Use clear eligibility details, an accurate destination URL, and a description that helps visitors decide whether the program fits them.
             </p>
           </div>
 
@@ -310,10 +246,10 @@ export function Premium() {
           <div className="glass rounded-3xl border border-white/10 p-5 space-y-4 text-xs text-muted">
             <div className="text-xs font-semibold uppercase tracking-[0.25em] text-white">FAQ</div>
             {[
-              ["Can I cancel?", "Yes — anytime from your dashboard. No fees, no friction."],
-              ["When does access start?", "Instantly after Stripe or PayPal confirms payment."],
-              ["What's the affiliate payout?", "$10 credited per successful subscriber you bring in."],
-              ["Is there an annual plan?", "Monthly only for now — annual coming soon with 2 months free."],
+              ["What does Premium include?", "Dashboard tools, tracked outbound redirects, public listing-candidate submission, and the ability to request featured placement."],
+              ["When does access start?", "Access is updated after the payment provider confirms a successful subscription."],
+              ["Is placement guaranteed?", "No. Listings must meet quality and disclosure requirements, and available placement is reviewed before it is shown."],
+              ["Can I review price and renewal terms?", "Yes. The payment provider presents current terms before payment is completed."],
             ].map(([q, a]) => (
               <div key={q}>
                 <div className="font-semibold text-white/80">{q}</div>

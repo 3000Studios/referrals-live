@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Seo } from "@/components/seo/Seo";
 import { useAppStore } from "@/store/useAppStore";
 import { ReferralCard } from "@/components/referrals/ReferralCard";
@@ -7,11 +8,20 @@ import { sortByNewest, sortByPopular, sortByTrending } from "@/lib/trending";
 import { categories } from "@/data/categories";
 import { AdSlot } from "@/components/monetization/AdSlot";
 import { api } from "@/lib/api";
+import { type StackGoal, useReferralStack } from "@/store/useReferralStack";
 
 type Sort = "trending" | "popular" | "newest";
 
+const goals: Array<{ id: StackGoal; title: string; hint: string; category: string; query: string }> = [
+  { id: "first-referral", title: "Start simple", hint: "Find your first program", category: "all", query: "" },
+  { id: "creator", title: "Grow an audience", hint: "Creator-friendly picks", category: "all", query: "creator" },
+  { id: "cashback", title: "Save money", hint: "Cashback and rewards", category: "finance", query: "cashback" },
+  { id: "business", title: "Run a business", hint: "Tools for your workflow", category: "business", query: "" },
+];
+
 export function Browse() {
   const referrals = useAppStore((s) => s.referrals);
+  const lastUpdatedAt = useAppStore((s) => s.lastUpdatedAt);
   const [params] = useSearchParams();
   const initialCat = params.get("cat") ?? "all";
   const initialQ = params.get("q") ?? "";
@@ -21,6 +31,14 @@ export function Browse() {
   const [sort, setSort] = useState<Sort>("trending");
   const [remoteResults, setRemoteResults] = useState(referrals);
   const [searching, setSearching] = useState(false);
+  const savedIds = useReferralStack((s) => s.savedIds);
+  const savedGoal = useReferralStack((s) => s.goal);
+  const setSavedGoal = useReferralStack((s) => s.setGoal);
+  const hydrateStack = useReferralStack((s) => s.hydrate);
+
+  useEffect(() => {
+    hydrateStack();
+  }, [hydrateStack]);
 
   useEffect(() => {
     let cancelled = false;
@@ -73,7 +91,7 @@ export function Browse() {
           <div className="text-xs font-semibold uppercase tracking-[0.25em] text-neon">Marketplace</div>
           <h1 className="font-display text-4xl font-extrabold text-white">Browse referrals</h1>
           <p className="mt-3 max-w-2xl text-sm text-muted">
-            Instant search + sorting across live member links and the hourly discovery feed.
+            Instant search + sorting across live member links and verified sources monitored hourly.
           </p>
         </div>
       </div>
@@ -122,6 +140,35 @@ export function Browse() {
         <AdSlot variant="rectangle" />
       </div>
 
+      <section className="mt-5 rounded-3xl border border-neon/15 bg-neon/[0.035] p-5">
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <div className="text-xs font-semibold uppercase tracking-[0.22em] text-neon">Build your stack</div>
+            <p className="mt-1 text-sm text-muted">Choose a goal, save programs, and keep a practical shortlist without creating an account.</p>
+          </div>
+          <Link to="/stack" className="rounded-xl border border-neon/25 px-4 py-2.5 text-sm font-semibold text-neon transition hover:bg-neon/10">
+            View stack {savedIds.length ? `(${savedIds.length})` : ""} →
+          </Link>
+        </div>
+        <div className="mt-4 grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
+          {goals.map((goal) => (
+            <button
+              key={goal.id}
+              type="button"
+              onClick={() => {
+                setSavedGoal(goal.id);
+                setCategory(goal.category);
+                setQuery(goal.query);
+              }}
+              className={`rounded-2xl border p-4 text-left transition ${savedGoal === goal.id ? "border-neon/50 bg-neon/10" : "border-white/10 bg-black/20 hover:border-neon/25"}`}
+            >
+              <div className="text-sm font-semibold text-white">{goal.title}</div>
+              <div className="mt-1 text-xs text-muted">{goal.hint}</div>
+            </button>
+          ))}
+        </div>
+      </section>
+
       <div className="mt-10 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
         {sorted.map((r, i) => (
           <ReferralCard key={r.id} referral={r} index={i} />
@@ -132,7 +179,10 @@ export function Browse() {
           No promo codes matched yet. Try a broader keyword like `bank`, `travel`, `hosting`, or `cashback`.
         </div>
       ) : null}
-      <div className="mt-4 text-xs text-muted">{searching ? "Searching the discovery feed…" : `Showing ${sorted.length} results`}</div>
+      <div className="mt-4 text-xs text-muted">
+        {searching ? "Refreshing the marketplace…" : `Showing ${sorted.length} results`} · Updates refresh automatically while this page is open.
+        {lastUpdatedAt ? ` Last sync ${new Date(lastUpdatedAt).toLocaleTimeString()}.` : ""} Community signals are directional, not a guarantee of eligibility or earnings.
+      </div>
     </div>
   );
 }
