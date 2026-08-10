@@ -10,6 +10,7 @@ type State = {
   user: UserProfile | null;
   votedIds: Record<string, true>;
   loading: boolean;
+  lastUpdatedAt: number;
   hydrate: () => Promise<void>;
   refreshPublic: () => Promise<void>;
   login: (email: string, password: string) => Promise<void>;
@@ -26,12 +27,13 @@ export const useAppStore = create<State>((set, get) => ({
   user: null,
   votedIds: {},
   loading: false,
+  lastUpdatedAt: 0,
 
   hydrate: async () => {
     set({ loading: true });
     try {
       const [me, pub] = await Promise.all([api.me(), api.publicReferrals()]);
-      set({ user: me.user, referrals: pub.referrals });
+      set({ user: me.user, referrals: pub.referrals, lastUpdatedAt: Date.now() });
     } finally {
       set({ loading: false });
     }
@@ -39,7 +41,7 @@ export const useAppStore = create<State>((set, get) => ({
 
   refreshPublic: async () => {
     const pub = await api.publicReferrals();
-    set({ referrals: pub.referrals });
+    set({ referrals: pub.referrals, lastUpdatedAt: Date.now() });
   },
 
   login: async (email, password) => {

@@ -96,8 +96,8 @@ async function upsert(env: Env) {
     stmts.push(
       env.DB.prepare(
         `INSERT OR REPLACE INTO ingested_offers
-         (id, source, source_url, canonical_key, title, description, url, category, tags_json, image_url, score, created_at, updated_at)
-         VALUES (?, 'curated', ?, ?, ?, ?, ?, ?, ?, ?, ?, COALESCE((SELECT created_at FROM ingested_offers WHERE id=?), ?), ?)`,
+         (id, source, source_url, canonical_key, title, description, url, category, tags_json, image_url, score, created_at, updated_at, review_status, verified_at)
+         VALUES (?, 'curated', ?, ?, ?, ?, ?, ?, ?, ?, ?, COALESCE((SELECT created_at FROM ingested_offers WHERE id=?), ?), ?, 'approved', ?)` ,
       ).bind(
         item.id,
         item.url,
@@ -112,10 +112,20 @@ async function upsert(env: Env) {
         item.id,
         ts,
         ts,
+        ts,
       ),
     );
   }
   await env.DB.batch(stmts);
+
+  const sourceStatements = curated.map((item) =>
+    env.DB.prepare(
+      `INSERT OR IGNORE INTO ingest_sources
+       (id, offer_id, source_name, source_url, enabled, created_at, updated_at)
+       VALUES (?, ?, ?, ?, 1, ?, ?)`,
+    ).bind(`source-${item.id}`, item.id, item.title, item.url, ts, ts),
+  );
+  await env.DB.batch(sourceStatements);
 
   const gateway = await env.DB.prepare("SELECT value_json FROM site_settings WHERE key='hq_gateway' LIMIT 1").first<any>();
   if (gateway?.value_json) {
@@ -141,6 +151,43 @@ async function upsert(env: Env) {
       }).catch(() => null);
     }
   }
+}
+
+async function monitorOfficialSources(env: Env) {
+  const ts = now();
+  const rows = await env.DB.prepare(
+    `SELECT id, offer_id, source_url FROM ingest_sources WHERE enabled=1 ORDER BY updated_at ASC LIMIT 20`,
+  ).all<any>();
+
+  await Promise.all(
+    (rows.results ?? []).map(async (source: any) => {
+      let status: number | null = null;
+      let error = "";
+      try {
+        const response = await fetch(String(source.source_url), {
+          headers: { "User-Agent": "referrals.live source monitor (+https://referrals.live/about)" },
+          redirect: "follow",
+        });
+        status = response.status;
+        if (!response.ok) error = `HTTP ${response.status}`;
+      } catch {
+        error = "Source check failed";
+      }
+
+      await env.DB.batch([
+        env.DB.prepare(
+          "UPDATE ingest_sources SET last_checked_at=?, last_http_status=?, last_error=?, updated_at=? WHERE id=?",
+        ).bind(ts, status, error || null, ts, source.id),
+        ...(status && status >= 200 && status < 400
+          ? [
+              env.DB.prepare(
+                "UPDATE ingested_offers SET verified_at=?, updated_at=? WHERE id=? AND review_status='approved'",
+              ).bind(ts, ts, source.offer_id),
+            ]
+          : []),
+      ]);
+    }),
+  );
 }
 
 type BlogVideo = {
@@ -339,78 +386,10 @@ async function generateHealthReport(env: Env) {
   }
 }
 
-async function hourlyDiscovery(env: Env) {
-  const ts = now();
-  const apiKey = env.GEMINI_API_KEY;
-  if (!apiKey) return;
-
-  const prompt = `Identify one high-quality, popular referral program that is NOT in this list: Dropbox, Wise, Shopify, Airbnb, Uber, Amazon. 
-Return the result as a valid JSON object with:
-- title: Program name
-- description: Brief summary
-- url: Official program URL
-- category: finance|tech|travel|shopping|saas|crypto
-- signup_requirements: What is needed to join
-- reward_payout: What the referrer gets
-- image_url: A relevant Unsplash URL
-
-Only return JSON.`;
-
-  try {
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-    });
-    const result = await response.json() as any;
-    const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
-    if (!text) return;
-    
-    const jsonMatch = text.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) return;
-    const p = JSON.parse(jsonMatch[0]);
-
-    const id = `auto-${slugify(p.title)}`;
-    
-    // Check if already exists
-    const exists = await env.DB.prepare("SELECT id FROM ingested_offers WHERE id=?").bind(id).first();
-    if (exists) return;
-
-    await env.DB.prepare(
-      `INSERT INTO ingested_offers 
-       (id, source, source_url, canonical_key, title, description, url, category, tags_json, image_url, score, created_at, updated_at)
-       VALUES (?, 'auto_discovery', ?, ?, ?, ?, ?, ?, '[]', ?, 75, ?, ?)`
-    ).bind(id, p.url, `auto:${id}`, p.title, p.description, p.url, p.category, p.image_url || "", ts, ts).run();
-
-    // Create admin task
-    await env.DB.prepare(
-      `INSERT INTO admin_tasks (id, type, title, description, metadata_json, created_at, updated_at)
-       VALUES (?, 'manual_signup', ?, ?, ?, ?, ?)`
-    ).bind(
-      crypto.randomUUID(),
-      `New Program: ${p.title}`,
-      `Please sign up for ${p.title} to get your referral link. Requirements: ${p.signup_requirements}. Reward: ${p.reward_payout}.`,
-      JSON.stringify({ url: p.url, requirements: p.signup_requirements, rewards: p.reward_payout }),
-      ts,
-      ts
-    ).run();
-
-    console.info(`Discovered new program: ${p.title}`);
-  } catch (err) {
-    console.error("Hourly discovery failed:", err);
-  }
-}
-
 export default {
   async scheduled(event: ScheduledEvent, env: Env, ctx: ExecutionContext) {
     ctx.waitUntil(upsert(env));
-    ctx.waitUntil(ensureDailyBlogPost(env));
-    ctx.waitUntil(hourlyDiscovery(env));
-    
-    const date = new Date(event.scheduledTime);
-    if (date.getUTCDay() === 1 && date.getUTCHours() === 8) {
-      ctx.waitUntil(generateHealthReport(env));
-    }
+    ctx.waitUntil(monitorOfficialSources(env));
   },
   async fetch(request: Request, env: Env) {
     const url = new URL(request.url);

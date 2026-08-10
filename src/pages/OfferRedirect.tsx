@@ -32,7 +32,7 @@ export function OfferRedirect() {
       <div className="text-xs font-semibold uppercase tracking-[0.25em] text-gold">Redirecting</div>
       <h1 className="font-display text-4xl font-extrabold text-white">{program?.title ?? "Opening offer"}</h1>
       <p className="text-sm text-muted">
-        Taking you to the offer in {seconds} second{seconds === 1 ? "" : "s"}. While you wait, you can review an alternative or join the email drop list.
+        Taking you to the offer in {seconds} second{seconds === 1 ? "" : "s"}. While you wait, you can review an alternative or return to your saved research stack.
       </p>
       <div className="grid gap-6 lg:grid-cols-[1fr_1fr]">
         <div className="glass rounded-3xl border border-white/10 p-6">
@@ -51,16 +51,16 @@ export function OfferRedirect() {
           )}
         </div>
         <div className="glass rounded-3xl border border-white/10 p-6">
-          <div className="text-xs font-semibold uppercase tracking-[0.25em] text-electric">Newsletter</div>
+          <div className="text-xs font-semibold uppercase tracking-[0.25em] text-electric">Keep researching</div>
           <div className="mt-4 text-sm text-muted">
-            Want the next high-converting referral drop before everyone else? Join the email list from the homepage capture block.
+            Compare programs by your goal, save the ones you want to revisit, and verify each provider’s current terms before you share.
           </div>
           <button
             type="button"
-            onClick={() => navigate("/#live-chat")}
+            onClick={() => navigate("/stack")}
             className="mt-4 rounded-2xl bg-gradient-to-r from-electric to-neon px-5 py-3 text-sm font-semibold text-black"
           >
-            Explore community first
+            Open your stack
           </button>
         </div>
       </div>

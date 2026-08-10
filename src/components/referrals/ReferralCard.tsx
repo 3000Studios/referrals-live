@@ -47,6 +47,7 @@ export function ReferralCard({ referral, index = 0, variant = "default" }: Props
   };
 
   const communitySignal = referral.votes >= 25 || referral.clicks >= 150 || referral.source === "automation";
+  const sourceChecked = referral.source === "verified_source";
   const isTrending = variant === "trending";
 
   return (
@@ -101,6 +102,11 @@ export function ReferralCard({ referral, index = 0, variant = "default" }: Props
             <div className="absolute right-3 top-3 flex items-center gap-1 rounded-full border border-neon/30 bg-black/70 px-2 py-0.5 backdrop-blur-sm">
               <span className="h-1.5 w-1.5 rounded-full bg-neon animate-glow-pulse" />
               <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-neon">Community signal</span>
+            </div>
+          ) : null}
+          {sourceChecked ? (
+            <div className="absolute right-3 top-3 rounded-full border border-neon/30 bg-black/70 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.14em] text-neon backdrop-blur-sm">
+              Source checked
             </div>
           ) : null}
         </div>

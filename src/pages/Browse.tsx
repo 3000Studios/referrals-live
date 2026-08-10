@@ -21,6 +21,7 @@ const goals: Array<{ id: StackGoal; title: string; hint: string; category: strin
 
 export function Browse() {
   const referrals = useAppStore((s) => s.referrals);
+  const lastUpdatedAt = useAppStore((s) => s.lastUpdatedAt);
   const [params] = useSearchParams();
   const initialCat = params.get("cat") ?? "all";
   const initialQ = params.get("q") ?? "";
@@ -90,7 +91,7 @@ export function Browse() {
           <div className="text-xs font-semibold uppercase tracking-[0.25em] text-neon">Marketplace</div>
           <h1 className="font-display text-4xl font-extrabold text-white">Browse referrals</h1>
           <p className="mt-3 max-w-2xl text-sm text-muted">
-            Instant search + sorting across live member links and the hourly discovery feed.
+            Instant search + sorting across live member links and verified sources monitored hourly.
           </p>
         </div>
       </div>
@@ -178,7 +179,10 @@ export function Browse() {
           No promo codes matched yet. Try a broader keyword like `bank`, `travel`, `hosting`, or `cashback`.
         </div>
       ) : null}
-      <div className="mt-4 text-xs text-muted">{searching ? "Searching the discovery feed…" : `Showing ${sorted.length} results`} · Community signals are directional, not a guarantee of eligibility or earnings.</div>
+      <div className="mt-4 text-xs text-muted">
+        {searching ? "Refreshing the marketplace…" : `Showing ${sorted.length} results`} · Updates refresh automatically while this page is open.
+        {lastUpdatedAt ? ` Last sync ${new Date(lastUpdatedAt).toLocaleTimeString()}.` : ""} Community signals are directional, not a guarantee of eligibility or earnings.
+      </div>
     </div>
   );
 }

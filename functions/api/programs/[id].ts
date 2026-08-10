@@ -34,7 +34,7 @@ export async function onRequestGet(context: { request: Request; env: Env; params
 
   const ingested = !referral
     ? await context.env.DB.prepare(
-        "SELECT id, title, description, url, category, tags_json, image_url, created_at, score FROM ingested_offers WHERE id=? LIMIT 1",
+        "SELECT id, title, description, url, category, tags_json, image_url, created_at, score, verified_at FROM ingested_offers WHERE id=? AND review_status='approved' LIMIT 1",
       )
         .bind(id)
         .first<any>()
@@ -51,7 +51,7 @@ export async function onRequestGet(context: { request: Request; env: Env; params
   const relatedRows = await context.env.DB.prepare(
     `SELECT id, title, category
      FROM ingested_offers
-     WHERE category=? AND id<>?
+     WHERE category=? AND id<>? AND review_status='approved'
      ORDER BY score DESC, updated_at DESC
      LIMIT 3`,
   )
@@ -71,7 +71,7 @@ export async function onRequestGet(context: { request: Request; env: Env; params
       createdAt: Number(row.created_at ?? ts),
       votes,
       clicks,
-      verified: votes >= 25 || clicks >= 150,
+      verified: Boolean(row.verified_at),
       pros: prosForCategory(category),
       cons: consForCategory(category),
       howToJoin: [
@@ -79,10 +79,7 @@ export async function onRequestGet(context: { request: Request; env: Env; params
         "Confirm the latest program terms on the destination site.",
         "Complete signup and follow their referral instructions.",
       ],
-      reviews: [
-        { author: "Community review", text: "High-intent offer with solid sharing potential if your audience already trusts this brand." },
-        { author: "Growth review", text: "Best results come from niche-targeted traffic and transparent positioning." },
-      ],
+      reviews: [],
       related: relatedRows.results ?? [],
     },
   });

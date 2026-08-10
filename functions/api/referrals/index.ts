@@ -12,6 +12,8 @@ type CreateBody = {
   status?: "private" | "public_candidate";
 };
 
+const categories = new Set(["fintech", "crypto", "saas", "travel", "ecommerce", "health"]);
+
 function isHttpUrl(value: string) {
   try {
     const u = new URL(value);
@@ -23,16 +25,26 @@ function isHttpUrl(value: string) {
 
 export async function onRequestGet(context: { request: Request; env: Env }) {
   const { DB } = context.env;
-  const rows = await DB.prepare(
+  const [memberRows, ingestedRows] = await Promise.all([
+    DB.prepare(
     `SELECT r.id, r.title, r.description, r.url, r.category, r.tags_json, r.image_url, r.created_at, m.votes, m.clicks
      FROM referrals r
      LEFT JOIN referral_metrics m ON m.referral_id=r.id
      WHERE r.status='public'
      ORDER BY COALESCE(m.clicks,0) DESC, COALESCE(m.votes,0) DESC, r.created_at DESC
      LIMIT 200`,
-  ).all<any>();
+    ).all<any>(),
+    DB.prepare(
+      `SELECT id, title, description, url, category, tags_json, image_url, score, created_at, verified_at
+       FROM ingested_offers
+       WHERE review_status='approved'
+       ORDER BY score DESC, verified_at DESC, updated_at DESC
+       LIMIT 200`,
+    ).all<any>(),
+  ]);
 
-  const referrals = (rows.results ?? []).map((r: any) => ({
+  const referrals = [
+    ...(memberRows.results ?? []).map((r: any) => ({
     id: r.id,
     title: r.title,
     description: r.description,
@@ -44,7 +56,24 @@ export async function onRequestGet(context: { request: Request; env: Env }) {
     clicks: Number(r.clicks ?? 0),
     createdAt: Number(r.created_at ?? now()),
     visibility: "public",
-  }));
+    source: "member",
+    })),
+    ...(ingestedRows.results ?? []).map((r: any) => ({
+      id: r.id,
+      title: r.title,
+      description: r.description,
+      url: r.url,
+      category: r.category,
+      tags: JSON.parse(r.tags_json ?? "[]"),
+      image: r.image_url,
+      votes: 0,
+      clicks: 0,
+      createdAt: Number(r.created_at ?? now()),
+      visibility: "public",
+      source: "verified_source",
+      verifiedAt: Number(r.verified_at ?? 0),
+    })),
+  ];
 
   return json({ ok: true, referrals });
 }
@@ -62,9 +91,10 @@ export async function onRequestPost(context: { request: Request; env: Env }) {
   const imageUrl = (body.imageUrl ?? "").trim();
   const status = body.status === "public_candidate" && user.premium ? "public_candidate" : "private";
 
-  if (!title || !description) return badRequest("Title and description are required.");
+  if (title.length < 3 || title.length > 120) return badRequest("Title must be 3 to 120 characters.");
+  if (description.length < 20 || description.length > 800) return badRequest("Description must be 20 to 800 characters.");
   if (!isHttpUrl(url)) return badRequest("Enter a valid http(s) URL.");
-  if (!category) return badRequest("Category is required.");
+  if (!categories.has(category)) return badRequest("Choose a valid category.");
   if (!isHttpUrl(imageUrl)) return badRequest("Image URL must be a valid http(s) URL.");
 
   const id = uid("ref");

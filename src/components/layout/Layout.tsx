@@ -12,10 +12,12 @@ import { Ticker } from "@/components/layout/Ticker";
 import { AdSlot } from "@/components/monetization/AdSlot";
 import { PageLoader } from "@/components/layout/PageLoader";
 import { useAppStore } from "@/store/useAppStore";
+import { ConsentBanner } from "@/components/legal/ConsentBanner";
 
 export function Layout() {
   const location = useLocation();
   const hydrate = useAppStore((s) => s.hydrate);
+  const refreshPublic = useAppStore((s) => s.refreshPublic);
   const [showTrail, setShowTrail] = useState(true);
 
   useEffect(() => {
@@ -29,6 +31,16 @@ export function Layout() {
   useEffect(() => {
     hydrate().catch(() => null);
   }, [hydrate]);
+
+  useEffect(() => {
+    const refresh = () => refreshPublic().catch(() => null);
+    const interval = window.setInterval(refresh, 30_000);
+    window.addEventListener("focus", refresh);
+    return () => {
+      window.clearInterval(interval);
+      window.removeEventListener("focus", refresh);
+    };
+  }, [refreshPublic]);
 
   return (
     <div className="relative min-h-screen bg-void">
@@ -66,6 +78,7 @@ export function Layout() {
           </motion.main>
         </div>
         <GlobalFooter />
+        <ConsentBanner />
 
         <div className="hidden md:block">
           <div className="pointer-events-none fixed bottom-6 right-6 z-40 w-[320px]">

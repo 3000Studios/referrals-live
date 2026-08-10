@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 declare global {
   interface Window {
@@ -26,9 +26,17 @@ const slots: Record<NonNullable<Props["variant"]>, string | undefined> = {
 export function AdSlot({ variant = "banner", className, label = "Advertisement" }: Props) {
   const ref = useRef<HTMLModElement>(null);
   const slot = slots[variant];
+  const [consent, setConsent] = useState(false);
 
   useEffect(() => {
-    if (!slot || !ref.current) return;
+    const sync = () => setConsent(window.localStorage.getItem("rl-ad-consent") === "accepted");
+    sync();
+    window.addEventListener("rl-ad-consent", sync);
+    return () => window.removeEventListener("rl-ad-consent", sync);
+  }, []);
+
+  useEffect(() => {
+    if (!slot || !ref.current || !consent) return;
     const existing = document.querySelector<HTMLScriptElement>('script[data-adsense-loader="true"]');
     const load = () => {
       try {
@@ -50,9 +58,9 @@ export function AdSlot({ variant = "banner", className, label = "Advertisement" 
     script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${client}`;
     script.addEventListener("load", load, { once: true });
     document.head.appendChild(script);
-  }, [client, slot, variant]);
+  }, [client, consent, slot, variant]);
 
-  if (!slot) return null;
+  if (!slot || !consent) return null;
 
   const heights: Record<typeof variant, string> = {
     banner: "min-h-[90px] md:min-h-[100px]",
