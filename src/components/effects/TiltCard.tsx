@@ -15,7 +15,7 @@ export function TiltCard({ children, className }: Props) {
   // Position spotlight as percentage strings for CSS calc
   const spotX = useMotionTemplate`${smx}`;
   const spotY = useMotionTemplate`${smy}`;
-  const bg = useMotionTemplate`radial-gradient(800px circle at calc(${spotX} * 100%) calc(${spotY} * 100%), rgba(0,204,255,0.14), rgba(124,58,237,0.06) 40%, transparent 65%)`;
+  const bg = useMotionTemplate`radial-gradient(800px circle at calc(${spotX} * 100%) calc(${spotY} * 100%), rgba(52,211,153,0.14), rgba(5,150,105,0.06) 40%, transparent 65%)`;
 
   return (
     <motion.div

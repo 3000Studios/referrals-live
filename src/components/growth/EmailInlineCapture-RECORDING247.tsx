@@ -5,16 +5,22 @@ import { trackEmailCapture } from "@/lib/analytics";
 export function EmailInlineCapture() {
   const [email, setEmail] = useState("");
   const [done, setDone] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const add = useAppStore((s) => s.addEmailCapture);
 
-  const submit = (e: FormEvent) => {
+  const submit = async (e: FormEvent) => {
     e.preventDefault();
     const v = email.trim();
     if (!v) return;
-    add(v, "inline_home").catch(() => null);
-    trackEmailCapture("inline_home");
-    setEmail("");
-    setDone(true);
+    setError(null);
+    try {
+      await add(v, "inline_home");
+      trackEmailCapture("inline_home");
+      setEmail("");
+      setDone(true);
+    } catch {
+      setError("We could not save your email right now. Please try again shortly.");
+    }
   };
 
   return (
@@ -29,15 +35,15 @@ export function EmailInlineCapture() {
         <div className="relative">
           <div className="inline-flex items-center gap-2 rounded-full border border-neon/20 bg-neon/6 px-3 py-1 mb-3">
             <span className="h-1.5 w-1.5 rounded-full bg-neon animate-glow-pulse" />
-            <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-neon/80">Weekly drops</span>
+            <span className="text-[9px] font-bold uppercase tracking-[0.28em] text-neon/80">Program updates</span>
           </div>
           <div className="font-display text-2xl font-bold text-white leading-tight">
-            Get referral drops
+            Keep your shortlist
             <br />
-            <span className="text-gradient-neon">weekly</span>
+            <span className="text-gradient-neon">within reach</span>
           </div>
           <p className="mt-2 max-w-sm text-[13px] text-muted leading-relaxed">
-            Short, tactical, and built for people who ship. No spam.
+            Leave an email if you want to hear about new marketplace updates. We will only use it as described in our Privacy Policy.
           </p>
         </div>
 
@@ -47,7 +53,7 @@ export function EmailInlineCapture() {
               <span className="text-xl">✓</span>
               <div>
                 <div className="text-sm font-semibold text-neon">You're in.</div>
-                <div className="text-xs text-muted mt-0.5">First drop lands this week.</div>
+                <div className="text-xs text-muted mt-0.5">We saved your interest for future marketplace updates.</div>
               </div>
             </div>
           ) : (
@@ -68,6 +74,7 @@ export function EmailInlineCapture() {
               </button>
             </form>
           )}
+          {error ? <p role="alert" className="mt-2 text-xs text-red-300">{error}</p> : null}
         </div>
       </div>
     </div>

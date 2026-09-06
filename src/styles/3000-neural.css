@@ -11,7 +11,7 @@
   }
   .card-3000:hover {
     @apply -translate-y-1 border-white/12;
-    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6), 0 0 24px rgba(0, 204, 255, 0.06);
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6), 0 0 24px rgba(52, 211, 153, 0.08);
   }
 
   /* Neural state indicators */
