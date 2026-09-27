@@ -7,6 +7,7 @@ import { AdSlot } from "@/components/monetization/AdSlot";
 import { api, type ApiBlogPost } from "@/lib/api";
 import { useEffect, useState } from "react";
 import { MarkdownLite } from "@/components/seo/MarkdownLite";
+import { Helmet } from "react-helmet-async";
 
 const DEFAULT_ARTICLE_VIDEO = {
   src: "https://cdn.coverr.co/videos/coverr-typing-on-a-laptop-9718/1080p.mp4",
@@ -150,6 +151,5 @@ export function BlogPost() {
       ) : null}
 
       <AffiliateBlock />
-    </article>
-  );
-}
+      {slug.startsWith("dri-") && (<Helmet><meta name="robots" content="noindex, nofollow" /></Helmet>)}     </article>
+    
