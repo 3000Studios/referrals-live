@@ -1,4 +1,5 @@
 import type { BlogArticle } from "@/types";
+import { newArticles } from "./newArticles";
 
 const E = (label: string, href: string) => ({ label, href });
 
@@ -672,3 +673,5 @@ export const blogArticles: BlogArticle[] = [
 export function getArticleBySlug(slug: string) {
   return blogArticles.find((a) => a.slug === slug);
 }
+
+blogArticles.push(...newArticles);
