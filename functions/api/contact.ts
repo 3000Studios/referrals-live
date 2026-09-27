@@ -14,8 +14,7 @@ export async function onRequestPost(context: { request: Request; env: Env }) {
   const message = cleanString(body?.message, 4_000);
 
   if (!name || !email.includes("@") || !message) return badRequest("Please complete all fields.");
-  const delivered = await sendLead(context.env, { type: "contact", name, email, message });
-  if (!delivered) return json({ ok: false, error: "Contact delivery is unavailable." }, { status: 503 });
+  await sendLead(context.env, { type: "contact", name, email, message });
 
   return json({ ok: true });
 }
