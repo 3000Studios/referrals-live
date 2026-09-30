@@ -170,14 +170,19 @@ export function safeOrigin(env: Env, fallback: string) {
 }
 
 export async function sendLead(env: Env, payload: Record<string, unknown>) {
-  if (!env.LEAD_WEBHOOK_URL) return;
-  await fetch(env.LEAD_WEBHOOK_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json; charset=utf-8" },
-    body: JSON.stringify({
-      site: "referrals.live",
-      capturedAt: new Date().toISOString(),
-      ...payload,
-    }),
-  }).catch(() => null);
+  if (!env.LEAD_WEBHOOK_URL) return false;
+  try {
+    await fetch(env.LEAD_WEBHOOK_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json; charset=utf-8" },
+      body: JSON.stringify({
+        site: "referrals.live",
+        capturedAt: new Date().toISOString(),
+        ...payload,
+      }),
+    });
+    return true;
+  } catch {
+    return false;
+  }
 }
