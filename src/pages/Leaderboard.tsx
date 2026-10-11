@@ -28,7 +28,14 @@ export function Leaderboard() {
     setLoading(true);
     api
       .leaderboard(50, offset)
-      .then((res) => setCreators(res.creators))
+      .then((res) =>
+        setCreators(
+          Array.isArray((res as any)?.creators)
+            ? (res as any).creators.filter((c: any) => c && c.id)
+            : [],
+        ),
+      )
+      .catch(() => setCreators([]))
       .finally(() => setLoading(false));
   }, [offset]);
 
@@ -70,22 +77,22 @@ export function Leaderboard() {
                     {c.avatar ?? "👤"}
                   </div>
                   <div>
-                    <p className="font-semibold text-white">{c.displayName}</p>
-                    <p className="text-xs text-muted">{c.totalSubmitted} submissions</p>
+                    <p className="font-semibold text-white">{c.displayName ?? "Creator"}</p>
+                    <p className="text-xs text-muted">{c.totalSubmitted ?? 0} submissions</p>
                   </div>
                 </div>
 
                 {/* Stats */}
                 <div className="ml-auto grid gap-3 text-right text-sm">
                   <div className="flex items-center gap-2">
-                    <span className="text-muted">🔗 {c.totalClicks.toLocaleString()} clicks</span>
+                    <span className="text-muted">🔗 {(c.totalClicks ?? 0).toLocaleString()} clicks</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="font-semibold text-gold">${c.totalEarnings.toFixed(2)}</span>
+                    <span className="font-semibold text-gold">${(c.totalEarnings ?? 0).toFixed(2)}</span>
                   </div>
-                  {c.avgClicksPerReferral > 0 && (
+                  {(c.avgClicksPerReferral ?? 0) > 0 && (
                     <div className="text-xs text-muted">
-                      {c.avgClicksPerReferral.toFixed(1)} avg/referral
+                      {(c.avgClicksPerReferral ?? 0).toFixed(1)} avg/referral
                     </div>
                   )}
                 </div>

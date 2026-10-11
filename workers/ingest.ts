@@ -41,9 +41,9 @@ const curated: Curated[] = [
   },
   {
     id: "ref-wise",
-    title: "Wise — Invite Friends Help",
-    description: "How Wise friend invites work (official help center).",
-    url: "https://wise.com/help/articles/2978044/invite-friends-to-wise",
+    title: "Wise — Invite Friends",
+    description: "Invite friends to Wise and earn rewards (official invite page).",
+    url: "https://wise.com/invite",
     category: "fintech",
     tags: ["money", "international", "invite"],
     imageUrl: "https://cdn.simpleicons.org/wise/9FE870",
@@ -357,9 +357,9 @@ Return the result as a valid JSON object with:
 Only return JSON.`;
 
   try {
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
       body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
     });
     const result = await response.json() as any;

@@ -16,6 +16,7 @@ export async function onRequestGet(context: { request: Request; env: Env }) {
       FROM creator_leaderboard cl
       JOIN users u ON u.id = cl.user_id
       LEFT JOIN creator_badges cb ON cb.user_id = cl.user_id
+      GROUP BY cl.user_id
       ORDER BY cl.rank ASC, cl.total_earnings_cents DESC
       LIMIT ? OFFSET ?`
     )

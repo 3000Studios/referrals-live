@@ -36,10 +36,7 @@ export const categories: Category[] = [
     description: "Marketplaces and creator storefronts with strong CPA.",
     icon: "🛒",
   },
-  {
-    id: "health",
-    name: "Health & Wellness",
-    description: "Fitness apps, telehealth, and subscription boxes.",
-    icon: "💚",
-  },
+  // NOTE: "Health & Wellness" (id: health) was removed 2026-10-11 — it had zero
+  // programs and rendered an empty category. Re-add it only when a real
+  // program exists in that category. Do not list empty categories.
 ];
