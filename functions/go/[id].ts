@@ -49,7 +49,11 @@ export async function onRequestGet(context: { request: Request; env: Env; params
   const ts = now();
 
   const target = await resolveTargetUrl(context.env, id, ts);
-  if (!target) return new Response("Not found", { status: 404 });
+  if (!target) {
+    // Unknown/stale id: send people to the marketplace instead of a dead-end 404.
+    const origin = new URL(context.request.url).origin;
+    return Response.redirect(`${origin}/browse`, 302);
+  }
 
   let out = target;
   try {
@@ -82,6 +86,14 @@ export async function onRequestGet(context: { request: Request; env: Env; params
     }
   } catch {
     // keep original
+  }
+
+  // Honesty guard: never send a visitor to a placeholder destination
+  // (unreplaced referral code or unresolved {{TOKEN}}). Land them on the
+  // program's own page instead, which renders real content.
+  if (/YOURCODE|YOUR_CODE|\{\{[^}]+\}\}/i.test(out)) {
+    const origin = new URL(context.request.url).origin;
+    return Response.redirect(`${origin}/program/${encodeURIComponent(id)}`, 302);
   }
 
   return Response.redirect(out, 302);

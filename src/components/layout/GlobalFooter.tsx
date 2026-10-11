@@ -56,6 +56,16 @@ export const GlobalFooter = () => {
                   Upgrade to Pro
                 </Link>
               </li>
+              <li>
+                <Link to="/testimonials" className="text-[13px] text-muted hover:text-white transition-colors duration-200 hover:[text-shadow:0_0_12px_rgba(0,255,136,0.4)]">
+                  Testimonials
+                </Link>
+              </li>
+              <li>
+                <Link to="/analytics" className="text-[13px] text-muted hover:text-white transition-colors duration-200 hover:[text-shadow:0_0_12px_rgba(0,255,136,0.4)]">
+                  Analytics
+                </Link>
+              </li>
             </ul>
           </div>
 

@@ -40,7 +40,7 @@ export async function onRequestGet(context: { env: Env }) {
   const posts = rows.results ?? [];
 
   const dbSlugs = new Set(posts.map((p: any) => String(p.slug)));
-  const staticPaths = ["/", "/browse", "/categories", "/leaderboard", "/blog", "/premium", "/submit", "/about", "/contact", "/privacy", "/terms", "/disclosure", "/disclaimer"];
+  const staticPaths = ["/", "/browse", "/categories", "/leaderboard", "/blog", "/premium", "/submit", "/testimonials", "/analytics", "/about", "/contact", "/privacy", "/terms", "/disclosure", "/disclaimer"];
   const urls = [
     ...staticPaths.map((p) => ({ loc: `${origin}${p}`, lastmod: null })),
     ...posts.map((p: any) => ({
