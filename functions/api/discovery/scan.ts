@@ -27,18 +27,25 @@ Focus on high-signal programs like Dropbox, Wise, Shopify, Airbnb, etc., tailore
 Only return the JSON array, no other text.`;
 
   try {
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }]
       })
     });
 
     const result = await response.json() as any;
-    
+
     if (result.error) {
-      throw new Error(`Gemini Error: ${result.error.message || JSON.stringify(result.error)}`);
+      const msg = result.error.message || JSON.stringify(result.error);
+      // The configured secret is present but Google rejects it (invalid,
+      // revoked, or restricted away from the Generative Language API).
+      // Replacing the GEMINI_API_KEY secret is the fix — see runbook notes.
+      if (/api key/i.test(msg)) {
+        throw new Error(`GEMINI_API_KEY was rejected by Google (${msg}). Replace the GEMINI_API_KEY secret with a valid Gemini API key from a project with the Generative Language API enabled.`);
+      }
+      throw new Error(`Gemini Error: ${msg}`);
     }
 
     let text = result.candidates?.[0]?.content?.parts?.[0]?.text;

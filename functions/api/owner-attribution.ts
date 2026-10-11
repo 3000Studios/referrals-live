@@ -5,6 +5,12 @@ import { requireUser } from "./_session";
 type Entry = { domain: string; params: Record<string, string> };
 
 export async function onRequestGet(context: { request: Request; env: Env }) {
+  // Attribution params can contain the owner's personal referral codes —
+  // they must not be world-readable. Admin-only, same as POST/DELETE.
+  // (The /go redirect reads D1 directly and is unaffected.)
+  const user = await requireUser(context.request, context.env);
+  if (!user) return json({ ok: false, error: "Unauthorized" }, { status: 401 });
+  if (!user.isAdmin) return json({ ok: false, error: "Forbidden" }, { status: 403 });
   const rows = await context.env.DB.prepare("SELECT domain, params_json, updated_at FROM owner_attribution ORDER BY domain ASC").all<any>();
   const items = (rows.results ?? []).map((r: any) => ({
     domain: r.domain,
