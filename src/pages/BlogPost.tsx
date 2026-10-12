@@ -10,7 +10,7 @@ import { MarkdownLite } from "@/components/seo/MarkdownLite";
 import { Helmet } from "react-helmet-async";
 
 const DEFAULT_ARTICLE_VIDEO = {
-  src: "https://cdn.coverr.co/videos/coverr-typing-on-a-laptop-9718/1080p.mp4",
+  src: "https://cdn.coverr.co/videos/coverr-a-woman-typing-on-a-laptop-3645/1080p.mp4",
   label: "Auto-play video: typing on a laptop",
   attributionLabel: "Video source: Coverr (free license)",
   attributionHref: "https://coverr.co/",

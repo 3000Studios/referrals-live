@@ -32,6 +32,21 @@ const STATIC_BLOG_SLUGS = [
   "travel-rewards-referrals",
   "ecommerce-affiliate-playbook",
   "building-a-referral-brand",
+  "avoiding-referral-scams-red-flags",
+  "building-referral-income-from-a-small-newsletter",
+  "how-creators-vet-referral-partners-before-promoting",
+  "how-referral-programs-actually-pay-beginners-breakdown",
+  "how-to-disclose-affiliate-links-ftc-plain-english",
+  "how-to-rank-referral-offers-without-spamming-friends",
+  "how-to-write-a-referral-review-people-trust",
+  "recurring-vs-one-time-referral-payouts-the-math",
+  "referral-link-placement-where-clicks-actually-come-from",
+  "referral-vs-affiliate-vs-creator-codes-difference",
+  "side-hustles-you-can-start-with-zero-audience",
+  "tax-basics-for-referral-income-us",
+  "tiered-referral-programs-explained",
+  "using-qr-codes-for-in-person-referrals",
+  "when-to-say-no-to-a-referral-deal",
 ];
 
 export async function onRequestGet(context: { env: Env }) {
