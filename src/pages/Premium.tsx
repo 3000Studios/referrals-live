@@ -1,8 +1,9 @@
 import { Seo } from "@/components/seo/Seo";
 import { useAppStore } from "@/store/useAppStore";
 import { trackEvent, trackPremiumView } from "@/lib/analytics";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, FormEvent } from "react";
 import { Link } from "react-router-dom";
+import { STRIPE_PRO_LINK, PRO_PRICE_LABEL } from "@/data/featured";
 
 declare global {
   interface Window {
@@ -12,36 +13,21 @@ declare global {
   }
 }
 
-const STRIPE_PAYMENT_LINK = import.meta.env.VITE_STRIPE_PAYMENT_LINK as string | undefined;
-const PAYPAL_CLIENT_ID    = import.meta.env.VITE_PAYPAL_CLIENT_ID as string | undefined;
-const PAYPAL_PLAN_ID      = import.meta.env.VITE_PAYPAL_PLAN_ID as string | undefined;
+const PAYPAL_CLIENT_ID = import.meta.env.VITE_PAYPAL_CLIENT_ID as string | undefined;
+const PAYPAL_PLAN_ID = import.meta.env.VITE_PAYPAL_PLAN_ID as string | undefined;
 
+// REBUILD 2026-10-18: this page previously carried invented testimonials,
+// invented member stats, a randomized fake "spots left" counter and an
+// unverified "$10 per referral" claim. All removed — Pro sells on what it
+// actually does: posting + featured placement.
 const perks = [
-  { icon: "🔥", text: "Post & manage referrals from your dashboard" },
-  { icon: "💬", text: "Live chat posting (free tier = read-only)" },
-  { icon: "⭐", text: "2 featured links on the homepage — 3× more clicks" },
-  { icon: "📊", text: "Tracked outbound redirects with performance stats" },
+  { icon: "🔥", text: "Post your own referral links publicly in the catalog" },
+  { icon: "⭐", text: "Pin 2 featured placements on the homepage" },
+  { icon: "💬", text: "Post in the live community chat (free tier is read-only)" },
+  { icon: "📊", text: "Tracked redirects with click stats for your links" },
   { icon: "🏆", text: "Priority ranking on public listings" },
-  { icon: "🤝", text: "$10 affiliate commission per referral you bring in" },
+  { icon: "🤝", text: "Affiliate commissions on members you bring in" },
 ];
-
-const testimonials = [
-  { name: "Marcus T.", avatar: "M", text: "Featured placement got me 4× more clicks within the first week. Paid for itself fast.", stars: 5 },
-  { name: "Deja R.", avatar: "D", text: "The affiliate payout alone covered 3 months. No brainer.", stars: 5 },
-  { name: "Chris K.", avatar: "C", text: "Live chat access alone is worth it. The community is actually active.", stars: 5 },
-];
-
-const stats = [
-  { value: "3×", label: "avg. more clicks" },
-  { value: "$10", label: "per referral earned" },
-  { value: "500+", label: "active members" },
-];
-
-function StarRating({ count }: { count: number }) {
-  return (
-    <span className="text-gold text-xs">{"★".repeat(count)}</span>
-  );
-}
 
 function PayPalButton() {
   const ref = useRef<HTMLDivElement>(null);
@@ -70,7 +56,7 @@ function PayPalButton() {
         createSubscription: (_data: unknown, actions: any) =>
           actions.subscription.create({ plan_id: PAYPAL_PLAN_ID }),
         onApprove: (_data: any) => {
-          trackEvent("premium_click", { plan: "Premium", method: "paypal", status: "approved" });
+          trackEvent("premium_click", { plan: "Pro", method: "paypal", status: "approved" });
           window.location.href = "/dashboard?billing=success&provider=paypal";
         },
         onError: () => setPpError("PayPal error. Try card checkout above."),
@@ -100,9 +86,12 @@ function PayPalButton() {
 
 export function Premium() {
   const user = useAppStore((s) => s.user);
+  const addEmailCapture = useAppStore((s) => s.addEmailCapture);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [spotsLeft] = useState(() => Math.floor(Math.random() * 8) + 3);
+  const [waitlistEmail, setWaitlistEmail] = useState("");
+  const [waitlistDone, setWaitlistDone] = useState(false);
+  const [waitlistError, setWaitlistError] = useState<string | null>(null);
 
   useEffect(() => {
     trackPremiumView("premium_page");
@@ -111,11 +100,11 @@ export function Premium() {
   function startCardCheckout() {
     setLoading(true);
     setError(null);
-    trackEvent("premium_click", { plan: "Premium", method: "stripe" });
+    trackEvent("premium_click", { plan: "Pro", method: "stripe" });
 
     if (!user) {
-      if (STRIPE_PAYMENT_LINK) {
-        window.location.href = STRIPE_PAYMENT_LINK;
+      if (STRIPE_PRO_LINK) {
+        window.location.href = STRIPE_PRO_LINK;
         return;
       }
       window.location.href = "/login?next=/premium";
@@ -126,194 +115,177 @@ export function Premium() {
       .then(async (r) => {
         const d = await r.json().catch(() => null) as { url?: string; error?: string } | null;
         if (r.ok && d?.url) { window.location.href = d.url; return; }
-        if (STRIPE_PAYMENT_LINK) { window.location.href = STRIPE_PAYMENT_LINK; return; }
+        if (STRIPE_PRO_LINK) { window.location.href = STRIPE_PRO_LINK; return; }
         const reason = d?.error ?? `Checkout server returned ${r.status}`;
         throw new Error(`${reason}. Try PayPal below or contact support@referrals.live.`);
       })
       .catch((err) => {
-        if (STRIPE_PAYMENT_LINK) { window.location.href = STRIPE_PAYMENT_LINK; return; }
+        if (STRIPE_PRO_LINK) { window.location.href = STRIPE_PRO_LINK; return; }
         setError(err instanceof Error ? err.message : "Unable to start checkout");
         setLoading(false);
       });
   }
 
-  const cardCheckoutAvailable = Boolean(user) || Boolean(STRIPE_PAYMENT_LINK);
+  async function joinWaitlist(e: FormEvent) {
+    e.preventDefault();
+    setWaitlistError(null);
+    try {
+      await addEmailCapture(waitlistEmail.trim(), "pro-waitlist");
+      setWaitlistDone(true);
+      trackEvent("pro_waitlist_join", {});
+    } catch {
+      setWaitlistError("Couldn't save that email — try again, or email support@referrals.live.");
+    }
+  }
+
+  const cardCheckoutAvailable = Boolean(user) || Boolean(STRIPE_PRO_LINK);
+  const paypalAvailable = Boolean(PAYPAL_CLIENT_ID && PAYPAL_PLAN_ID);
 
   return (
     <div>
       <Seo
-        title="Premium — referrals.live"
-        description="Upgrade to Premium for homepage featuring, live chat posting, $10 affiliate commissions, and priority placement."
+        title="Pro — post your referral links | referrals.live"
+        description="Browsing deals is free forever. Pro lets you post your own referral links publicly, pin 2 featured homepage placements, and track every click."
         path="/premium"
       />
 
       {/* Header */}
-      <div className="text-xs font-semibold uppercase tracking-[0.25em] text-gold">Upgrade</div>
-      <h1 className="font-display text-4xl font-extrabold text-white">Go Premium</h1>
-      <p className="mt-2 max-w-xl text-sm text-muted">
-        One flat price. Everything unlocked. Cancel anytime.
+      <div className="text-xs font-semibold uppercase tracking-[0.25em] text-gold">For posters</div>
+      <h1 className="font-display text-4xl font-extrabold text-white">Go Pro — put your links where the clicks are</h1>
+      <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted">
+        Browsing and grabbing deals on referrals.live is <span className="font-semibold text-white">free forever</span> —
+        no account needed. Pro is for the other side of the model:{" "}
+        <span className="font-semibold text-white">posting your own referral links</span> in the public
+        catalog so visitors sign up through <em>your</em> links and you earn the referral credits.
       </p>
 
-      {/* Scarcity bar */}
-      <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-gold/30 bg-gold/10 px-4 py-1.5 text-xs font-semibold text-gold">
-        <span className="relative flex h-2 w-2">
-          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-gold opacity-75" />
-          <span className="relative inline-flex h-2 w-2 rounded-full bg-gold" />
-        </span>
-        Only {spotsLeft} featured slots open this week
-      </div>
-
-      {/* Stats row */}
-      <div className="mt-8 grid grid-cols-3 gap-4">
-        {stats.map((s) => (
-          <div key={s.label} className="glass rounded-2xl border border-white/10 p-4 text-center">
-            <div className="font-display text-2xl font-extrabold text-gold">{s.value}</div>
-            <div className="mt-1 text-xs text-muted">{s.label}</div>
+      {/* Free vs Pro */}
+      <div className="mt-8 grid gap-4 md:grid-cols-2">
+        <div className="glass rounded-3xl border border-white/10 p-6">
+          <div className="font-display text-xl font-bold text-white">Free — forever</div>
+          <ul className="mt-4 space-y-2.5 text-sm text-muted">
+            <li>✓ Browse and click every deal in the catalog</li>
+            <li>✓ Save links on your private member board</li>
+            <li>✓ Vote on deals and read the community chat</li>
+          </ul>
+          <Link to="/browse" className="mt-5 inline-flex rounded-2xl border border-white/15 px-5 py-3 text-sm font-semibold text-white hover:border-gold/40">
+            Browse free deals →
+          </Link>
+        </div>
+        <div className="glass rounded-3xl border border-gold/40 p-6 shadow-gold">
+          <div className="flex items-baseline justify-between">
+            <div className="font-display text-xl font-bold text-white">Pro</div>
+            <div className="font-display text-2xl font-extrabold text-gold">{PRO_PRICE_LABEL}</div>
           </div>
-        ))}
+          <ul className="mt-4 space-y-2.5 text-sm text-muted">
+            {perks.map((p) => (
+              <li key={p.text} className="flex items-start gap-2.5">
+                <span className="mt-0.5 leading-none">{p.icon}</span>
+                <span>{p.text}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
 
-      <div className="mt-10 grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
-
-        {/* Left: plan + checkout */}
+      <div className="mt-8 grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
+        {/* Left: checkout */}
         <div className="space-y-6">
-
-          {/* Plan card */}
           <div className="glass rounded-3xl border border-white/10 p-6">
-            <div className="flex items-start justify-between">
-              <div>
-                <div className="text-[10px] font-semibold uppercase tracking-[0.25em] text-neon">Most popular</div>
-                <div className="mt-1 font-display text-2xl font-bold text-white">Premium Monthly</div>
-              </div>
-              <div className="text-right">
-                <div className="font-display text-3xl font-extrabold text-gold">$7.99</div>
-                <div className="text-xs text-muted">/ month</div>
-              </div>
-            </div>
+            <div className="font-display text-2xl font-bold text-white">Start posting</div>
+            <p className="mt-1 text-xs text-muted">Recurring subscription — cancel anytime from your dashboard. Access activates as soon as payment confirms.</p>
 
-            <ul className="mt-6 space-y-3">
-              {perks.map((p) => (
-                <li key={p.text} className="flex items-start gap-3 text-sm text-muted">
-                  <span className="mt-0.5 text-base leading-none">{p.icon}</span>
-                  <span>{p.text}</span>
-                </li>
-              ))}
-            </ul>
-
-            {/* Stripe CTA */}
-            <div className="mt-8">
+            <div className="mt-6">
               <div className="mb-2 text-xs font-semibold uppercase tracking-widest text-muted/60">Credit / Debit Card</div>
               {cardCheckoutAvailable ? (
                 <button
                   type="button"
                   onClick={startCardCheckout}
                   disabled={loading}
-                  className="flex w-full items-center justify-center gap-2 rounded-2xl bg-white px-6 py-4 text-sm font-bold text-black transition-all hover:bg-white/90 active:scale-[0.98] disabled:opacity-40"
+                  className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-gold to-amber-500 px-6 py-4 text-sm font-bold text-black transition-all hover:brightness-110 active:scale-[0.98] disabled:opacity-40"
                 >
-                  {loading ? (
-                    <>
-                      <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                      </svg>
-                      Connecting to Stripe…
-                    </>
-                  ) : (
-                    <>
-                      <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor"><path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
-                      Pay with Card — $7.99/mo
-                    </>
-                  )}
+                  {loading ? "Connecting to Stripe…" : `Go Pro — ${PRO_PRICE_LABEL}`}
                 </button>
               ) : (
                 <Link
                   to="/login?next=/premium"
                   className="flex w-full items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-6 py-4 text-sm font-bold text-white hover:bg-white/10"
                 >
-                  Login to upgrade
+                  Sign in to upgrade
                 </Link>
               )}
 
-              {/* PayPal */}
               <div className="mt-4 border-t border-white/10 pt-4">
                 <div className="mb-2 text-xs font-semibold uppercase tracking-widest text-muted/60">Or pay with PayPal</div>
                 <PayPalButton />
+                {!paypalAvailable && !cardCheckoutAvailable ? (
+                  <p className="text-xs leading-relaxed text-muted">
+                    Online checkout opens as soon as the payment link is switched on. Join the
+                    waitlist below and you'll be first to know — no charge today, no fake checkout.
+                  </p>
+                ) : null}
               </div>
             </div>
 
             {error && (
-              <div className="mt-4 animate-in fade-in slide-in-from-top-2 rounded-2xl border border-red-500/40 bg-red-500/10 px-5 py-4 text-sm text-red-100">
+              <div className="mt-4 rounded-2xl border border-red-500/40 bg-red-500/10 px-5 py-4 text-sm text-red-100">
                 <div className="font-bold mb-1">Checkout Error</div>
                 {error}
               </div>
             )}
 
-            {/* Trust line */}
-            <p className="mt-5 rounded-2xl border border-gold/20 bg-gold/10 p-4 text-xs leading-relaxed text-gold/90">
-              Recurring subscription — cancel anytime from your dashboard. Access activates instantly after payment confirms. All sales final except where required by law.
-            </p>
-
-            {/* Payment logos */}
-            <div className="mt-6 flex items-center justify-center gap-6 opacity-40 grayscale hover:opacity-80 hover:grayscale-0 transition-all">
-              <img src="https://upload.wikimedia.org/wikipedia/commons/b/ba/Stripe_Logo%2C_revised_2016.svg" alt="Stripe" className="h-5" />
-              <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg" alt="PayPal" className="h-5" />
-              <img src="https://cdn.simpleicons.org/visa/1A1F71" alt="Visa" className="h-4" />
-              <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" alt="Mastercard" className="h-5" />
-            </div>
-          </div>
-
-          {/* Testimonials */}
-          <div className="space-y-3">
-            {testimonials.map((t) => (
-              <div key={t.name} className="glass rounded-2xl border border-white/10 p-4">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-electric/20 text-xs font-bold text-electric">
-                    {t.avatar}
+            {/* Waitlist — the honest fallback when no checkout is configured */}
+            {!cardCheckoutAvailable && !paypalAvailable ? (
+              <form onSubmit={joinWaitlist} className="mt-6 rounded-2xl border border-gold/25 bg-gold/5 p-5">
+                <div className="text-sm font-bold text-white">Join the Pro waitlist</div>
+                <p className="mt-1 text-xs leading-relaxed text-muted">We'll email you the moment Pro checkout opens.</p>
+                {waitlistDone ? (
+                  <p className="mt-3 rounded-xl border border-gold/40 bg-gold/10 px-4 py-3 text-sm text-gold">✓ You're on the list — watch your inbox.</p>
+                ) : (
+                  <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+                    <label className="sr-only" htmlFor="pro-waitlist-email">Email</label>
+                    <input
+                      id="pro-waitlist-email"
+                      type="email"
+                      required
+                      value={waitlistEmail}
+                      onChange={(e) => setWaitlistEmail(e.target.value)}
+                      placeholder="you@email.com"
+                      className="w-full rounded-xl border border-white/10 bg-black/40 px-4 py-3 text-sm text-white outline-none ring-gold/30 focus:ring"
+                    />
+                    <button type="submit" className="shrink-0 rounded-xl bg-gradient-to-r from-gold to-amber-500 px-5 py-3 text-sm font-bold text-black hover:brightness-110">
+                      Notify me
+                    </button>
                   </div>
-                  <div>
-                    <div className="text-xs font-bold text-white">{t.name}</div>
-                    <StarRating count={t.stars} />
-                  </div>
-                </div>
-                <p className="mt-2 text-xs text-muted leading-relaxed">"{t.text}"</p>
-              </div>
-            ))}
+                )}
+                {waitlistError ? <p className="mt-2 text-xs text-red-300">{waitlistError}</p> : null}
+              </form>
+            ) : null}
           </div>
         </div>
 
         {/* Right: sidebar */}
         <div className="space-y-5">
-
-          {/* Current status */}
           <div className="glass rounded-3xl border border-white/10 p-5 text-sm text-muted">
             <div className="text-xs font-semibold uppercase tracking-[0.25em] text-electric">Your status</div>
             <div className="mt-2 text-lg font-semibold text-white">
-              {user?.premium ? "✅ Premium active" : "⬜ Free tier"}
+              {user?.premium ? "✅ Pro active" : "⬜ Free tier"}
             </div>
             {!user?.premium && (
-              <div className="mt-3 rounded-xl bg-white/5 p-3 text-xs leading-relaxed">
-                <span className="text-gold font-semibold">★ Tip:</span> Premium members average 3× more profile clicks thanks to featured placement.
-              </div>
+              <p className="mt-3 rounded-xl bg-white/5 p-3 text-xs leading-relaxed">
+                With Pro, your links leave your private board and go public in the catalog — where
+                every visitor click can turn into your referral credit.
+              </p>
             )}
           </div>
 
-          {/* Affiliate earnings box */}
-          <div className="glass rounded-3xl border border-neon/20 p-5">
-            <div className="text-xs font-semibold uppercase tracking-[0.25em] text-neon">Earn it back</div>
-            <div className="mt-2 font-display text-xl font-bold text-white">$10 per referral</div>
-            <p className="mt-2 text-xs text-muted leading-relaxed">
-              Refer one friend and your first month is covered. Refer two and you're in profit. Your unique referral link is in your dashboard.
-            </p>
-          </div>
-
-          {/* FAQ */}
           <div className="glass rounded-3xl border border-white/10 p-5 space-y-4 text-xs text-muted">
             <div className="text-xs font-semibold uppercase tracking-[0.25em] text-white">FAQ</div>
             {[
               ["Can I cancel?", "Yes — anytime from your dashboard. No fees, no friction."],
-              ["When does access start?", "Instantly after Stripe or PayPal confirms payment."],
-              ["What's the affiliate payout?", "$10 credited per successful subscriber you bring in."],
-              ["Is there an annual plan?", "Monthly only for now — annual coming soon with 2 months free."],
+              ["When does access start?", "As soon as Stripe or PayPal confirms payment."],
+              ["What can I post?", "Your own referral links for real programs. Listings are reviewed for dead links and spam."],
+              ["Is browsing still free?", "Always. Pro only unlocks posting and featured placement — deals stay free for everyone."],
             ].map(([q, a]) => (
               <div key={q}>
                 <div className="font-semibold text-white/80">{q}</div>
@@ -322,10 +294,9 @@ export function Premium() {
             ))}
           </div>
 
-          {/* Support */}
           <div className="glass rounded-3xl border border-white/10 p-5 text-xs text-muted">
             <div className="font-bold text-white mb-1">Need help?</div>
-            <a href="mailto:support@referrals.live" className="text-neon hover:underline">support@referrals.live</a>
+            <a href="mailto:support@referrals.live" className="text-gold hover:underline">support@referrals.live</a>
           </div>
         </div>
       </div>

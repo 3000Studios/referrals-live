@@ -96,6 +96,49 @@ export function Submit() {
     }
   };
 
+  // REBUILD 2026-10-18: posting is account-gated (and public posting is a
+  // Pro feature). Previously logged-out visitors could fill the whole form
+  // and only failed at submit with a raw "Unauthorized" API error.
+  if (!user) {
+    return (
+      <div>
+        <Seo
+          title="Post your referral link — sign in | referrals.live"
+          description="Posting referral links requires a free account; public posting and featured placement are Pro features. Browsing deals is always free."
+          path="/submit"
+        />
+        <div className="text-xs font-semibold uppercase tracking-[0.25em] text-gold">Post a deal</div>
+        <h1 className="font-display text-4xl font-extrabold text-white">Your links belong here — first, sign in</h1>
+        <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted">
+          Browsing and grabbing deals is free forever, no account needed.{" "}
+          <span className="font-semibold text-white">Posting</span> your own referral links takes a free
+          account so your links live on your board — and a <span className="font-semibold text-gold">Pro</span>{" "}
+          subscription makes them public in the catalog with featured placement.
+        </p>
+        <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+          <Link
+            to="/login?next=/submit"
+            className="inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-gold to-amber-500 px-8 py-4 text-sm font-bold text-black shadow-gold transition hover:brightness-110 active:scale-95"
+          >
+            Sign in →
+          </Link>
+          <Link
+            to="/register"
+            className="inline-flex items-center justify-center rounded-2xl border border-white/15 px-8 py-4 text-sm font-semibold text-white transition hover:border-gold/40"
+          >
+            Create free account
+          </Link>
+          <Link
+            to="/premium"
+            className="inline-flex items-center justify-center rounded-2xl border border-gold/30 px-8 py-4 text-sm font-semibold text-gold transition hover:bg-gold/10"
+          >
+            See Pro
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div>
       <Seo
@@ -202,15 +245,16 @@ export function Submit() {
 
         <div className="space-y-6">
           <div className="glass rounded-3xl border border-gold/30 p-6">
-            <div className="text-xs font-semibold uppercase tracking-[0.25em] text-gold">Boost your link</div>
+            <div className="text-xs font-semibold uppercase tracking-[0.25em] text-gold">Go public with Pro</div>
             <p className="mt-3 text-sm text-muted">
-              Premium boosts increase visibility in trending feeds and unlock sponsor-style placement opportunities.
+              Free accounts keep links on a private board. Pro makes your links public in the
+              catalog and unlocks 2 featured homepage placements.
             </p>
             <Link
               to="/premium"
               className="mt-4 inline-flex rounded-2xl border border-gold/40 px-5 py-3 text-sm font-semibold text-gold hover:bg-gold/10"
             >
-              View boost packs
+              See Pro
             </Link>
           </div>
           {doneId ? (

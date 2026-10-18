@@ -1,30 +1,18 @@
-import { Suspense, useEffect, useState } from "react";
-import { Outlet, useLocation } from "react-router-dom";
+import { Suspense, useEffect } from "react";
+import { Outlet } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Navbar } from "@/components/layout/Navbar";
 import { GlobalNav } from "@/components/layout/GlobalNav";
 import { GlobalFooter } from "@/components/layout/GlobalFooter";
 import { NetworkBackground } from "@/components/three/NetworkBackground";
-import { PageWallpaper } from "@/components/three/PageWallpaper";
 import { WallpaperBase } from "@/components/three/WallpaperBase";
-import { MouseTrail } from "@/components/effects/MouseTrail";
 import { Ticker } from "@/components/layout/Ticker";
 import { AdSlot } from "@/components/monetization/AdSlot";
 import { PageLoader } from "@/components/layout/PageLoader";
 import { useAppStore } from "@/store/useAppStore";
 
 export function Layout() {
-  const location = useLocation();
   const hydrate = useAppStore((s) => s.hydrate);
-  const [showTrail, setShowTrail] = useState(true);
-
-  useEffect(() => {
-    const mq = window.matchMedia("(max-width: 900px)");
-    const update = () => setShowTrail(!mq.matches);
-    update();
-    mq.addEventListener("change", update);
-    return () => mq.removeEventListener("change", update);
-  }, []);
 
   useEffect(() => {
     hydrate().catch(() => null);
@@ -75,16 +63,18 @@ export function Layout() {
         <AdSlot variant="mobile-sticky" />
       </div>
 
-      {/* Background Layer (Moved to bottom, negative z-index) */}
+      {/* Background layer — static CSS gradients only.
+          REBUILD 2026-10-18: the perpetual full-screen canvas wallpaper
+          (PageWallpaper, a 60fps rAF loop) and the MouseTrail follower were
+          removed — same always-on animation tax that made tmack48.com lag.
+          Pages that want motion use the hero video + hover videos instead. */}
       <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden" aria-hidden>
         <div className="absolute inset-0 z-0">
           <WallpaperBase />
         </div>
         <div className="absolute inset-0 z-10 opacity-60">
-          <PageWallpaper routeKey={location.pathname} />
           <NetworkBackground />
         </div>
-        {showTrail ? <MouseTrail /> : null}
       </div>
     </div>
   );

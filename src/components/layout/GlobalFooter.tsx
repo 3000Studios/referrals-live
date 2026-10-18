@@ -7,7 +7,7 @@ export const GlobalFooter = () => {
       {/* Top glow line */}
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-neon/25 to-transparent" />
       {/* Background depth radial */}
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_40%_at_50%_100%,rgba(0,255,136,0.04),transparent)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_40%_at_50%_100%,rgba(255,215,0,0.04),transparent)]" />
 
       <TrustTicker />
 
@@ -21,7 +21,8 @@ export const GlobalFooter = () => {
               <span className="text-gradient-neon">.live</span>
             </div>
             <p className="text-[13px] text-muted leading-relaxed max-w-xs">
-              A live referral marketplace for creators, operators, and side hustlers who want tracked links, public rankings, and premium placement.
+              Referral deals that pay both sides: click a deal, sign up, you get the bonus and the
+              poster earns a credit. Free to browse — Pro to post your own links.
             </p>
             <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.25em]">
               <span className="relative flex h-2 w-2">
@@ -97,8 +98,16 @@ export const GlobalFooter = () => {
           </div>
         </div>
 
+        {/* FTC affiliate disclosure — kept prominent on every page */}
+        <p className="mt-14 rounded-2xl border border-white/8 bg-white/[0.03] px-5 py-4 text-[11px] leading-relaxed text-white/45">
+          Affiliate disclosure: referrals.live, the site owner, and members who post here may earn a
+          commission or referral credit when you sign up through links on this site — at no extra
+          cost to you. Some links are the owner's own referral links and are labeled as such.{" "}
+          <Link to="/disclosure" className="underline hover:text-gold">Read the full disclosure</Link>.
+        </p>
+
         {/* Bottom bar */}
-        <div className="mt-14 pt-6 border-t border-white/5 flex flex-wrap items-center justify-between gap-4">
+        <div className="mt-8 pt-6 border-t border-white/5 flex flex-wrap items-center justify-between gap-4">
           <p className="text-[10px] text-white/20 uppercase tracking-[0.22em]">
             © {new Date().getFullYear()} referrals.live — All sales final where permitted by law.
           </p>

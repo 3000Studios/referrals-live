@@ -1,6 +1,9 @@
 import { motion } from "framer-motion";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { TiltCard } from "@/components/effects/TiltCard";
+import { HoverVideo } from "@/components/media/HoverVideo";
+import { videoForCategory } from "@/data/media";
 import { useAppStore } from "@/store/useAppStore";
 import { trackOutboundClick, trackVote } from "@/lib/analytics";
 import { ShareButtons } from "@/components/social/ShareButtons";
@@ -69,13 +72,24 @@ export function ReferralCard({ referral, index = 0, variant = "default" }: Props
               isTrending ? "h-52" : "h-44",
             )}
           >
-            <img
-              src={referral.image}
-              alt={referral.title}
-              className="h-full w-full bg-white/95 object-contain p-8 transition-transform duration-500 group-hover:scale-105"
-              loading="lazy"
-              decoding="async"
-            />
+            {videoForCategory(referral.category) ? (
+              <>
+                {/* Category stock video — loads only on hover / in-view */}
+                <HoverVideo video={videoForCategory(referral.category)!} className="absolute inset-0" />
+                <div className="absolute bottom-3 left-3 flex items-center gap-2 rounded-xl bg-black/65 px-2.5 py-1.5 backdrop-blur-sm">
+                  <img src={referral.image} alt="" className="h-6 w-6 rounded-md bg-white/95 object-contain p-0.5" loading="lazy" decoding="async" />
+                  <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/85">{referral.category}</span>
+                </div>
+              </>
+            ) : (
+              <img
+                src={referral.image}
+                alt={referral.title}
+                className="h-full w-full bg-white/95 object-contain p-8 transition-transform duration-500 group-hover:scale-105"
+                loading="lazy"
+                decoding="async"
+              />
+            )}
             {/* Bottom gradient fade for depth */}
             <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[rgba(3,4,9,0.85)] to-transparent" />
           </div>
@@ -180,12 +194,12 @@ export function ReferralCard({ referral, index = 0, variant = "default" }: Props
 
           {/* Secondary actions */}
           <div className="flex flex-wrap gap-2 pt-0.5">
-            <button
-              type="button"
+            <Link
+              to="/premium"
               className="rounded-full border border-gold/25 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-gold/70 transition hover:border-gold/50 hover:bg-gold/8 hover:text-gold"
             >
-              ⚡ Boost
-            </button>
+              ⚡ Boost with Pro
+            </Link>
             <a
               href={`/program/${referral.id}`}
               className="rounded-full border border-white/8 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/50 transition hover:border-electric/30 hover:text-electric/80"
