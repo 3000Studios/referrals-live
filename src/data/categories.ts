@@ -25,6 +25,12 @@ export const categories: Category[] = [
     icon: "🛠️",
   },
   {
+    id: "ai",
+    name: "AI Tools",
+    description: "AI video, voice, and creator tools with affiliate payouts.",
+    icon: "🤖",
+  },
+  {
     id: "travel",
     name: "Travel & Rewards",
     description: "Airline miles, hotel points, and card referrals.",
