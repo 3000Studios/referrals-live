@@ -1,0 +1,707 @@
+[
+ {
+  "id": "ref-dropbox",
+  "title": "Dropbox \u2014 Referral Program",
+  "description": "Invite friends to Dropbox and earn extra space. Official referral program page.",
+  "url": "https://www.dropbox.com/referrals",
+  "category": "saas",
+  "tags": [
+   "storage",
+   "referrals",
+   "productivity"
+  ],
+  "image": "https://cdn.simpleicons.org/dropbox/0061FF",
+  "createdAt": 1792760080000,
+  "votes": 0,
+  "clicks": 0
+ },
+ {
+  "id": "ref-revolut",
+  "title": "Revolut \u2014 Referral Program",
+  "description": "How Revolut referrals work: invite friends and earn rewards when they sign up, add money, order a card, and make purchases (official help).",
+  "url": "https://help.revolut.com/en-SG/help/referrals/other/what-are-the-requirements-to-get-my-referral-reward/",
+  "category": "fintech",
+  "tags": [
+   "fintech",
+   "banking",
+   "referrals"
+  ],
+  "image": "https://cdn.simpleicons.org/revolut/0075EB",
+  "createdAt": 1792760080000,
+  "votes": 0,
+  "clicks": 0
+ },
+ {
+  "id": "ref-wise",
+  "title": "Wise \u2014 Invite Friends",
+  "description": "Invite friends to Wise and earn rewards (official invite page). Great for audiences doing international transfers.",
+  "url": "https://wise.com/invite",
+  "category": "fintech",
+  "tags": [
+   "money",
+   "international",
+   "invite"
+  ],
+  "image": "https://cdn.simpleicons.org/wise/9FE870",
+  "createdAt": 1792760080000,
+  "votes": 0,
+  "clicks": 0
+ },
+ {
+  "id": "ref-coinbase",
+  "title": "Coinbase \u2014 Invite Friends",
+  "description": "Coinbase official referral program page: how to earn crypto bonuses by inviting friends.",
+  "url": "https://www.coinbase.com/legal/international-referral",
+  "category": "crypto",
+  "tags": [
+   "crypto",
+   "exchange",
+   "invite"
+  ],
+  "image": "https://cdn.simpleicons.org/coinbase/0052FF",
+  "createdAt": 1792760080000,
+  "votes": 0,
+  "clicks": 0
+ },
+ {
+  "id": "ref-uberaff",
+  "title": "Uber \u2014 Affiliate Program",
+  "description": "Affiliate program info for driving signups and rides (official).",
+  "url": "https://www.uber.com/us/en/affiliate-program/",
+  "category": "travel",
+  "tags": [
+   "affiliate",
+   "rideshare",
+   "marketing"
+  ],
+  "image": "https://cdn.simpleicons.org/uber/FFFFFF",
+  "createdAt": 1792760080000,
+  "votes": 0,
+  "clicks": 0
+ },
+ {
+  "id": "ref-shopify",
+  "title": "Shopify \u2014 Affiliate Program",
+  "description": "Promote Shopify and earn commissions (official affiliate program page).",
+  "url": "https://www.shopify.com/affiliates",
+  "category": "ecommerce",
+  "tags": [
+   "ecommerce",
+   "affiliate",
+   "saas"
+  ],
+  "image": "https://cdn.simpleicons.org/shopify/7AB55C",
+  "createdAt": 1792760080000,
+  "votes": 0,
+  "clicks": 0
+ },
+ {
+  "id": "ref-amazon-assoc",
+  "title": "Amazon Associates \u2014 Affiliate Program",
+  "description": "Earn by recommending products. Official Amazon Associates program page.",
+  "url": "https://affiliate-program.amazon.com/",
+  "category": "ecommerce",
+  "tags": [
+   "affiliate",
+   "products",
+   "creator"
+  ],
+  "image": "https://www.google.com/s2/favicons?domain=amazon.com&sz=256",
+  "createdAt": 1792760080000,
+  "votes": 0,
+  "clicks": 0
+ },
+ {
+  "id": "ref-sofi",
+  "title": "SoFi \u2014 Referral Program",
+  "description": "SoFi official referral program page: how inviting friends to SoFi checking, investing, and loans works.",
+  "url": "https://www.sofi.com/referral-program/",
+  "category": "fintech",
+  "tags": [
+   "fintech",
+   "banking",
+   "referrals"
+  ],
+  "image": "https://www.google.com/s2/favicons?domain=sofi.com&sz=256",
+  "createdAt": 1792760080000,
+  "votes": 0,
+  "clicks": 0
+ },
+ {
+  "id": "ref-acorns",
+  "title": "Acorns \u2014 Invite Friends",
+  "description": "Acorns official invite page: invite friends to start investing spare change and earn rewards.",
+  "url": "https://www.acorns.com/invite",
+  "category": "fintech",
+  "tags": [
+   "fintech",
+   "investing",
+   "invite"
+  ],
+  "image": "https://www.google.com/s2/favicons?domain=acorns.com&sz=256",
+  "createdAt": 1792760080000,
+  "votes": 0,
+  "clicks": 0
+ },
+ {
+  "id": "ref-betterment",
+  "title": "Betterment \u2014 Friend Referral",
+  "description": "Betterment official friend-referral offer page: refer friends to automated investing.",
+  "url": "https://www.betterment.com/friend-referral-offer",
+  "category": "fintech",
+  "tags": [
+   "fintech",
+   "investing",
+   "referrals"
+  ],
+  "image": "https://www.google.com/s2/favicons?domain=betterment.com&sz=256",
+  "createdAt": 1792760080000,
+  "votes": 0,
+  "clicks": 0
+ },
+ {
+  "id": "ref-schwab",
+  "title": "Charles Schwab \u2014 Referral Program",
+  "description": "Charles Schwab official referral page: how the Schwab referral bonus program works.",
+  "url": "https://www.schwab.com/referral",
+  "category": "fintech",
+  "tags": [
+   "fintech",
+   "brokerage",
+   "referrals"
+  ],
+  "image": "https://www.google.com/s2/favicons?domain=schwab.com&sz=256",
+  "createdAt": 1792760080000,
+  "votes": 0,
+  "clicks": 0
+ },
+ {
+  "id": "ref-gemini",
+  "title": "Gemini \u2014 Referral Program",
+  "description": "Gemini official referral program page: refer friends and earn crypto rewards.",
+  "url": "https://www.gemini.com/referrals",
+  "category": "crypto",
+  "tags": [
+   "crypto",
+   "exchange",
+   "referrals"
+  ],
+  "image": "https://www.google.com/s2/favicons?domain=gemini.com&sz=256",
+  "createdAt": 1792760080000,
+  "votes": 0,
+  "clicks": 0
+ },
+ {
+  "id": "ref-kraken",
+  "title": "Kraken \u2014 Referrals",
+  "description": "Kraken official referrals page: invite friends to Kraken and get rewards.",
+  "url": "https://www.kraken.com/referrals",
+  "category": "crypto",
+  "tags": [
+   "crypto",
+   "exchange",
+   "invite"
+  ],
+  "image": "https://www.google.com/s2/favicons?domain=kraken.com&sz=256",
+  "createdAt": 1792760080000,
+  "votes": 0,
+  "clicks": 0
+ },
+ {
+  "id": "ref-binanceus",
+  "title": "Binance.US \u2014 Referral Program",
+  "description": "Binance.US official referral page: refer friends and earn crypto.",
+  "url": "https://www.binance.us/referral",
+  "category": "crypto",
+  "tags": [
+   "crypto",
+   "exchange",
+   "referrals"
+  ],
+  "image": "https://cdn.simpleicons.org/binance/F0B90B",
+  "createdAt": 1792760080000,
+  "votes": 0,
+  "clicks": 0
+ },
+ {
+  "id": "ref-notion",
+  "title": "Notion \u2014 Affiliate Program",
+  "description": "Notion official affiliate program page: promote Notion and earn commissions.",
+  "url": "https://www.notion.com/affiliates",
+  "category": "saas",
+  "tags": [
+   "saas",
+   "productivity",
+   "affiliate"
+  ],
+  "image": "https://cdn.simpleicons.org/notion/FFFFFF",
+  "createdAt": 1792760080000,
+  "votes": 0,
+  "clicks": 0
+ },
+ {
+  "id": "ref-canva",
+  "title": "Canva \u2014 Affiliate Program",
+  "description": "Canva official affiliate program page (Canvassador Program): how to earn by promoting Canva.",
+  "url": "https://www.canva.com/affiliates/",
+  "category": "saas",
+  "tags": [
+   "saas",
+   "design",
+   "affiliate"
+  ],
+  "image": "https://www.google.com/s2/favicons?domain=canva.com&sz=256",
+  "createdAt": 1792760080000,
+  "votes": 0,
+  "clicks": 0
+ },
+ {
+  "id": "ref-hostinger",
+  "title": "Hostinger \u2014 Affiliate Program",
+  "description": "Hostinger official affiliate program page: earn commissions promoting web hosting.",
+  "url": "https://www.hostinger.com/affiliates",
+  "category": "saas",
+  "tags": [
+   "saas",
+   "hosting",
+   "affiliate"
+  ],
+  "image": "https://cdn.simpleicons.org/hostinger/673DE6",
+  "createdAt": 1792760080000,
+  "votes": 0,
+  "clicks": 0
+ },
+ {
+  "id": "ref-namecheap",
+  "title": "Namecheap \u2014 Affiliate Program",
+  "description": "Namecheap official affiliate program page: earn by promoting domains and hosting.",
+  "url": "https://www.namecheap.com/affiliates/",
+  "category": "saas",
+  "tags": [
+   "saas",
+   "domains",
+   "affiliate"
+  ],
+  "image": "https://cdn.simpleicons.org/namecheap/DE3723",
+  "createdAt": 1792760080000,
+  "votes": 0,
+  "clicks": 0
+ },
+ {
+  "id": "ref-digitalocean",
+  "title": "DigitalOcean \u2014 Referral Program",
+  "description": "DigitalOcean official referral program page: refer developers and earn cloud credits/commissions.",
+  "url": "https://www.digitalocean.com/referral-program",
+  "category": "saas",
+  "tags": [
+   "saas",
+   "cloud",
+   "referrals"
+  ],
+  "image": "https://cdn.simpleicons.org/digitalocean/0080FF",
+  "createdAt": 1792760080000,
+  "votes": 0,
+  "clicks": 0
+ },
+ {
+  "id": "ref-grammarly",
+  "title": "Grammarly \u2014 Affiliate Program",
+  "description": "Grammarly official affiliates page: promote the writing assistant and earn commissions.",
+  "url": "https://www.grammarly.com/affiliates",
+  "category": "saas",
+  "tags": [
+   "saas",
+   "writing",
+   "affiliate"
+  ],
+  "image": "https://cdn.simpleicons.org/grammarly/15C39A",
+  "createdAt": 1792760080000,
+  "votes": 0,
+  "clicks": 0
+ },
+ {
+  "id": "ref-nordvpn",
+  "title": "NordVPN \u2014 Affiliate Program",
+  "description": "NordVPN official affiliate program page: join the VPN affiliate program and earn commissions.",
+  "url": "https://nordvpn.com/affiliate/",
+  "category": "saas",
+  "tags": [
+   "saas",
+   "vpn",
+   "affiliate"
+  ],
+  "image": "https://cdn.simpleicons.org/nordvpn/4687FF",
+  "createdAt": 1792760080000,
+  "votes": 0,
+  "clicks": 0
+ },
+ {
+  "id": "ref-bluehost",
+  "title": "Bluehost \u2014 Affiliate Program",
+  "description": "Bluehost official affiliate program page: earn commissions on hosting referrals.",
+  "url": "https://www.bluehost.com/affiliates",
+  "category": "saas",
+  "tags": [
+   "saas",
+   "hosting",
+   "affiliate"
+  ],
+  "image": "https://www.google.com/s2/favicons?domain=bluehost.com&sz=256",
+  "createdAt": 1792760080000,
+  "votes": 0,
+  "clicks": 0
+ },
+ {
+  "id": "ref-siteground",
+  "title": "SiteGround \u2014 Affiliate Program",
+  "description": "SiteGround official affiliate hosting program page: earn by referring hosting customers.",
+  "url": "https://www.siteground.com/affiliates",
+  "category": "saas",
+  "tags": [
+   "saas",
+   "hosting",
+   "affiliate"
+  ],
+  "image": "https://www.google.com/s2/favicons?domain=siteground.com&sz=256",
+  "createdAt": 1792760080000,
+  "votes": 0,
+  "clicks": 0
+ },
+ {
+  "id": "ref-hubspot",
+  "title": "HubSpot \u2014 Affiliate Program",
+  "description": "HubSpot official affiliate program page: promote HubSpot CRM tools and earn commissions.",
+  "url": "https://www.hubspot.com/partners/affiliates",
+  "category": "saas",
+  "tags": [
+   "saas",
+   "crm",
+   "affiliate"
+  ],
+  "image": "https://cdn.simpleicons.org/hubspot/FF7A59",
+  "createdAt": 1792760080000,
+  "votes": 0,
+  "clicks": 0
+ },
+ {
+  "id": "ref-kit",
+  "title": "Kit \u2014 Affiliate Program",
+  "description": "Kit (ConvertKit) official affiliate program page: earn recurring commissions promoting the creator email platform.",
+  "url": "https://kit.com/affiliate",
+  "category": "saas",
+  "tags": [
+   "saas",
+   "email",
+   "affiliate"
+  ],
+  "image": "https://www.google.com/s2/favicons?domain=kit.com&sz=256",
+  "createdAt": 1792760080000,
+  "votes": 0,
+  "clicks": 0
+ },
+ {
+  "id": "ref-surfshark",
+  "title": "Surfshark \u2014 Affiliate Program",
+  "description": "Surfshark official affiliate program page: join the VPN affiliate program and earn commissions.",
+  "url": "https://surfshark.com/affiliate",
+  "category": "saas",
+  "tags": [
+   "saas",
+   "vpn",
+   "affiliate"
+  ],
+  "image": "https://cdn.simpleicons.org/surfshark/1780A6",
+  "createdAt": 1792760080000,
+  "votes": 0,
+  "clicks": 0
+ },
+ {
+  "id": "ref-expressvpn",
+  "title": "ExpressVPN \u2014 Affiliate Program",
+  "description": "ExpressVPN official affiliate program page: promote ExpressVPN and earn commissions.",
+  "url": "https://www.expressvpn.com/affiliates",
+  "category": "saas",
+  "tags": [
+   "saas",
+   "vpn",
+   "affiliate"
+  ],
+  "image": "https://cdn.simpleicons.org/expressvpn/DA3B2E",
+  "createdAt": 1792760080000,
+  "votes": 0,
+  "clicks": 0
+ },
+ {
+  "id": "ref-udemy",
+  "title": "Udemy \u2014 Affiliate Program",
+  "description": "Udemy official affiliates program page: become an affiliate and earn promoting online courses.",
+  "url": "https://www.udemy.com/affiliate/",
+  "category": "saas",
+  "tags": [
+   "saas",
+   "education",
+   "affiliate"
+  ],
+  "image": "https://cdn.simpleicons.org/udemy/A435F0",
+  "createdAt": 1792760080000,
+  "votes": 0,
+  "clicks": 0
+ },
+ {
+  "id": "ref-skillshare",
+  "title": "Skillshare \u2014 Affiliates",
+  "description": "Skillshare official affiliates page: earn commissions promoting online classes.",
+  "url": "https://www.skillshare.com/en/affiliates",
+  "category": "saas",
+  "tags": [
+   "saas",
+   "education",
+   "affiliate"
+  ],
+  "image": "https://cdn.simpleicons.org/skillshare/00FF84",
+  "createdAt": 1792760080000,
+  "votes": 0,
+  "clicks": 0
+ },
+ {
+  "id": "ref-airbnb",
+  "title": "Airbnb \u2014 Invite Friends",
+  "description": "Airbnb official invite page: invite friends to join Airbnb (referral program).",
+  "url": "https://www.airbnb.com/referrals",
+  "category": "travel",
+  "tags": [
+   "travel",
+   "referrals",
+   "invite"
+  ],
+  "image": "https://cdn.simpleicons.org/airbnb/FF5A5F",
+  "createdAt": 1792760080000,
+  "votes": 0,
+  "clicks": 0
+ },
+ {
+  "id": "ref-rakuten",
+  "title": "Rakuten \u2014 Refer a Friend",
+  "description": "Rakuten official referral page: refer friends to cash-back shopping and earn rewards.",
+  "url": "https://www.rakuten.com/referral",
+  "category": "ecommerce",
+  "tags": [
+   "ecommerce",
+   "cashback",
+   "referrals"
+  ],
+  "image": "https://cdn.simpleicons.org/rakuten/BF0000",
+  "createdAt": 1792760080000,
+  "votes": 0,
+  "clicks": 0
+ },
+ {
+  "id": "ref-walmart",
+  "title": "Walmart \u2014 Affiliate Program",
+  "description": "Walmart official affiliate program page: drive sales and earn commissions.",
+  "url": "https://affiliates.walmart.com/",
+  "category": "ecommerce",
+  "tags": [
+   "ecommerce",
+   "affiliate",
+   "retail"
+  ],
+  "image": "https://www.google.com/s2/favicons?domain=walmart.com&sz=256",
+  "createdAt": 1792760080000,
+  "votes": 0,
+  "clicks": 0
+ },
+ {
+  "id": "ref-etsy",
+  "title": "Etsy \u2014 Affiliates & Creators",
+  "description": "Etsy official affiliates page: earn commissions promoting one-of-a-kind products.",
+  "url": "https://www.etsy.com/affiliates",
+  "category": "ecommerce",
+  "tags": [
+   "ecommerce",
+   "affiliate",
+   "marketplace"
+  ],
+  "image": "https://cdn.simpleicons.org/etsy/F1641E",
+  "createdAt": 1792760080000,
+  "votes": 0,
+  "clicks": 0
+ },
+ {
+  "id": "ref-envato",
+  "title": "Envato \u2014 Affiliates",
+  "description": "Envato official affiliates page: earn by promoting creative assets and templates.",
+  "url": "https://www.envato.com/affiliates/",
+  "category": "ecommerce",
+  "tags": [
+   "ecommerce",
+   "affiliate",
+   "creative"
+  ],
+  "image": "https://cdn.simpleicons.org/envato/81B441",
+  "createdAt": 1792760080000,
+  "votes": 0,
+  "clicks": 0
+ },
+ {
+  "id": "ref-fetch",
+  "title": "Fetch \u2014 Refer Friends",
+  "description": "Fetch official referral page: how to share your Fetch referral code and earn points.",
+  "url": "https://fetch.com/referral",
+  "category": "ecommerce",
+  "tags": [
+   "ecommerce",
+   "rewards",
+   "referrals"
+  ],
+  "image": "https://www.google.com/s2/favicons?domain=fetch.com&sz=256",
+  "createdAt": 1792760080000,
+  "votes": 0,
+  "clicks": 0
+ },
+ {
+  "id": "ref-honey",
+  "title": "Honey \u2014 Join with the Owner's Link",
+  "description": "The site owner's personal Honey referral link: join Honey free, earn rewards and automatic coupon savings at checkout \u2014 the owner earns Honey Gold when you join. Labeled owner link, per our disclosure.",
+  "url": "https://joinhoney.com/ref/a4g6fs4",
+  "category": "ecommerce",
+  "tags": [
+   "ecommerce",
+   "cashback",
+   "referrals",
+   "owner-pick"
+  ],
+  "image": "https://www.google.com/s2/favicons?domain=joinhoney.com&sz=256",
+  "createdAt": 1792760080000,
+  "votes": 0,
+  "clicks": 0
+ },
+ {
+  "id": "ref-chime",
+  "title": "Chime \u2014 Referral Program",
+  "description": "Chime official referral program: both sides earn a cash reward when a new member opens a Chime Checking Account through a referral, receives a qualifying direct deposit of $200 or more within 45 days, and activates their debit card. Reward amount varies by promotion (official blog).",
+  "url": "https://www.chime.com/blog/chime-referral-program/",
+  "category": "fintech",
+  "tags": [
+   "fintech",
+   "banking",
+   "referrals"
+  ],
+  "image": "https://www.google.com/s2/favicons?domain=chime.com&sz=256",
+  "createdAt": 1792760080000,
+  "votes": 0,
+  "clicks": 0
+ },
+ {
+  "id": "ref-webull",
+  "title": "Webull \u2014 Refer Friends",
+  "description": "Webull official offers page: refer friends and earn 20 or 100 fractional shares for each qualifying referral (up to 10); new users get 10 fractional shares on a first deposit of $100 or more. Terms apply.",
+  "url": "https://www.webull.com/offers-promotions/",
+  "category": "fintech",
+  "tags": [
+   "fintech",
+   "investing",
+   "referrals"
+  ],
+  "image": "https://www.google.com/s2/favicons?domain=webull.com&sz=256",
+  "createdAt": 1792760080000,
+  "votes": 0,
+  "clicks": 0
+ },
+ {
+  "id": "ref-paypal",
+  "title": "PayPal \u2014 Invite Friends",
+  "description": "PayPal official P2P referral terms: invite friends and earn up to 10,000 PayPal Rewards points when ten invited friends join and use PayPal. Points redeem at checkout and in the PayPal app.",
+  "url": "https://www.paypal.com/us/campaign/invite/terms",
+  "category": "fintech",
+  "tags": [
+   "fintech",
+   "payments",
+   "referrals"
+  ],
+  "image": "https://www.google.com/s2/favicons?domain=paypal.com&sz=256",
+  "createdAt": 1792760080000,
+  "votes": 0,
+  "clicks": 0
+ },
+ {
+  "id": "ref-ibotta",
+  "title": "Ibotta \u2014 Referral Program",
+  "description": "Ibotta official help: earn referral cash when a new Saver you invite redeems their first offer. The new Saver enters your code at signup and submits a receipt (official help center).",
+  "url": "https://help.ibotta.com/hc/en-us/articles/225561927-When-do-I-get-referral-cash-for-inviting-a-new-Saver",
+  "category": "ecommerce",
+  "tags": [
+   "ecommerce",
+   "cashback",
+   "referrals"
+  ],
+  "image": "https://www.google.com/s2/favicons?domain=ibotta.com&sz=256",
+  "createdAt": 1792760080000,
+  "votes": 0,
+  "clicks": 0
+ },
+ {
+  "id": "ref-swagbucks",
+  "title": "Swagbucks \u2014 Refer & Earn",
+  "description": "Swagbucks official help: invite friends with your personal referral link from the Refer & Earn tab and earn from the referral program when they join and earn (official help center).",
+  "url": "https://help.swagbucks.com/hc/en-us/articles/205641024-How-do-I-invite-someone-to-join-Swagbucks-com",
+  "category": "ecommerce",
+  "tags": [
+   "ecommerce",
+   "rewards",
+   "referrals"
+  ],
+  "image": "https://www.google.com/s2/favicons?domain=swagbucks.com&sz=256",
+  "createdAt": 1792760080000,
+  "votes": 0,
+  "clicks": 0
+ },
+ {
+  "id": "ref-descript",
+  "title": "Descript \u2014 Affiliate Program",
+  "description": "Descript official affiliate program: earn a commission every time someone subscribes to Descript through your affiliate link, paid to your PayPal via PartnerStack (official affiliate page).",
+  "url": "https://www.descript.com/affiliate",
+  "category": "saas",
+  "tags": [
+   "saas",
+   "video",
+   "affiliate"
+  ],
+  "image": "https://www.google.com/s2/favicons?domain=descript.com&sz=256",
+  "createdAt": 1792760080000,
+  "votes": 0,
+  "clicks": 0
+ },
+ {
+  "id": "ref-runway",
+  "title": "Runway \u2014 Affiliate Program",
+  "description": "Runway official affiliate program: earn $15 for every new subscriber who buys a paid plan with your code, uncapped; new users get 25% off any plan. Paid monthly via Stripe (official page).",
+  "url": "https://runway.com/affiliate-program",
+  "category": "ai",
+  "tags": [
+   "ai",
+   "video",
+   "affiliate"
+  ],
+  "image": "https://www.google.com/s2/favicons?domain=runway.com&sz=256",
+  "createdAt": 1792760080000,
+  "votes": 0,
+  "clicks": 0
+ },
+ {
+  "id": "ref-elevenlabs",
+  "title": "ElevenLabs \u2014 Creator Affiliate",
+  "description": "ElevenLabs creator affiliate program (official PartnerStack directory): earn 22% commission on every referred customer transaction for the first 12 months; 11% on business tier, 25% on Reception.",
+  "url": "https://market.partnerstack.com/page/elevenlabsinc",
+  "category": "ai",
+  "tags": [
+   "ai",
+   "voice",
+   "affiliate"
+  ],
+  "image": "https://www.google.com/s2/favicons?domain=elevenlabs.io&sz=256",
+  "createdAt": 1792760080000,
+  "votes": 0,
+  "clicks": 0
+ }
+]
