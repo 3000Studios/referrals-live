@@ -438,6 +438,31 @@ ${ranked
   })
 }
 
+// Testimonials — the app loads stories from the API, so the generic
+// source-extraction builder scoops JSX expression fragments (ternaries,
+// interpolations) into the snapshot. Give the route a dedicated builder
+// with the page's real static copy instead. No stories are invented here:
+// the live app loads the latest community stories automatically.
+builders['/testimonials'] = () => ({
+  title: 'Success Stories — referrals.live',
+  description: 'Creator testimonials sharing how they earn money from referral programs.',
+  inner: `<main>
+      <p>Success Stories</p>
+      <h1>Creator Testimonials</h1>
+      <p>Read how our top creators monetize referrals and build profitable affiliate businesses.</p>
+      <section>
+        <h2>Stories from the community</h2>
+        <p>Every story on this page is shared by a creator in the referrals.live community. Each one names the referral program they promoted, tells how they promoted it, and — when the creator chooses to share it — the earnings from that program and the period those earnings cover.</p>
+        <p>The live page loads the newest published stories automatically. If no story has been published yet for a category you care about, browse the programs and the leaderboard to see what the community is promoting right now.</p>
+      </section>
+      <section>
+        <h2>Share your success story</h2>
+        <p>Building an income stream with a referral program listed here? Your story helps the next creator pick the right program and promote it well. Published stories carry your creator name, the program, and your results — exactly as you report them.</p>
+        <p><a href="/browse">Browse referral programs</a> · <a href="/leaderboard">See the leaderboard</a> · <a href="/about">About referrals.live</a></p>
+      </section>
+    </main>`,
+})
+
 // Static pages whose copy lives in their page component (with <Seo> meta).
 const STATIC_PAGES = {
   '/about': 'About.tsx',
@@ -448,7 +473,6 @@ const STATIC_PAGES = {
   '/disclaimer': 'Disclaimer.tsx',
   '/premium': 'Premium.tsx',
   '/submit': 'Submit.tsx',
-  '/testimonials': 'Testimonials.tsx',
   '/analytics': 'Analytics.tsx',
 }
 
