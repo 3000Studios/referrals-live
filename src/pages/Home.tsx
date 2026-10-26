@@ -180,7 +180,7 @@ export function Home() {
       </section>
 
       {/* ================= HOW IT WORKS ================= */}
-      <section className="mt-16" aria-label="How it works">
+      <section className="mt-16 acss-reveal" aria-label="How it works">
         <div className="text-center">
           <div className="text-xs font-semibold uppercase tracking-[0.25em] text-gold">How it works</div>
           <h2 className="mt-2 font-display text-3xl font-bold text-white">Three steps. Both sides get paid.</h2>
@@ -202,7 +202,7 @@ export function Home() {
       </section>
 
       {/* ================= TRENDING ================= */}
-      <section className="mt-16 space-y-6">
+      <section className="mt-16 space-y-6 acss-reveal">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
             <div className="text-xs font-semibold uppercase tracking-[0.25em] text-gold">Trending now</div>
