@@ -1,2 +1,35 @@
 /privacy-policy /privacy/ 301
-/*    /index.html   200
+/offer/*      / 200
+# /program/* boots the app for program ids that exist only in the D1
+# catalog (the app fetches them from /api/programs/:id). At build time
+# scripts/generate-404.mjs prepends exact shield rules to
+# dist/_redirects so prerendered /program/<id> pages keep serving their
+# own static HTML — redirect rules are always followed, even when a
+# static asset matches, so the splat alone would shadow them.
+/program/*    / 200
+/login        / 200
+/login/       / 200
+/register     / 200
+/register/    / 200
+/dashboard    / 200
+/dashboard/   / 200
+/affiliate    / 200
+/affiliate/   / 200
+/admin        / 200
+/admin/       / 200
+/chat         / 200
+/chat/        / 200
+/lounge       / 200
+/lounge/      / 200
+/community    / 200
+/community/   / 200
+/featured     / 200
+/featured/    / 200
+/signup       / 200
+/signup/      / 200
+/profile      / 200
+/profile/     / 200
+/payouts      / 200
+/payouts/     / 200
+/referrals    / 200
+/referrals/   / 200
