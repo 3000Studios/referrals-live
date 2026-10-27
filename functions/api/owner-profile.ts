@@ -23,6 +23,14 @@ const DEFAULT_PROFILE = {
 };
 
 export async function onRequestGet(context: { request: Request; env: Env }) {
+  // The profile carries the owner's personal email addresses, PayPal/Stripe
+  // emails and Venmo handle — it must not be world-readable. Admin-only,
+  // same treatment owner-attribution got in 5f3b3aa. (P0 audit FAIL #3,
+  // 2026-10-27.) The /go redirect reads D1 directly and is unaffected.
+  const user = await requireUser(context.request, context.env);
+  if (!user) return json({ ok: false, error: "Unauthorized" }, { status: 401 });
+  if (!user.isAdmin) return json({ ok: false, error: "Forbidden" }, { status: 403 });
+
   const row = await context.env.DB.prepare(
     "SELECT owner_name, owner_email, paypal_email, venmo_handle, stripe_email, default_referral_code, notes_json, updated_at FROM owner_profile WHERE id='owner' LIMIT 1",
   ).first<any>();

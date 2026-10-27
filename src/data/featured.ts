@@ -18,14 +18,10 @@ export const MUSE_INVITE_URL = "https://muse.ai";
 export const HONEY_REF_URL = "https://joinhoney.com/ref/a4g6fs4";
 
 /**
- * SoFi Crypto — the owner's personal invite link (given 2026-10-27).
- * Offer, exactly as SoFi states it to the owner: the person who joins gets
- * $25 in SOFID and the owner gets $50 in SOFID when the new member opens a
- * SoFi Crypto account through this link and makes a purchase of $25 or more
- * within 30 days. Terms apply. Do not inflate these figures anywhere.
+ * SoFi personal invite links are PRIVATE-ONLY by owner ruling 2026-10-27
+ * (SoFi's terms bar public distribution). They live in HELD-LINKS.md at the
+ * repo root — never add them to this file or anywhere in the shipped bundle.
  */
-export const SOFI_CRYPTO_URL =
-  "https://www.sofi.com/invite/crypto?gcp=0d37cda8-b31f-4f4f-83ac-b3fb0ce0cb52&isAliasGcp=false&siid=1d462057-6381-4c0c-ae15-341b328c0d09";
 
 /**
  * Pro checkout. Driven by the VITE_STRIPE_PAYMENT_LINK env var (a Stripe

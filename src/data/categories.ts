@@ -7,6 +7,12 @@ export type Category = {
 
 export const categories: Category[] = [
   {
+    id: "mobile",
+    name: "Mobile & Wireless",
+    description: "Phone plans and wireless referrals.",
+    icon: "📱",
+  },
+  {
     id: "fintech",
     name: "Fintech & Banking",
     description: "Brokerages, neobanks, and cash bonuses that convert.",

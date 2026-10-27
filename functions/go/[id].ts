@@ -77,6 +77,11 @@ export async function onRequestGet(context: { request: Request; env: Env; params
         if (!k || !v) return;
         const resolved = replaceTokens(String(v), profile).trim();
         if (!resolved) return;
+        // Attribution params carry BARE referral codes only — never a URL.
+        // A URL-valued default code (the live owner_profile once held a full
+        // US Mobile referral URL) must never be stuffed into another
+        // program's ref= parameter. P0 audit FAIL #2, 2026-10-27.
+        if (!/^[A-Za-z0-9._~-]+$/.test(resolved)) return;
         u.searchParams.set(k, resolved);
       });
       u.searchParams.set("utm_source", "referrals_live");
