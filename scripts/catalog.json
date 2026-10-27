@@ -703,5 +703,21 @@
   "createdAt": 1792760080000,
   "votes": 0,
   "clicks": 0
+ },
+ {
+  "id": "ref-sofi-crypto",
+  "title": "SoFi Crypto \u2014 Invite",
+  "description": "The site owner's personal SoFi Crypto invite: open a SoFi Crypto account through this link and make a purchase of $25 or more within 30 days, and you get $25 in SOFID \u2014 the owner gets $50 in SOFID. Terms apply.",
+  "url": "https://www.sofi.com/invite/crypto?gcp=0d37cda8-b31f-4f4f-83ac-b3fb0ce0cb52&isAliasGcp=false&siid=1d462057-6381-4c0c-ae15-341b328c0d09",
+  "category": "crypto",
+  "tags": [
+   "crypto",
+   "exchange",
+   "invite"
+  ],
+  "image": "https://www.google.com/s2/favicons?domain=sofi.com&sz=256",
+  "createdAt": 1793109600000,
+  "votes": 0,
+  "clicks": 0
  }
 ]
