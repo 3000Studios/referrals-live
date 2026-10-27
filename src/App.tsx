@@ -1,4 +1,5 @@
 import { Layout } from "@/components/layout/Layout";
+import { ScrollToTop } from "@/components/layout/ScrollToTop";
 import { lazy, Suspense } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 
@@ -36,8 +37,10 @@ const LoadingSpinner = () => (
 
 export default function App() {
   return (
-    <Suspense fallback={<LoadingSpinner />}>
-      <Routes>
+    <>
+      <ScrollToTop />
+      <Suspense fallback={<LoadingSpinner />}>
+        <Routes>
         <Route element={<Layout />}>
           <Route index element={<Home />} />
           <Route path="browse" element={<Browse />} />
@@ -73,7 +76,8 @@ export default function App() {
           <Route path="referrals" element={<Navigate to="/browse" replace />} />
           <Route path="*" element={<NotFound />} />
         </Route>
-      </Routes>
-    </Suspense>
+        </Routes>
+      </Suspense>
+    </>
   );
 }

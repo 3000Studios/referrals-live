@@ -2,6 +2,17 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <script>
+      // Every page load must start at the top. Disable the browser's
+      // automatic scroll restoration (it was restoring the previous
+      // page's scroll position on navigation) and reset scroll now,
+      // before first paint. SPA route changes are handled by the
+      // ScrollToTop component in the app bundle.
+      if ("scrollRestoration" in history) {
+        history.scrollRestoration = "manual";
+      }
+      window.scrollTo(0, 0);
+    </script>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="robots" content="index, follow" />
