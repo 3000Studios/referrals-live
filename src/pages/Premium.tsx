@@ -3,7 +3,7 @@ import { useAppStore } from "@/store/useAppStore";
 import { trackEvent, trackPremiumView } from "@/lib/analytics";
 import { useEffect, useState, useRef, FormEvent } from "react";
 import { Link } from "react-router-dom";
-import { STRIPE_PRO_LINK, PRO_PRICE_LABEL } from "@/data/featured";
+import { SUBSCRIPTION_CHECKOUT_URL as STRIPE_PRO_LINK, SUBSCRIPTION_PRICE_LABEL as PRO_PRICE_LABEL } from "@/data/subscription";
 
 declare global {
   interface Window {
@@ -21,11 +21,12 @@ const PAYPAL_PLAN_ID = import.meta.env.VITE_PAYPAL_PLAN_ID as string | undefined
 // unverified "$10 per referral" claim. All removed — Pro sells on what it
 // actually does: posting + featured placement.
 const perks = [
-  { icon: "🔥", text: "Post your own referral links publicly in the catalog" },
-  { icon: "⭐", text: "Pin 2 featured placements on the homepage" },
-  { icon: "💬", text: "Post in the live community chat (free tier is read-only)" },
+  { icon: "📋", text: "A member dashboard to add and manage your best referral links" },
+  { icon: "🏠", text: "Your links appear in the member boxes on the homepage, right under the featured carousel" },
+  { icon: "⭐", text: "Pin 2 featured placements so your best offers stand out" },
   { icon: "📊", text: "Tracked redirects with click stats for your links" },
   { icon: "🏆", text: "Priority ranking on public listings" },
+  { icon: "💬", text: "Post in the live community chat (free tier is read-only)" },
   { icon: "🤝", text: "Affiliate commissions on members you bring in" },
 ];
 
@@ -56,7 +57,7 @@ function PayPalButton() {
         createSubscription: (_data: unknown, actions: any) =>
           actions.subscription.create({ plan_id: PAYPAL_PLAN_ID }),
         onApprove: (_data: any) => {
-          trackEvent("premium_click", { plan: "Pro", method: "paypal", status: "approved" });
+          trackEvent("premium_click", { plan: "Premium", method: "paypal", status: "approved" });
           window.location.href = "/dashboard?billing=success&provider=paypal";
         },
         onError: () => setPpError("PayPal error. Try card checkout above."),
@@ -100,7 +101,7 @@ export function Premium() {
   function startCardCheckout() {
     setLoading(true);
     setError(null);
-    trackEvent("premium_click", { plan: "Pro", method: "stripe" });
+    trackEvent("premium_click", { plan: "Premium", method: "stripe" });
 
     if (!user) {
       if (STRIPE_PRO_LINK) {
@@ -144,19 +145,20 @@ export function Premium() {
   return (
     <div>
       <Seo
-        title="Pro — post your referral links | referrals.live"
-        description="Browsing deals is free forever. Pro lets you post your own referral links publicly, pin 2 featured homepage placements, and track every click."
+        title="Go Premium — referrals.live"
+        description="Premium is $3.99/mo: a dashboard for your best referral links, placement in the homepage member boxes, featured pins, tracked clicks, and priority ranking."
         path="/premium"
       />
 
       {/* Header */}
       <div className="text-xs font-semibold uppercase tracking-[0.25em] text-gold">For posters</div>
-      <h1 className="font-display text-4xl font-extrabold text-white">Go Pro — put your links where the clicks are</h1>
+      <h1 className="font-display text-4xl font-extrabold text-white">Go Premium — put your links where the clicks are</h1>
       <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted">
         Browsing and grabbing deals on referrals.live is <span className="font-semibold text-white">free forever</span> —
-        no account needed. Pro is for the other side of the model:{" "}
-        <span className="font-semibold text-white">posting your own referral links</span> in the public
-        catalog so visitors sign up through <em>your</em> links and you earn the referral credits.
+        no account needed. Premium is for the other side of the model:{" "}
+        <span className="font-semibold text-white">posting your own referral links</span> from your
+        member dashboard — they appear in the member boxes on the homepage, right under the
+        featured carousel, so visitors sign up through <em>your</em> links and you earn the credits.
       </p>
 
       {/* Free vs Pro */}
@@ -174,7 +176,7 @@ export function Premium() {
         </div>
         <div className="glass rounded-3xl border border-gold/40 p-6 shadow-gold">
           <div className="flex items-baseline justify-between">
-            <div className="font-display text-xl font-bold text-white">Pro</div>
+            <div className="font-display text-xl font-bold text-white">Premium</div>
             <div className="font-display text-2xl font-extrabold text-gold">{PRO_PRICE_LABEL}</div>
           </div>
           <ul className="mt-4 space-y-2.5 text-sm text-muted">
@@ -204,7 +206,7 @@ export function Premium() {
                   disabled={loading}
                   className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-gold to-amber-500 px-6 py-4 text-sm font-bold text-black transition-all hover:brightness-110 active:scale-[0.98] disabled:opacity-40"
                 >
-                  {loading ? "Connecting to Stripe…" : `Go Pro — ${PRO_PRICE_LABEL}`}
+                  {loading ? "Connecting to Stripe…" : `Go Premium — ${PRO_PRICE_LABEL}`}
                 </button>
               ) : (
                 <Link
@@ -237,8 +239,8 @@ export function Premium() {
             {/* Waitlist — the honest fallback when no checkout is configured */}
             {!cardCheckoutAvailable && !paypalAvailable ? (
               <form onSubmit={joinWaitlist} className="mt-6 rounded-2xl border border-gold/25 bg-gold/5 p-5">
-                <div className="text-sm font-bold text-white">Join the Pro waitlist</div>
-                <p className="mt-1 text-xs leading-relaxed text-muted">We'll email you the moment Pro checkout opens.</p>
+                <div className="text-sm font-bold text-white">Join the Premium waitlist</div>
+                <p className="mt-1 text-xs leading-relaxed text-muted">We'll email you the moment Premium checkout opens.</p>
                 {waitlistDone ? (
                   <p className="mt-3 rounded-xl border border-gold/40 bg-gold/10 px-4 py-3 text-sm text-gold">✓ You're on the list — watch your inbox.</p>
                 ) : (
@@ -269,12 +271,12 @@ export function Premium() {
           <div className="glass rounded-3xl border border-white/10 p-5 text-sm text-muted">
             <div className="text-xs font-semibold uppercase tracking-[0.25em] text-electric">Your status</div>
             <div className="mt-2 text-lg font-semibold text-white">
-              {user?.premium ? "✅ Pro active" : "⬜ Free tier"}
+              {user?.premium ? "✅ Premium active" : "⬜ Free tier"}
             </div>
             {!user?.premium && (
               <p className="mt-3 rounded-xl bg-white/5 p-3 text-xs leading-relaxed">
-                With Pro, your links leave your private board and go public in the catalog — where
-                every visitor click can turn into your referral credit.
+                With Premium, your links leave your private board and appear in the member boxes
+                on the homepage — where every visitor click can turn into your referral credit.
               </p>
             )}
           </div>
@@ -284,7 +286,8 @@ export function Premium() {
             {[
               ["Can I cancel?", "Yes — anytime from your dashboard. No fees, no friction."],
               ["When does access start?", "As soon as Stripe or PayPal confirms payment."],
-              ["What can I post?", "Your own referral links for real programs. Listings are reviewed for dead links and spam."],
+              ["How do my links get on the homepage?", "Add them in your dashboard and submit them as public. After review they appear in the member boxes under the hero carousel."],
+              ["What can I post?", "Your own referral links for real programs. You attest the program allows public posting — programs that bar it are held out of the homepage boxes. Listings are reviewed for dead links and spam."],
               ["Is browsing still free?", "Always. Pro only unlocks posting and featured placement — deals stay free for everyone."],
             ].map(([q, a]) => (
               <div key={q}>
