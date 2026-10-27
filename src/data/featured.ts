@@ -37,4 +37,5 @@ export const SOFI_CRYPTO_URL =
 export const STRIPE_PRO_LINK =
   (import.meta.env.VITE_STRIPE_PAYMENT_LINK as string | undefined) ?? "";
 
-export const PRO_PRICE_LABEL = "$7.99/mo";
+/** Premium price — Boss-fixed 2026-10-27: single tier, $3.99/month, monthly only. */
+export const PRO_PRICE_LABEL = "$3.99/mo";
