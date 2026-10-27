@@ -10,6 +10,7 @@ type CreateBody = {
   tags: string[];
   imageUrl: string;
   status?: "private" | "public_candidate";
+  termsAttested?: boolean;
 };
 
 function isHttpUrl(value: string) {
@@ -24,7 +25,7 @@ function isHttpUrl(value: string) {
 export async function onRequestGet(context: { request: Request; env: Env }) {
   const { DB } = context.env;
   const rows = await DB.prepare(
-    `SELECT r.id, r.title, r.description, r.url, r.category, r.tags_json, r.image_url, r.created_at, m.votes, m.clicks
+    `SELECT r.id, r.user_id, r.title, r.description, r.url, r.category, r.tags_json, r.image_url, r.created_at, r.terms_attested, r.terms_flagged, m.votes, m.clicks
      FROM referrals r
      LEFT JOIN referral_metrics m ON m.referral_id=r.id
      WHERE r.status='public'
@@ -44,6 +45,12 @@ export async function onRequestGet(context: { request: Request; env: Env }) {
     clicks: Number(r.clicks ?? 0),
     createdAt: Number(r.created_at ?? now()),
     visibility: "public",
+    // 'system' = site catalog row; 'member' = a subscriber's own listing.
+    // The homepage member boxes render member rows only, and only when the
+    // member attested the program allows public posting and it isn't flagged.
+    owner: r.user_id === "user-system" ? "system" : "member",
+    termsAttested: Number(r.terms_attested ?? 0) === 1,
+    termsFlagged: Number(r.terms_flagged ?? 0) === 1,
   }));
 
   return json({ ok: true, referrals });
@@ -62,6 +69,14 @@ export async function onRequestPost(context: { request: Request; env: Env }) {
   const imageUrl = (body.imageUrl ?? "").trim();
   const status = body.status === "public_candidate" && user.premium ? "public_candidate" : "private";
 
+  // Terms check (business-model rule, 2026-10-27): many refer-a-friend
+  // programs bar public posting. A link can only go public when the member
+  // attests this program allows public posting of referral links.
+  const termsAttested = body.termsAttested === true;
+  if (status === "public_candidate" && !termsAttested) {
+    return badRequest("To post publicly, confirm the program allows public posting of referral links.");
+  }
+
   if (!title || !description) return badRequest("Title and description are required.");
   if (!isHttpUrl(url)) return badRequest("Enter a valid http(s) URL.");
   if (!category) return badRequest("Category is required.");
@@ -73,8 +88,8 @@ export async function onRequestPost(context: { request: Request; env: Env }) {
 
   await context.env.DB.batch([
     context.env.DB.prepare(
-      "INSERT INTO referrals (id, user_id, title, description, url, category, tags_json, image_url, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-    ).bind(id, user.id, title, description, url, category, tagsJson, imageUrl, status, ts, ts),
+      "INSERT INTO referrals (id, user_id, title, description, url, category, tags_json, image_url, status, terms_attested, terms_flagged, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?, ?)",
+    ).bind(id, user.id, title, description, url, category, tagsJson, imageUrl, status, termsAttested ? 1 : 0, ts, ts),
     context.env.DB.prepare("INSERT INTO referral_metrics (referral_id, votes, clicks) VALUES (?, 0, 0)").bind(id),
   ]);
 

@@ -27,6 +27,7 @@ export function Submit() {
   const [doneId, setDoneId] = useState<string | null>(null);
   const user = useAppStore((s) => s.user);
   const [wantPublicCandidate, setWantPublicCandidate] = useState(false);
+  const [termsAttested, setTermsAttested] = useState(false);
   const [autofillLoading, setAutofillLoading] = useState(false);
 
   const onSubmit = async (e: FormEvent) => {
@@ -38,6 +39,10 @@ export function Submit() {
     }
     if (!isValidUrl(url.trim())) {
       setError("Enter a valid http(s) URL.");
+      return;
+    }
+    if (wantPublicCandidate && !termsAttested) {
+      setError("To post publicly, confirm the program allows public posting of referral links (terms check below).");
       return;
     }
     const tagList = tags
@@ -58,6 +63,7 @@ export function Submit() {
         tags: tagList.length ? tagList : ["community"],
         image: img,
         wantPublicCandidate,
+        termsAttested,
       });
       trackEvent("referral_submitted", { id: created.id });
       setDoneId(created.id);
@@ -232,6 +238,21 @@ export function Submit() {
                 onChange={(e) => setWantPublicCandidate(e.target.checked)}
               />
               <span>Submit as a public candidate (premium)</span>
+            </label>
+          ) : null}
+          {user?.premium && wantPublicCandidate ? (
+            <label className="flex items-start gap-3 rounded-2xl border border-gold/30 bg-gold/5 px-4 py-3 text-sm text-white/90">
+              <input
+                type="checkbox"
+                className="mt-0.5"
+                checked={termsAttested}
+                onChange={(e) => setTermsAttested(e.target.checked)}
+              />
+              <span>
+                <span className="font-semibold text-gold">Terms check:</span> I confirm this program's
+                referral terms allow public posting of referral links. Many programs bar public
+                posting — if this one does, it stays off the homepage boxes and can be flagged on review.
+              </span>
             </label>
           ) : null}
           {error ? <div className="rounded-2xl border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-200">{error}</div> : null}

@@ -15,7 +15,7 @@ type State = {
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string, displayName: string) => Promise<void>;
   logout: () => Promise<void>;
-  submitReferral: (input: { title: string; description: string; url: string; category: string; tags: string[]; image: string; wantPublicCandidate?: boolean }) => Promise<{ id: string }>;
+  submitReferral: (input: { title: string; description: string; url: string; category: string; tags: string[]; image: string; wantPublicCandidate?: boolean; termsAttested?: boolean }) => Promise<{ id: string }>;
   upvote: (id: string) => Promise<void>;
   trackClick: (_id: string) => void;
   addEmailCapture: (email: string, source: string) => Promise<void>;
@@ -69,6 +69,7 @@ export const useAppStore = create<State>((set, get) => ({
       tags: input.tags,
       imageUrl: input.image,
       status,
+      termsAttested: input.termsAttested === true,
     });
     return res.referral;
   },

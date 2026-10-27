@@ -19,6 +19,10 @@ export type ApiReferral = {
   clicks: number;
   createdAt: number;
   source?: string;
+  /** 'system' = site catalog row; 'member' = a subscriber's own listing. */
+  owner?: "system" | "member";
+  termsAttested?: boolean;
+  termsFlagged?: boolean;
 };
 
 export type ApiBlogVideo = { src: string; label: string; attributionLabel: string; attributionHref: string };
@@ -59,7 +63,7 @@ export const api = {
       `/api/discovery/search?q=${encodeURIComponent(query)}&cat=${encodeURIComponent(category)}`,
     ),
   myReferrals: () => apiFetch<{ ok: true; referrals: any[] }>("/api/my/referrals"),
-  createReferral: (input: { title: string; description: string; url: string; category: string; tags: string[]; imageUrl: string; status?: "private" | "public_candidate" }) =>
+  createReferral: (input: { title: string; description: string; url: string; category: string; tags: string[]; imageUrl: string; status?: "private" | "public_candidate"; termsAttested?: boolean }) =>
     apiFetch<{ ok: true; referral: { id: string } }>("/api/referrals", { method: "POST", body: JSON.stringify(input) }),
   vote: (id: string) => apiFetch<{ ok: true }>(`/api/referrals/${id}/vote`, { method: "POST" }),
   share: (id: string, channel: string) => apiFetch<{ ok: true }>(`/api/referrals/${id}/share`, { method: "POST", body: JSON.stringify({ channel }) }),

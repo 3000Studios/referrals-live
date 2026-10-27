@@ -7,7 +7,7 @@ export async function onRequestGet(context: { request: Request; env: Env }) {
   if (!user) return json({ ok: false, error: "Unauthorized" }, { status: 401 });
 
   const rows = await context.env.DB.prepare(
-    `SELECT r.id, r.title, r.description, r.url, r.category, r.tags_json, r.image_url, r.status, r.created_at, r.updated_at,
+    `SELECT r.id, r.title, r.description, r.url, r.category, r.tags_json, r.image_url, r.status, r.terms_attested, r.terms_flagged, r.created_at, r.updated_at,
             m.votes, m.clicks
      FROM referrals r
      LEFT JOIN referral_metrics m ON m.referral_id=r.id
@@ -27,6 +27,8 @@ export async function onRequestGet(context: { request: Request; env: Env }) {
     tags: JSON.parse(r.tags_json ?? "[]"),
     image: r.image_url,
     status: r.status,
+    termsAttested: Number(r.terms_attested ?? 0) === 1,
+    termsFlagged: Number(r.terms_flagged ?? 0) === 1,
     votes: Number(r.votes ?? 0),
     clicks: Number(r.clicks ?? 0),
     createdAt: Number(r.created_at),

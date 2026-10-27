@@ -11,6 +11,8 @@ type MyReferral = {
   status: string;
   votes: number;
   clicks: number;
+  termsAttested?: boolean;
+  termsFlagged?: boolean;
 };
 
 const avatarOptions = ["spark", "cube", "bolt", "crown", "ghost", "star", "wave"] as const;
@@ -407,6 +409,14 @@ export function Dashboard() {
                   <div className="font-semibold text-white">{r.title}</div>
                   <div className="text-xs text-muted">
                     {r.votes} votes · {r.clicks} clicks · <span className="text-white/80">{r.status}</span>
+                    {" · "}
+                    {r.termsFlagged ? (
+                      <span className="text-red-300">terms flagged — held out of homepage boxes</span>
+                    ) : r.termsAttested ? (
+                      <span className="text-neon">terms attested ✓</span>
+                    ) : (
+                      <span className="text-white/60">not terms-attested — hidden from homepage boxes</span>
+                    )}
                   </div>
                 </div>
 
