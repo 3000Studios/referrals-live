@@ -8,13 +8,14 @@ import { sortByTrending } from "@/lib/trending";
 import { categories } from "@/data/categories";
 import { EmailInlineCapture } from "@/components/growth/EmailInlineCapture";
 import { AdSlot } from "@/components/monetization/AdSlot";
-import { MUSE_INVITE_URL, HONEY_REF_URL } from "@/data/featured";
-import { HERO_VIDEO, videoForCategory } from "@/data/media";
+import { videoForCategory } from "@/data/media";
+import { HeroCarousel } from "@/components/home/HeroCarousel";
+import { MemberBoxes } from "@/components/home/MemberBoxes";
 
 const FAQS = [
   {
     q: "Is referrals.live really free?",
-    a: "Yes. Browsing and clicking deals is free forever — no account needed. You only pay if you choose Pro, which lets you post your own referral links publicly and get featured placement.",
+    a: "Yes. Browsing and clicking deals is free forever — no account needed. You only pay if you choose Premium ($3.99/mo), which lets you post your own referral links publicly in the member boxes on this homepage.",
   },
   {
     q: "How do I earn from a deal here?",
@@ -22,11 +23,15 @@ const FAQS = [
   },
   {
     q: "How does referrals.live make money?",
-    a: "Two honest ways: some links on this site are the owner's own referral links (they're labeled), so the owner earns the referral credit when you sign up; and Pro members pay a subscription to post and feature their links. Full details are on our disclosure page.",
+    a: "Two honest ways: some links on this site are the owner's own referral links (they're labeled), so the owner earns the referral credit when you sign up; and Premium members pay a $3.99/mo subscription to post and feature their links. Full details are on our disclosure page.",
   },
   {
     q: "How do I post my own referral link?",
-    a: "Create a free account, then go Pro to publish your links publicly and pin up to 2 featured placements on the homepage. Free accounts can save links on their private board.",
+    a: "Create a free account, subscribe to Premium, and add your links from your dashboard. They appear in the member boxes on this homepage, under the featured carousel, and you can pin up to 2 featured placements. Free accounts can save links on their private board.",
+  },
+  {
+    q: "Why isn't a member link showing on the homepage?",
+    a: "Every public post needs a terms check: the poster attests that the program allows public posting of referral links. Programs whose terms bar public posting are held out of the homepage boxes — some big brands only allow sharing with people you know.",
   },
   {
     q: "Are these programs legit?",
@@ -42,36 +47,22 @@ export function Home() {
 
   const trending = useMemo(() => sortByTrending(referrals).slice(0, 6), [referrals]);
   const feed = useMemo(() => sortByTrending(referrals).slice(0, feedCount), [referrals, feedCount]);
-  const honey = useMemo(() => referrals.find((r) => r.id === "ref-honey"), [referrals]);
 
   return (
     <div>
       <Seo
         title="referrals.live — Click a deal. Sign up. You earn, we earn."
-        description="Free referral deals that pay both sides: click a deal, sign up, and you get a bonus while the poster earns too. Post your own links with Pro."
+        description="Free referral deals that pay both sides: click a deal, sign up, and you get a bonus while the poster earns too. Premium members post their own links in the boxes under the carousel."
         path="/"
       />
 
       {/* ================= HERO ================= */}
       <section className="relative overflow-hidden rounded-[2rem] border border-gold/20 px-6 py-16 md:px-14 md:py-24">
-        {HERO_VIDEO ? (
-          <video
-            className="absolute inset-0 h-full w-full object-cover"
-            src={HERO_VIDEO.src}
-            poster={HERO_VIDEO.poster}
-            autoPlay
-            muted
-            loop
-            playsInline
-            aria-hidden
-          />
-        ) : (
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_55%_at_20%_0%,rgba(255,215,0,0.16),transparent_55%),radial-gradient(ellipse_55%_45%_at_85%_100%,rgba(201,150,46,0.14),transparent_55%)]" />
-        )}
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_55%_at_20%_0%,rgba(255,215,0,0.16),transparent_55%),radial-gradient(ellipse_55%_45%_at_85%_100%,rgba(201,150,46,0.14),transparent_55%)]" />
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/55 via-black/35 to-black/70" />
 
-        <div className="relative grid items-center gap-10 lg:grid-cols-[1.15fr_0.85fr]">
-          <div className="text-center lg:text-left">
+        <div className="relative">
+          <div className="mx-auto max-w-3xl text-center">
             <div className="inline-flex items-center gap-2 rounded-full border border-gold/30 bg-black/50 px-4 py-1.5">
               <span className="h-1.5 w-1.5 rounded-full bg-gold" />
               <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-gold">Free forever — no account needed to grab a deal</span>
@@ -81,12 +72,12 @@ export function Home() {
               <br />
               <span className="bg-gold-gradient bg-clip-text text-transparent">You earn — we earn.</span>
             </h1>
-            <p className="mx-auto mt-5 max-w-xl text-[1.05rem] leading-relaxed text-white/75 lg:mx-0 md:text-lg">
+            <p className="mx-auto mt-5 max-w-xl text-[1.05rem] leading-relaxed text-white/75 md:text-lg">
               Every link here pays a bonus. You get the signup bonus, the person who posted the link
               gets a referral credit, and the company pays for both. That is the whole model — no
               tricks, nothing to buy to browse.
             </p>
-            <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row lg:justify-start sm:justify-center">
+            <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
               <Link
                 to="/browse"
                 className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-gold to-amber-500 px-8 py-4 text-sm font-bold text-black shadow-gold transition hover:brightness-110 active:scale-95"
@@ -97,11 +88,11 @@ export function Home() {
                 to="/submit"
                 className="inline-flex items-center gap-2 rounded-2xl border border-white/20 bg-black/40 px-8 py-4 text-sm font-semibold text-white backdrop-blur-sm transition hover:border-gold/50"
               >
-                Post your link — go Pro
+                Post your link — Premium
               </Link>
             </div>
             <form
-              className="mx-auto mt-8 flex max-w-xl gap-2 lg:mx-0"
+              className="mx-auto mt-8 flex max-w-xl gap-2"
               onSubmit={(e) => {
                 e.preventDefault();
                 navigate(`/browse?q=${encodeURIComponent(q.trim())}`);
@@ -121,63 +112,16 @@ export function Home() {
             </form>
           </div>
 
-          {/* ===== Featured #1: Muse (owner's invite) ===== */}
-          <div className="relative rounded-3xl border border-gold/50 bg-black/70 p-6 shadow-gold backdrop-blur-sm">
-            <div className="flex items-center justify-between gap-3">
-              <span className="rounded-full bg-gold px-3 py-1 text-[10px] font-extrabold uppercase tracking-[0.2em] text-black">
-                ★ Featured #1
-              </span>
-              <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/50">Owner's pick</span>
-            </div>
-            <h2 className="mt-4 font-display text-3xl font-bold text-white">Muse</h2>
-            <p className="mt-2 text-sm leading-relaxed text-white/75">
-              The AI that builds, writes, researches and runs your projects for you. Join Muse with
-              the owner's invite and <span className="font-semibold text-gold">both sides earn bonus
-              tokens</span> — you start ahead, the owner earns too. Exactly how every deal on this
-              site works.
-            </p>
-            <a
-              href={MUSE_INVITE_URL}
-              target="_blank"
-              rel="sponsored noopener noreferrer"
-              className="mt-5 flex w-full items-center justify-center rounded-2xl bg-gradient-to-r from-gold to-amber-500 px-6 py-3.5 text-sm font-bold text-black transition hover:brightness-110 active:scale-95"
-            >
-              Join Muse with the invite →
-            </a>
-            <p className="mt-3 text-center text-[11px] leading-relaxed text-white/45">
-              This is the site owner's invite link — the owner earns bonus tokens when you join.
-              Full details on our <Link to="/disclosure" className="underline hover:text-gold">disclosure page</Link>.
-            </p>
-          </div>
+        </div>
+
+        {/* ===== Hero carousel: the owner's own links (data-driven) ===== */}
+        <div className="relative mt-12">
+          <HeroCarousel />
         </div>
       </section>
 
-      {/* ================= HONEY SPOTLIGHT ================= */}
-      <section className="mt-8 flex flex-col items-center gap-5 rounded-3xl border border-gold/25 bg-gradient-to-r from-gold/10 via-transparent to-gold/10 px-6 py-6 md:flex-row md:px-10">
-        <img
-          src="https://www.google.com/s2/favicons?domain=joinhoney.com&sz=256"
-          alt="Honey"
-          className="h-16 w-16 rounded-2xl bg-white/95 object-contain p-2"
-          loading="lazy"
-          decoding="async"
-        />
-        <div className="flex-1 text-center md:text-left">
-          <div className="text-[10px] font-bold uppercase tracking-[0.25em] text-gold">Owner's personal pick</div>
-          <h2 className="mt-1 font-display text-2xl font-bold text-white">Honey — automatic coupons &amp; rewards</h2>
-          <p className="mt-1 text-sm text-white/70">
-            Join Honey with the owner's personal referral link and earn rewards while it hunts coupon
-            codes for you at checkout. The owner earns Gold when you join — that's the deal, stated plainly.
-          </p>
-        </div>
-        <a
-          href={honey?.url ?? HONEY_REF_URL}
-          target="_blank"
-          rel="sponsored noopener noreferrer"
-          className="shrink-0 rounded-2xl bg-gradient-to-r from-gold to-amber-500 px-7 py-3.5 text-sm font-bold text-black shadow-gold transition hover:brightness-110 active:scale-95"
-        >
-          Join Honey — it's free →
-        </a>
-      </section>
+      {/* ================= MEMBER BOXES ================= */}
+      <MemberBoxes referrals={referrals} />
 
       {/* ================= HOW IT WORKS ================= */}
       <section className="mt-16 acss-reveal" aria-label="How it works">
@@ -189,7 +133,7 @@ export function Home() {
           {[
             { step: "1", icon: "👆", title: "Pick a deal", desc: "Browse the catalog — banks, apps, tools, shopping. Every deal states what you get for signing up." },
             { step: "2", icon: "✍️", title: "Sign up through the link", desc: "The link carries the poster's referral credit. Sign up on the company's own site — we never see your password or your money." },
-            { step: "3", icon: "💰", title: "You earn — poster earns", desc: "Complete the program's steps and the company pays your bonus and the poster's credit. Want your links here? Go Pro and post them." },
+            { step: "3", icon: "💰", title: "You earn — poster earns", desc: "Complete the program's steps and the company pays your bonus and the poster's credit. Want your links here? Premium members post theirs from their dashboard — they land in the member boxes under the carousel." },
           ].map((s) => (
             <div key={s.step} className="glass relative overflow-hidden rounded-3xl border border-white/8 p-8 text-center">
               <div className="pointer-events-none absolute right-4 top-4 font-display text-4xl font-extrabold text-white/5 select-none">0{s.step}</div>
@@ -283,11 +227,11 @@ export function Home() {
         <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-white/70">
           Browsing is free forever. To <span className="font-semibold text-white">post your own referral links</span> where
           thousands of deal-hunters can click them — and pin up to 2 featured placements on this
-          homepage — you need a free account plus <span className="font-semibold text-gold">Pro</span>.
+          homepage — you need a free account plus <span className="font-semibold text-gold">Premium — $3.99/mo</span>. They show in the member boxes right under the hero carousel.
         </p>
         <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row">
           <Link to="/premium" className="rounded-2xl bg-gradient-to-r from-gold to-amber-500 px-8 py-4 text-sm font-bold text-black shadow-gold transition hover:brightness-110 active:scale-95">
-            See Pro — post your links →
+            See Premium — post your links →
           </Link>
           <Link to="/register" className="rounded-2xl border border-white/15 px-8 py-4 text-sm font-semibold text-white transition hover:border-gold/40">
             Create free account
