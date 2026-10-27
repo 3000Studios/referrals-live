@@ -495,6 +495,26 @@ builders['/premium'] = () => ({
     </main>`,
 })
 
+// Submit — the generic builder scoops a `) : null}` fragment from the
+// page's nested conditionals (introduced with the terms-check block,
+// 2026-10-27). Dedicated builder with the page's real static copy.
+builders['/submit'] = () => ({
+  title: 'Submit a referral — referrals.live',
+  description:
+    'Submit a referral to your member board. Premium members can post publicly after the terms check; public homepage referrals are curated and owner-attributed.',
+  inner: `<main>
+      <p>Submission</p>
+      <h1>Submit a referral</h1>
+      <p>Member submissions stay on user-owned boards. Public homepage referrals are curated and owner-attributed.</p>
+      <section>
+        <h2>How posting works</h2>
+        <p>Browsing and grabbing deals is free forever, no account needed. Posting your own referral links takes a free account so your links live on your member board and dashboard.</p>
+        <p>Premium members can submit a link as a public candidate. Public posting includes a terms check: you confirm the program allows public posting of referral links, because many programs bar it. Attested links appear in the member boxes on the homepage after review; flagged programs are held out.</p>
+        <p><a href="/login">Sign in</a> · <a href="/register">Create a free account</a> · <a href="/premium">See Premium</a></p>
+      </section>
+    </main>`,
+})
+
 // Static pages whose copy lives in their page component (with <Seo> meta).
 const STATIC_PAGES = {
   '/about': 'About.tsx',
@@ -503,7 +523,6 @@ const STATIC_PAGES = {
   '/terms': 'Terms.tsx',
   '/disclosure': 'Disclosure.tsx',
   '/disclaimer': 'Disclaimer.tsx',
-  '/submit': 'Submit.tsx',
   '/analytics': 'Analytics.tsx',
 }
 
