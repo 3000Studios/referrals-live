@@ -33,7 +33,19 @@ export function Register() {
       <div className="text-xs font-semibold uppercase tracking-[0.25em] text-neon">Account</div>
       <h1 className="font-display text-4xl font-extrabold text-white">{headline}</h1>
       <p className="mt-3 text-sm text-muted">{subline}</p>
-      <form onSubmit={onSubmit} className="mt-8 glass space-y-4 rounded-3xl border border-white/10 p-6">
+      <div className="mt-8">
+        <a
+          href="/api/auth/google"
+          className="flex w-full items-center justify-center gap-3 rounded-2xl border border-white/15 bg-white px-4 py-3 text-sm font-semibold text-black transition hover:brightness-95"
+        >
+          <span aria-hidden className="font-display text-base font-extrabold text-[#4285F4]">G</span>
+          Continue with Google
+        </a>
+        <div className="my-4 flex items-center gap-3 text-[11px] uppercase tracking-widest text-muted">
+          <span className="h-px flex-1 bg-white/10" /> or email <span className="h-px flex-1 bg-white/10" />
+        </div>
+      </div>
+      <form onSubmit={onSubmit} className="glass space-y-4 rounded-3xl border border-white/10 p-6">
         <label className="block text-xs uppercase tracking-wide text-muted">
           Username
           <input

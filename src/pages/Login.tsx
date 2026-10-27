@@ -16,6 +16,14 @@ export function Login() {
   const nextParam = searchParams.get("next");
   const safeNext = nextParam && nextParam.startsWith("/") && !nextParam.startsWith("//") ? nextParam : null;
 
+  // Friendly text for Google sign-in failures bounced back from /api/auth/google*.
+  const oauthError = searchParams.get("error");
+  const oauthMessage = oauthError?.startsWith("google")
+    ? oauthError === "google_not_configured"
+      ? "Google sign-in isn't switched on yet — use your email and password below."
+      : "Google sign-in didn't complete — try again, or use your email and password below."
+    : null;
+
   const onSubmit = (e: FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -34,8 +42,23 @@ export function Login() {
       <Seo title="Login — referrals.live" description="Access your referrals.live dashboard." path="/login" />
       <div className="text-xs font-semibold uppercase tracking-[0.25em] text-neon">Account</div>
       <h1 className="font-display text-4xl font-extrabold text-white">Login</h1>
-      <p className="mt-3 text-sm text-muted">Log in with your email and password to manage referrals, Pro placement, and chat access.</p>
-      <form onSubmit={onSubmit} className="mt-8 glass space-y-4 rounded-3xl border border-white/10 p-6">
+      <p className="mt-3 text-sm text-muted">Log in to manage your referrals, your dashboard links, and Premium placement.</p>
+      {oauthMessage ? (
+        <div className="mt-4 rounded-2xl border border-gold/40 bg-gold/10 px-4 py-3 text-sm text-gold">{oauthMessage}</div>
+      ) : null}
+      <div className="mt-8">
+        <a
+          href="/api/auth/google"
+          className="flex w-full items-center justify-center gap-3 rounded-2xl border border-white/15 bg-white px-4 py-3 text-sm font-semibold text-black transition hover:brightness-95"
+        >
+          <span aria-hidden className="font-display text-base font-extrabold text-[#4285F4]">G</span>
+          Continue with Google
+        </a>
+        <div className="my-4 flex items-center gap-3 text-[11px] uppercase tracking-widest text-muted">
+          <span className="h-px flex-1 bg-white/10" /> or email <span className="h-px flex-1 bg-white/10" />
+        </div>
+      </div>
+      <form onSubmit={onSubmit} className="glass space-y-4 rounded-3xl border border-white/10 p-6">
         <label className="block text-xs uppercase tracking-wide text-muted">
           Email
           <input
