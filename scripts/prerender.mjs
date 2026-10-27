@@ -463,6 +463,38 @@ builders['/testimonials'] = () => ({
     </main>`,
 })
 
+// Premium — same defect class as /testimonials: the generic builder scooped
+// JSX ternary fragments (and both checkout state strings) into the snapshot
+// (fleet audit FAIL #4, 2026-10-27). Dedicated builder with the page's real
+// static copy: single $3.99/mo tier (Boss-fixed 2026-10-27), member dashboard,
+// homepage member boxes. Checkout state is dynamic and intentionally absent
+// from the snapshot — the live app renders the real checkout or waitlist.
+builders['/premium'] = () => ({
+  title: 'Go Premium — referrals.live',
+  description:
+    'Premium membership is $3.99/mo: a dashboard for your best referral links, placement in the homepage member boxes, featured pins, tracked clicks, and priority ranking.',
+  inner: `<main>
+      <p>For posters</p>
+      <h1>Your links. On the homepage.</h1>
+      <p>Free accounts keep their links private. Premium members get a dashboard to add and manage their best referral links — and those links appear in the member boxes on the homepage, directly under the featured carousel, where visitors actually look.</p>
+      <section>
+        <h2>What Premium includes</h2>
+        <p>A member dashboard to add and manage your best referral links.</p>
+        <p>Your links shown in the member boxes on the homepage, under the featured carousel.</p>
+        <p>Pin 2 featured placements so your best offers stand out.</p>
+        <p>Tracked redirects with click stats, so you know what is converting.</p>
+        <p>Priority ranking on public listings.</p>
+        <p>Post in the live community chat and tip other posters.</p>
+      </section>
+      <section>
+        <h2>One plan, one price</h2>
+        <p>Premium is $3.99 per month. Monthly only — no annual upsell, no tiers. Cancel anytime; your links stay on your private board. Browsing referrals.live is free forever.</p>
+        <p>To post a link publicly you attest that the program allows public posting — programs that bar it are held out of the homepage boxes.</p>
+        <p><a href="/register">Create a free account</a> · <a href="/browse">Browse referral programs</a> · <a href="/about">About referrals.live</a></p>
+      </section>
+    </main>`,
+})
+
 // Static pages whose copy lives in their page component (with <Seo> meta).
 const STATIC_PAGES = {
   '/about': 'About.tsx',
@@ -471,7 +503,6 @@ const STATIC_PAGES = {
   '/terms': 'Terms.tsx',
   '/disclosure': 'Disclosure.tsx',
   '/disclaimer': 'Disclaimer.tsx',
-  '/premium': 'Premium.tsx',
   '/submit': 'Submit.tsx',
   '/analytics': 'Analytics.tsx',
 }
