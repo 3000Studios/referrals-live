@@ -13,8 +13,17 @@ type Props = {
 const DEFAULT_OG =
   "https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&w=1200&q=80&fm=jpg";
 
+// Pages are served in trailing-slash form (Cloudflare Pages 308s the
+// no-slash form to it), so canonical/og:url must use that same form.
+// Asset URLs (favicon, images) keep going through absoluteUrl() untouched.
+function pageUrl(path: string) {
+  if (path === "/" || path.endsWith("/")) return absoluteUrl(path);
+  const lastSegment = path.slice(path.lastIndexOf("/") + 1);
+  return absoluteUrl(lastSegment.includes(".") ? path : `${path}/`);
+}
+
 export function Seo({ title, description, path, image = DEFAULT_OG, article }: Props) {
-  const url = absoluteUrl(path);
+  const url = pageUrl(path);
   const img = image.startsWith("http") ? image : absoluteUrl(image);
   const org = JSON.stringify(jsonLdOrganization());
   const site = JSON.stringify(jsonLdWebSite());

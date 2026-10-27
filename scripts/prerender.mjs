@@ -561,7 +561,7 @@ for (const route of [...new Set(routes)]) {
   writeRoute(shell, route, {
     title,
     description,
-    canonical: `${SITE_URL}${route === '/' ? '/' : route}`,
+    canonical: `${SITE_URL}${route === '/' ? '/' : `${route}/`}`,
     inner,
   })
 }
