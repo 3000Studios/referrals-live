@@ -8,7 +8,7 @@ import { sortByTrending } from "@/lib/trending";
 import { categories } from "@/data/categories";
 import { EmailInlineCapture } from "@/components/growth/EmailInlineCapture";
 import { AdSlot } from "@/components/monetization/AdSlot";
-import { MUSE_INVITE_URL, HONEY_REF_URL } from "@/data/featured";
+import { MUSE_INVITE_URL, HONEY_REF_URL, SOFI_CRYPTO_URL } from "@/data/featured";
 import { HERO_VIDEO, videoForCategory } from "@/data/media";
 
 const FAQS = [
@@ -176,6 +176,38 @@ export function Home() {
           className="shrink-0 rounded-2xl bg-gradient-to-r from-gold to-amber-500 px-7 py-3.5 text-sm font-bold text-black shadow-gold transition hover:brightness-110 active:scale-95"
         >
           Join Honey — it's free →
+        </a>
+      </section>
+
+      {/* ================= SOFI CRYPTO SPOTLIGHT ================= */}
+      <section className="mt-8 flex flex-col items-center gap-5 rounded-3xl border border-gold/25 bg-gradient-to-r from-gold/10 via-transparent to-gold/10 px-6 py-6 md:flex-row md:px-10">
+        <img
+          src="https://www.google.com/s2/favicons?domain=sofi.com&sz=256"
+          alt="SoFi"
+          className="h-16 w-16 rounded-2xl bg-white/95 object-contain p-2"
+          loading="lazy"
+          decoding="async"
+        />
+        <div className="flex-1 text-center md:text-left">
+          <div className="text-[10px] font-bold uppercase tracking-[0.25em] text-gold">Owner's crypto pick</div>
+          <h2 className="mt-1 font-display text-2xl font-bold text-white">SoFi Crypto — get $25 in SOFID</h2>
+          <p className="mt-1 text-sm text-white/70">
+            Open a SoFi Crypto account through the owner's invite link and make a purchase of $25 or
+            more within 30 days, and <span className="font-semibold text-white">you get $25 in SOFID</span> —
+            the owner gets $50 in SOFID. Terms apply. This is the owner's personal invite link,
+            labeled like every owner link on this site.
+          </p>
+          <Link to="/browse?cat=crypto" className="mt-2 inline-block text-xs font-semibold text-gold hover:text-white">
+            See all crypto deals →
+          </Link>
+        </div>
+        <a
+          href={SOFI_CRYPTO_URL}
+          target="_blank"
+          rel="sponsored noopener noreferrer"
+          className="shrink-0 rounded-2xl bg-gradient-to-r from-gold to-amber-500 px-7 py-3.5 text-sm font-bold text-black shadow-gold transition hover:brightness-110 active:scale-95"
+        >
+          Get $25 in SOFID →
         </a>
       </section>
 
