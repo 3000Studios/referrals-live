@@ -38,6 +38,8 @@ Two ways to accept money for the $3.99/mo Premium plan (Boss-fixed price 2026-10
 
 The Premium page tries the tracked checkout first for logged-in users and automatically falls back to the payment link if the backend isn't configured.
 
+**Live status (2026-10-28):** the $3.99/mo Premium Payment Link is created in Stripe (live mode) and wired via `VITE_STRIPE_PAYMENT_LINK` in the Pages project env (production + preview); the Premium page's guest checkout routes to it. The retired $7.99/mo link was deactivated in Stripe and must not be reintroduced. Full link record (IDs, URLs, redirect target): `PAYMENT-LINKS.md` in the desk workspace (`~/workspace/referrals-live/`).
+
 ## Stock imagery APIs (optional)
 
 - `VITE_UNSPLASH_ACCESS_KEY`
