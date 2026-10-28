@@ -70,8 +70,14 @@ export async function onRequestGet(context: { request: Request; env: Env; params
         PAYPAL_EMAIL: String(owner?.paypal_email ?? ""),
         VENMO_HANDLE: String(owner?.venmo_handle ?? ""),
         STRIPE_EMAIL: String(owner?.stripe_email ?? ""),
-        DEFAULT_REFERRAL_CODE: String(owner?.default_referral_code ?? ""),
       };
+      // The owner's global default referral code is deliberately NOT part of
+      // the substitutable profile: a global-default placeholder in a
+      // per-domain attribution row now resolves to "" and is dropped by the
+      // empty-value skip below, instead of spraying one program's code into
+      // every other program's ref= parameter. US Mobile contamination fix,
+      // 2026-10-28.
+      const defaultCode = String(owner?.default_referral_code ?? "");
       const params = JSON.parse(attr.params_json) as Record<string, string>;
       Object.entries(params).forEach(([k, v]) => {
         if (!k || !v) return;
@@ -82,6 +88,11 @@ export async function onRequestGet(context: { request: Request; env: Env; params
         // US Mobile referral URL) must never be stuffed into another
         // program's ref= parameter. P0 audit FAIL #2, 2026-10-27.
         if (!/^[A-Za-z0-9._~-]+$/.test(resolved)) return;
+        // Belt-and-braces: never stamp the owner's global default code onto
+        // another program's link even when a row stores it as a literal
+        // value. The only exempt program is the one that owns that code
+        // (ref-usmobile), whose own destination carries it natively.
+        if (defaultCode && resolved === defaultCode && id !== "ref-usmobile") return;
         u.searchParams.set(k, resolved);
       });
       u.searchParams.set("utm_source", "referrals_live");
