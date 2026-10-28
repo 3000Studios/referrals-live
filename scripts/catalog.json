@@ -48,22 +48,6 @@
   "clicks": 0
  },
  {
-  "id": "ref-coinbase",
-  "title": "Coinbase \u2014 Invite Friends",
-  "description": "Coinbase official referral program page: how to earn crypto bonuses by inviting friends.",
-  "url": "https://www.coinbase.com/legal/international-referral",
-  "category": "crypto",
-  "tags": [
-   "crypto",
-   "exchange",
-   "invite"
-  ],
-  "image": "https://cdn.simpleicons.org/coinbase/0052FF",
-  "createdAt": 1792760080000,
-  "votes": 0,
-  "clicks": 0
- },
- {
   "id": "ref-uberaff",
   "title": "Uber \u2014 Affiliate Program",
   "description": "Affiliate program info for driving signups and rides (official).",
@@ -107,22 +91,6 @@
    "creator"
   ],
   "image": "https://www.google.com/s2/favicons?domain=amazon.com&sz=256",
-  "createdAt": 1792760080000,
-  "votes": 0,
-  "clicks": 0
- },
- {
-  "id": "ref-sofi",
-  "title": "SoFi \u2014 Referral Program",
-  "description": "SoFi official referral program page: how inviting friends to SoFi checking, investing, and loans works.",
-  "url": "https://www.sofi.com/referral-program/",
-  "category": "fintech",
-  "tags": [
-   "fintech",
-   "banking",
-   "referrals"
-  ],
-  "image": "https://www.google.com/s2/favicons?domain=sofi.com&sz=256",
   "createdAt": 1792760080000,
   "votes": 0,
   "clicks": 0

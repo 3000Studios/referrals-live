@@ -62,16 +62,8 @@ const curated: Curated[] = [
   // Added 2026-10-11 (owner order: add 20+ new best links). Every URL below
   // was fetched and verified live before inclusion — real program pages only,
   // no personal codes, no 404/parked destinations. Mirrors migration 0019.
-  {
-    id: "ref-sofi",
-    title: "SoFi — Referral Program",
-    description: "SoFi official referral program page: how inviting friends to SoFi works.",
-    url: "https://www.sofi.com/referral-program/",
-    category: "fintech",
-    tags: ["fintech", "banking", "referrals"],
-    imageUrl: "https://www.google.com/s2/favicons?domain=sofi.com&sz=256",
-    score: 88,
-  },
+  // ref-sofi was removed 2026-10-28 by owner decision (SoFi is PRIVATE per
+  // standing ruling M49; see migration 0025). Do not re-add it here.
   {
     id: "ref-acorns",
     title: "Acorns — Invite Friends",
