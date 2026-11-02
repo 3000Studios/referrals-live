@@ -687,5 +687,21 @@
   "createdAt": 1793113200000,
   "votes": 0,
   "clicks": 0
+ },
+ {
+  "id": "ref-grant",
+  "title": "Grant \u2014 Cash Advance Referral",
+  "description": "The site owner's Grant referral link: I've been using the Grant app to get cash advances and boost my finances \u2014 join through this invite and you'll get a bonus when you join, under Grant's current referral terms. Grant offers cash advances of $25\u2013$500 with no credit check (eligibility and full terms at grantcash.com/legal).",
+  "url": "https://grantcash.onelink.me/Kt7A?af_xp=referral&pid=user_referral&c=user_referral&deep_link_value=user_referral&deep_link_sub1=UXZME5GPMK",
+  "category": "fintech",
+  "tags": [
+   "fintech",
+   "cash-advance",
+   "referrals"
+  ],
+  "image": "https://www.google.com/s2/favicons?domain=grantcash.com&sz=256",
+  "createdAt": 1793599447711,
+  "votes": 0,
+  "clicks": 0
  }
 ]
