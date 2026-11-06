@@ -703,5 +703,21 @@
   "createdAt": 1793599447711,
   "votes": 0,
   "clicks": 0
+ },
+ {
+  "id": "ref-freelancer",
+  "title": "Freelancer — Reference Invitation",
+  "description": "The site owner's Freelancer reference-invitation link: leave a reference for 3000 Studios (username TopPickJeremy) or connect about project work through his Freelancer profile.",
+  "url": "https://www.freelancer.com/external-references/invitation/TopPickJeremy",
+  "category": "saas",
+  "tags": [
+   "freelance",
+   "work",
+   "referrals"
+  ],
+  "image": "https://www.google.com/s2/favicons?domain=freelancer.com&sz=256",
+  "createdAt": 1793941200000,
+  "votes": 0,
+  "clicks": 0
  }
 ]

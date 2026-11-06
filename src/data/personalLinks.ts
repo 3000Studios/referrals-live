@@ -39,6 +39,39 @@ export const personalLinks: PersonalLink[] = [
     image: "https://www.google.com/s2/favicons?domain=joinhoney.com&sz=256",
     ctaLabel: "Join Honey — it's free",
   },
+  {
+    id: "owner-usmobile",
+    name: "US Mobile",
+    bonus: "Referral rewards on prepaid phone plans",
+    terms:
+      "Join US Mobile through the owner's link and referral rewards apply under US Mobile's current referral terms. Prepaid phone plans on major US networks.",
+    categoryLabel: "Mobile & Wireless",
+    url: "https://www.usmobile.com/referrals?referrer=B15A26AD&name=Incoming&utm_page_url=monster_referral",
+    image: "https://www.google.com/s2/favicons?domain=usmobile.com&sz=256",
+    ctaLabel: "Join US Mobile",
+  },
+  {
+    id: "owner-grant",
+    name: "Grant",
+    bonus: "Get a bonus when you join",
+    terms:
+      "Join through the owner's invite and you'll get a bonus when you join, under Grant's current referral terms. Grant offers cash advances of $25–$500 with no credit check (eligibility and full terms at grantcash.com/legal).",
+    categoryLabel: "Fintech & Banking",
+    url: "https://grantcash.onelink.me/Kt7A?af_xp=referral&pid=user_referral&c=user_referral&deep_link_value=user_referral&deep_link_sub1=UXZME5GPMK",
+    image: "https://www.google.com/s2/favicons?domain=grantcash.com&sz=256",
+    ctaLabel: "Get the Grant app",
+  },
+  {
+    id: "owner-freelancer",
+    name: "Freelancer",
+    bonus: "Connect with the owner on Freelancer",
+    terms:
+      "The owner's Freelancer reference-invitation link — leave a reference for 3000 Studios (TopPickJeremy) or connect about project work through his Freelancer profile.",
+    categoryLabel: "SaaS & Tools",
+    url: "https://www.freelancer.com/external-references/invitation/TopPickJeremy",
+    image: "https://www.google.com/s2/favicons?domain=freelancer.com&sz=256",
+    ctaLabel: "Open the invitation",
+  },
   // Harvested owner links (Chime, Rakuten, Discover, …) drop in here as the
   // desk verifies each one against the program's public-posting terms.
 ];
