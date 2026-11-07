@@ -242,6 +242,21 @@ const { blogArticles } = await loadModule(path.join(srcRoot, 'data', 'blogArticl
 const { categories } = await loadModule(path.join(srcRoot, 'data', 'categories.ts'))
 
 const catName = (id) => categories.find((c) => c.id === id)?.name ?? id
+const catDesc = (id) => categories.find((c) => c.id === id)?.description ?? ''
+
+// The only catalog entries whose outbound URL is the site owner's own
+// verified referral link (served to visitors through /offer/:id, the same
+// four links GET /go/:id redirects to). For every other program the catalog
+// URL is the company's own public program page and may be linked as such;
+// these four must never be presented as an "official program page".
+const OWNER_LINK_IDS = new Set([
+  'ref-honey',
+  'ref-usmobile',
+  'ref-grant',
+  'ref-freelancer',
+])
+
+const companyName = (p) => p.title.split(/[—–]/)[0].trim() || p.title
 
 const programCard = (p, heading = 3) => `        <article>
           <h${heading}><a href="/program/${esc(p.id)}">${esc(p.title)}</a></h${heading}>
@@ -331,12 +346,25 @@ ${items
   })
 }
 
-// Program detail pages — one per catalog entry.
+// Program detail pages — one per catalog entry. Beyond the listing summary,
+// each page carries factual orientation a reviewer (or visitor) can verify:
+// how referral programs work in general, what to check before joining, and
+// where the company's own binding terms live. No reward amounts, codes, or
+// payout claims are stated for any program — the catalog does not carry
+// verified figures, so none are printed.
 for (const p of catalog) {
-  builders[`/program/${p.id}`] = () => ({
-    title: `${p.title} — referrals.live`,
-    description: p.description,
-    inner: `<main>
+  builders[`/program/${p.id}`] = () => {
+    const company = companyName(p)
+    const related = catalog
+      .filter((q) => q.category === p.category && q.id !== p.id)
+      .slice(0, 3)
+    const official = OWNER_LINK_IDS.has(p.id)
+      ? `        <p>Current terms, eligibility, and rewards for this program are published by ${esc(company)} and are shown when you open the offer — referrals.live does not set or guarantee them.</p>`
+      : `        <p><a href="${esc(p.url)}" rel="nofollow noopener" target="_blank">Official ${esc(company)} program page</a> — the current terms, eligibility, and rewards, published by ${esc(company)}.</p>`
+    return {
+      title: `${p.title} — referrals.live`,
+      description: p.description,
+      inner: `<main>
       <article>
         <p><a href="/browse">All programs</a> · <a href="/categories">${esc(catName(p.category))}</a></p>
         <h1>${esc(p.title)}</h1>
@@ -344,10 +372,31 @@ for (const p of catalog) {
         ${p.image ? `<p><img src="${esc(p.image)}" alt="${esc(p.title)}" loading="lazy" /></p>` : ''}
         <p>Category: ${esc(catName(p.category))}${p.tags?.length ? ` · Tags: ${esc(p.tags.join(', '))}` : ''}</p>
         <p><a href="/offer/${esc(p.id)}">Get offer</a></p>
+        <h2>About the ${esc(company)} referral program</h2>
+        <p>${esc(p.description)} This listing sits in the ${esc(catName(p.category))} category of the directory — ${esc(catDesc(p.category))} The summary here is orientation only; the binding rules of the program are the ones ${esc(company)} publishes.</p>
+${official}
+        <h2>How referral programs work</h2>
+        <p>Referral programs are run by the companies themselves. A company gives its customers a way to invite other people; if a new customer signs up and meets the program's conditions, the company may reward the inviter, the new customer, or both. The reward, the conditions, and how long anything takes to arrive are all set by the company in its program terms — they are not set by referrals.live, and the company can change or end them at any time.</p>
+        <h2>Before you join</h2>
+        <ul>
+          <li>Read the current terms on the company's program page before signing up — rewards and eligibility change often.</li>
+          <li>Check who counts as a new customer. Many programs exclude existing customers, members of the same household, or self-referrals.</li>
+          <li>Check the qualifying steps and their deadlines. Programs commonly require specific actions — a first purchase, a deposit, or keeping the account open for a set period — inside a limited window.</li>
+          <li>Keep a record of your signup until any reward arrives. Only the company can credit its own program, so a missing reward is a question for ${esc(company)}, not for referrals.live.</li>
+        </ul>
         <p><a href="/disclosure">Affiliate disclosure</a> · <a href="/browse">Browse more programs</a></p>
-      </article>
+      </article>${
+        related.length
+          ? `
+      <section>
+        <h2>More ${esc(catName(p.category))} programs</h2>
+${related.map((q) => programCard(q)).join('\n')}
+      </section>`
+          : ''
+      }
     </main>`,
-  })
+    }
+  }
 }
 
 // Blog index + articles.
