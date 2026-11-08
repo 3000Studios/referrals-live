@@ -719,5 +719,22 @@
   "createdAt": 1793941200000,
   "votes": 0,
   "clicks": 0
+ },
+ {
+  "id": "ref-g2a",
+  "title": "G2A — Game Keys & Digital Deals",
+  "description": "The site owner's G2A referral link: shop game keys, gift cards and digital software on the G2A marketplace through this link — referral rewards apply under G2A's current referral terms.",
+  "url": "https://www.g2a.com/n/reflink-b5f89b7398",
+  "category": "ecommerce",
+  "tags": [
+   "gaming",
+   "game-keys",
+   "marketplace",
+   "referrals"
+  ],
+  "image": "https://www.google.com/s2/favicons?domain=g2a.com&sz=256",
+  "createdAt": 1794165841151,
+  "votes": 0,
+  "clicks": 0
  }
 ]

@@ -72,6 +72,17 @@ export const personalLinks: PersonalLink[] = [
     image: "https://www.google.com/s2/favicons?domain=freelancer.com&sz=256",
     ctaLabel: "Open the invitation",
   },
+  {
+    id: "owner-g2a",
+    name: "G2A",
+    bonus: "Game keys, gift cards & software deals",
+    terms:
+      "Shop G2A through the owner's link — game keys, gift cards and digital software on the G2A marketplace; referral rewards apply under G2A's current referral terms.",
+    categoryLabel: "Gaming & Marketplace",
+    url: "https://www.g2a.com/n/reflink-b5f89b7398",
+    image: "https://www.google.com/s2/favicons?domain=g2a.com&sz=256",
+    ctaLabel: "Shop G2A deals",
+  },
   // Harvested owner links (Chime, Rakuten, Discover, …) drop in here as the
   // desk verifies each one against the program's public-posting terms.
 ];
