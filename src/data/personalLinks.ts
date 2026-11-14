@@ -83,6 +83,17 @@ export const personalLinks: PersonalLink[] = [
     image: "https://www.google.com/s2/favicons?domain=g2a.com&sz=256",
     ctaLabel: "Shop G2A deals",
   },
+  {
+    id: "owner-zo",
+    name: "Zo Computer",
+    bonus: "$10 in AI credits when you subscribe",
+    terms:
+      "Join Zo through the owner's referral link and subscribe to a paid plan: you get $10 in AI credits and the owner earns $10 cash, under Zo's current referral terms. Zo is a personal cloud computer with AI built in — an always-on computer of your own for building sites, apps and automations.",
+    categoryLabel: "AI Tools",
+    url: "https://zocomputer.substack.com/p/earn-cash-for-everyone-you-subscribe?r=72373s",
+    image: "https://www.google.com/s2/favicons?domain=zo.computer&sz=256",
+    ctaLabel: "Try Zo Computer",
+  },
   // Harvested owner links (Chime, Rakuten, Discover, …) drop in here as the
   // desk verifies each one against the program's public-posting terms.
 ];
