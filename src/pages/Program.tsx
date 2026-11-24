@@ -51,6 +51,7 @@ export function Program() {
 
   useEffect(() => {
     if (!id) return;
+    let current = true;
     setProgram(null);
     setGuide(undefined);
     setError(null);
@@ -58,16 +59,23 @@ export function Program() {
       .then((r) => r.json())
       .then((data) => {
         if (!data?.ok) throw new Error(data?.error ?? "Failed to load");
-        setProgram(data.program);
+        if (current) setProgram(data.program);
       })
-      .catch((err) => setError(err instanceof Error ? err.message : "Failed to load"));
+      .catch((err) => {
+        if (current) setError(err instanceof Error ? err.message : "Failed to load");
+      });
     // Guides load as their own chunk, only on program pages.
     import("@/data/programGuides.json")
       .then((m) => {
         const all = (m.default ?? m) as unknown as Record<string, ProgramGuide>;
-        setGuide(all[id] ?? null);
+        if (current) setGuide(all[id] ?? null);
       })
-      .catch(() => setGuide(null));
+      .catch(() => {
+        if (current) setGuide(null);
+      });
+    return () => {
+      current = false;
+    };
   }, [id]);
 
   if (error) {

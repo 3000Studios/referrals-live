@@ -1,7 +1,7 @@
 import type { Env } from "../_lib";
 import { json } from "../_lib";
 import { requireUser } from "../_session";
-import { PREMIUM_PRICE_ID, normalizeStatus, periodEndMs, stripeGet, upsertSubscription } from "./webhook";
+import { isPremiumSubscription, normalizeStatus, periodEndMs, stripeGet, upsertSubscription } from "./webhook";
 
 /**
  * Lets a member cancel (at the end of the paid period) or resume their own
@@ -10,18 +10,14 @@ import { PREMIUM_PRICE_ID, normalizeStatus, periodEndMs, stripeGet, upsertSubscr
  */
 
 async function loadOwnSubscription(env: Env, userId: string) {
-  const row = await env.DB.prepare("SELECT stripe_customer_id, stripe_subscription_id FROM subscriptions WHERE user_id=? LIMIT 1")
+  const row = await env.DB.prepare("SELECT stripe_customer_id, stripe_sub_id FROM subscriptions WHERE user_id=? LIMIT 1")
     .bind(userId)
     .first<any>();
-  const subId = String(row?.stripe_subscription_id ?? "");
+  const subId = String(row?.stripe_sub_id ?? "");
   if (!/^sub_[A-Za-z0-9]{6,120}$/.test(subId)) return null;
   const sub = await stripeGet(env, `/v1/subscriptions/${encodeURIComponent(subId)}`);
   if (!sub?.id) return null;
-  const prices = new Set([PREMIUM_PRICE_ID, env.STRIPE_PRICE_ID].filter(Boolean));
-  const ours =
-    sub?.metadata?.site === "referrals.live" ||
-    String(sub?.metadata?.user_id ?? "") === userId ||
-    ((sub?.items?.data ?? []) as any[]).some((it) => prices.has(it?.price?.id));
+  const ours = isPremiumSubscription(env, sub);
   const sameCustomer = !row?.stripe_customer_id || String(sub.customer ?? "") === String(row.stripe_customer_id);
   return ours && sameCustomer ? { sub, customerId: String(sub.customer ?? row?.stripe_customer_id ?? "") || null } : null;
 }

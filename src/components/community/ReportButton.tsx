@@ -42,7 +42,7 @@ export function ReportButton({ referralId, className }: { referralId: string; cl
   }
 
   return (
-    <div className={clsx("relative", className)}>
+    <div className={clsx("flex flex-col items-end", className)}>
       <button
         type="button"
         aria-expanded={open}
@@ -61,7 +61,7 @@ export function ReportButton({ referralId, className }: { referralId: string; cl
       {open ? (
         <div
           role="menu"
-          className="absolute bottom-full right-0 z-30 mb-2 w-60 rounded-2xl border border-white/10 bg-[rgba(6,8,16,0.97)] p-2 shadow-2xl backdrop-blur-xl"
+          className="mt-2 w-full min-w-[11rem] max-w-[15rem] rounded-2xl border border-white/10 bg-[rgba(6,8,16,0.97)] p-2 shadow-2xl backdrop-blur-xl"
           onClick={(e) => e.stopPropagation()}
         >
           <div className="px-2 pb-1 pt-1 text-[10px] font-bold uppercase tracking-[0.2em] text-white/50">Why report it?</div>

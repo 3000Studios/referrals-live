@@ -3,9 +3,9 @@ import { json, now } from "../_lib";
 import { requireUser } from "../_session";
 import {
   PREMIUM_PAYMENT_LINK_ID,
-  PREMIUM_PRICE_ID,
   activateFromCheckout,
   isOurCheckout,
+  isPremiumSubscription,
   normalizeStatus,
   periodEndMs,
   stripeGet,
@@ -15,8 +15,8 @@ import {
 /**
  * Re-checks Stripe for the signed-in member's Premium subscription and
  * updates their access. Runs after checkout returns, so access never
- * depends on the webhook arriving first, and links Payment Link checkouts
- * that were paid with the member's account email.
+ * depends on the webhook arriving first. Only checkouts stamped with this
+ * member's account id count; a payer email never links a payment.
  */
 export async function onRequestPost(context: { request: Request; env: Env }) {
   const user = await requireUser(context.request, context.env);
@@ -24,16 +24,24 @@ export async function onRequestPost(context: { request: Request; env: Env }) {
   if (!context.env.STRIPE_SECRET_KEY) return json({ ok: false, error: "Billing not configured" }, { status: 503 });
 
   const db = context.env.DB;
+
+  // Each sync can make several Stripe calls on a shared account: allow 6 per 10 minutes.
+  const since = now() - 10 * 60 * 1000;
+  const recent = await db
+    .prepare("SELECT COUNT(*) AS n FROM audit_log WHERE user_id=? AND action='billing_sync' AND created_at>?")
+    .bind(user.id, since)
+    .first<any>()
+    .catch(() => null);
+  if (Number(recent?.n ?? 0) >= 6) return status(context.env, user.id);
+  await db
+    .prepare("INSERT INTO audit_log (id, user_id, action, meta_json, created_at) VALUES (?, ?, ?, ?, ?)")
+    .bind(`audit-${crypto.randomUUID()}`, user.id, "billing_sync", "{}", now())
+    .run()
+    .catch(() => null);
+
   const body = (await context.request.json().catch(() => ({}))) as { sessionId?: unknown };
   const sessionId = typeof body.sessionId === "string" && /^cs_[A-Za-z0-9_]{10,200}$/.test(body.sessionId) ? body.sessionId : "";
-  const email = user.email.trim().toLowerCase();
-
-  const ownsSession = (s: any) => {
-    const ref = String(s?.client_reference_id ?? s?.metadata?.user_id ?? "");
-    if (ref) return ref === user.id;
-    const payer = String(s?.customer_details?.email ?? s?.customer_email ?? "").trim().toLowerCase();
-    return Boolean(payer) && payer === email;
-  };
+  const ownsSession = (s: any) => String(s?.client_reference_id ?? s?.metadata?.user_id ?? "") === user.id;
 
   // 1. The session Stripe just returned from.
   if (sessionId) {
@@ -49,13 +57,7 @@ export async function onRequestPost(context: { request: Request; env: Env }) {
   const customerId = row?.stripe_customer_id as string | undefined;
   if (customerId) {
     const subs = await stripeGet(context.env, `/v1/subscriptions?customer=${encodeURIComponent(customerId)}&status=all&limit=10`);
-    const prices = new Set([PREMIUM_PRICE_ID, context.env.STRIPE_PRICE_ID].filter(Boolean));
-    const list = ((subs?.data ?? []) as any[]).filter(
-      (s) =>
-        s?.metadata?.site === "referrals.live" ||
-        String(s?.metadata?.user_id ?? "") === user.id ||
-        ((s?.items?.data ?? []) as any[]).some((it) => prices.has(it?.price?.id)),
-    );
+    const list = ((subs?.data ?? []) as any[]).filter((s) => isPremiumSubscription(context.env, s));
     const best =
       list.find((s) => normalizeStatus(s.status) === "active") ??
       list.sort((a, b) => Number(b.created ?? 0) - Number(a.created ?? 0))[0];

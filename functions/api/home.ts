@@ -10,7 +10,7 @@ export async function onRequestGet(context: { request: Request; env: Env }) {
      FROM featured_slots f
      JOIN referrals r ON r.id=f.referral_id
      LEFT JOIN referral_metrics m ON m.referral_id=r.id
-     WHERE f.ends_at>? 
+     WHERE f.ends_at>? AND r.status='public' AND r.terms_flagged=0 AND r.terms_attested=1
      ORDER BY f.created_at DESC
      LIMIT 12`,
   )

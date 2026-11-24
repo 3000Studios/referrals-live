@@ -39,6 +39,9 @@ async function verifyStripeWebhook(env: Env, raw: ArrayBuffer, sigHeader: string
   if (!env.STRIPE_WEBHOOK_SECRET) return false;
   const parsed = parseStripeSig(sigHeader);
   if (!parsed) return false;
+  // Reject replays of old signed events (Stripe's libraries use 5 minutes).
+  const ageSec = Math.abs(Date.now() / 1000 - Number(parsed.t));
+  if (!Number.isFinite(ageSec) || ageSec > 300) return false;
   const payloadToSign = new TextEncoder().encode(`${parsed.t}.`).buffer;
   // concatenate `${t}.` + raw
   const combined = new Uint8Array(payloadToSign.byteLength + raw.byteLength);
@@ -60,17 +63,18 @@ type Db = D1Database;
 /**
  * The Stripe account serves several 3000 Studios sites and every webhook
  * endpoint receives every event, so only act on checkouts that belong to
- * referrals.live: ours carry a referrals.live user id, the site metadata,
- * or the Premium Payment Link.
+ * referrals.live: our own Checkout Sessions (site metadata) or the Premium
+ * Payment Link. Access is granted only after the subscription itself is
+ * confirmed to be on the Premium price (see isPremiumSubscription).
  */
 export function isOurCheckout(obj: any) {
-  const ref = String(obj?.client_reference_id ?? "");
-  return (
-    ref.startsWith("user-") ||
-    Boolean(obj?.metadata?.user_id) ||
-    obj?.metadata?.site === "referrals.live" ||
-    obj?.payment_link === PREMIUM_PAYMENT_LINK_ID
-  );
+  return obj?.metadata?.site === "referrals.live" || obj?.payment_link === PREMIUM_PAYMENT_LINK_ID;
+}
+
+/** True only when the subscription has an item on the referrals.live Premium price. */
+export function isPremiumSubscription(env: Env, sub: any) {
+  const prices = new Set([PREMIUM_PRICE_ID, env.STRIPE_PRICE_ID].filter(Boolean));
+  return ((sub?.items?.data ?? []) as any[]).some((it) => prices.has(it?.price?.id));
 }
 
 /** current_period_end moved onto subscription items in API 2025-03 (basil). */
@@ -88,17 +92,12 @@ export function normalizeStatus(status: string | undefined) {
 }
 
 async function userIdForCheckout(db: Db, obj: any): Promise<string | null> {
+  // Only the account id the site stamped on the checkout. Emails are not
+  // verified at signup, so a payer's email never links a payment.
   const ref = String(obj?.client_reference_id ?? obj?.metadata?.user_id ?? "");
-  if (ref.startsWith("user-")) {
-    const row = await db.prepare("SELECT id FROM users WHERE id=? LIMIT 1").bind(ref).first<any>();
-    if (row?.id) return String(row.id);
-  }
-  const email = String(obj?.customer_details?.email ?? obj?.customer_email ?? "").trim().toLowerCase();
-  if (email) {
-    const row = await db.prepare("SELECT id FROM users WHERE lower(email)=? LIMIT 1").bind(email).first<any>();
-    if (row?.id) return String(row.id);
-  }
-  return null;
+  if (!ref.startsWith("user-")) return null;
+  const row = await db.prepare("SELECT id FROM users WHERE id=? LIMIT 1").bind(ref).first<any>();
+  return row?.id ? String(row.id) : null;
 }
 
 export async function stripeGet(env: Env, path: string) {
@@ -141,16 +140,12 @@ export async function activateFromCheckout(env: Env, obj: any): Promise<string |
   const subscriptionId = (typeof obj?.subscription === "string" ? obj.subscription : obj?.subscription?.id) ?? null;
   const customerId = (typeof obj?.customer === "string" ? obj.customer : obj?.customer?.id) ?? null;
 
-  let status = "active";
-  // Provisional end date; replaced by the subscription's real period end.
-  let periodEnd: number | null = now() + 35 * 24 * 60 * 60 * 1000;
-  if (subscriptionId) {
-    const sub = await stripeGet(env, `/v1/subscriptions/${encodeURIComponent(subscriptionId)}`);
-    if (sub) {
-      status = normalizeStatus(sub.status);
-      periodEnd = periodEndMs(sub) ?? periodEnd;
-    }
-  }
+  if (!subscriptionId) return null;
+  // Confirm with Stripe that this is a referrals.live Premium subscription.
+  const sub = await stripeGet(env, `/v1/subscriptions/${encodeURIComponent(subscriptionId)}`);
+  if (!sub || !isPremiumSubscription(env, sub)) return null;
+  const status = normalizeStatus(sub.status);
+  const periodEnd = periodEndMs(sub) ?? now() + 35 * 24 * 60 * 60 * 1000;
   await upsertSubscription(db, userId, { customerId, subscriptionId, status, periodEnd });
   return userId;
 }
@@ -207,14 +202,18 @@ export async function onRequestPost(context: { request: Request; env: Env }) {
         row = await db.prepare("SELECT id AS user_id FROM users WHERE id=? LIMIT 1").bind(metaUser).first<any>();
       }
       if (row?.user_id) {
-        const status = type === "customer.subscription.deleted" ? "inactive" : normalizeStatus(obj?.status);
-        const periodEnd = type === "customer.subscription.deleted" ? 0 : periodEndMs(obj);
-        await upsertSubscription(db, String(row.user_id), {
-          customerId: customerId ?? null,
-          subscriptionId,
-          status,
-          periodEnd,
-        });
+        // Events can arrive out of order, so read the subscription as it is now.
+        const live = (await stripeGet(context.env, `/v1/subscriptions/${encodeURIComponent(subscriptionId)}`)) ?? obj;
+        if (isPremiumSubscription(context.env, live)) {
+          const ended = live?.status === "canceled" || (live === obj && type === "customer.subscription.deleted");
+          const status = ended ? "inactive" : normalizeStatus(live?.status);
+          await upsertSubscription(db, String(row.user_id), {
+            customerId: customerId ?? null,
+            subscriptionId,
+            status,
+            periodEnd: ended ? 0 : periodEndMs(live),
+          });
+        }
       }
     }
   }

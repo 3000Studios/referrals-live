@@ -69,7 +69,10 @@ export const SHORTENER_HOSTS = new Set([
 
 const SITE_HOSTS = new Set(["referrals.live", "www.referrals.live"]);
 
-const URL_RE = /\bhttps?:\/\/[^\s<>"']+|\bwww\.[^\s<>"']+|\b[a-z0-9-]+\.(com|net|org|io|co|app|me|ly|gg|xyz|link|info|biz|us|ai)(\/[^\s<>"']*)?\b/gi;
+// Full URLs, www. hosts, and bare domains with any 2-24 letter ending
+// ("scam.shop", "evil.ru/x"). Bare words like "node.js" also match; that
+// only means a free member's message waits for a referrals.live-only check.
+const URL_RE = /\bhttps?:\/\/[^\s<>"']+|\bwww\.[^\s<>"']+|\b(?:[a-z0-9-]+\.)+[a-z]{2,24}\b(?:\/[^\s<>"']*)?/gi;
 
 export function findUrls(text: string): string[] {
   return Array.from(text.matchAll(URL_RE)).map((m) => m[0]);
@@ -78,7 +81,7 @@ export function findUrls(text: string): string[] {
 function hostOf(raw: string): string | null {
   try {
     const u = new URL(/^https?:\/\//i.test(raw) ? raw : `https://${raw}`);
-    return u.hostname.toLowerCase();
+    return u.hostname.toLowerCase().replace(/\.+$/, "");
   } catch {
     return null;
   }
@@ -154,7 +157,7 @@ export function checkListing(input: ListingInput): Verdict {
   if (!urlCheck.ok) return urlCheck;
   const imageCheck = checkHttpsUrl(input.imageUrl.trim(), "Image URL");
   if (!imageCheck.ok) return imageCheck;
-  const host = new URL(input.url.trim()).hostname.toLowerCase().replace(/^www\./, "");
+  const host = new URL(input.url.trim()).hostname.toLowerCase().replace(/\.+$/, "").replace(/^www\./, "");
   if (SHORTENER_HOSTS.has(host)) {
     return { ok: false, reason: "Link shorteners aren't allowed. Paste the program's full referral link." };
   }

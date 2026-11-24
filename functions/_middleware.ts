@@ -7,15 +7,13 @@
 // check too — every prerendered id is in the catalog — and their shield
 // rules in _redirects still serve their static HTML via next().
 async function programExists(env: any, id: string): Promise<boolean> {
-  const ts = Date.now();
   const referral = await env.DB.prepare(
     `SELECT r.id
      FROM referrals r
-     LEFT JOIN featured_slots f ON f.referral_id=r.id AND f.ends_at>?
-     WHERE r.id=? AND (r.status='public' OR f.referral_id IS NOT NULL)
+     WHERE r.id=? AND r.status='public' AND (r.user_id='user-system' OR r.terms_flagged=0)
      LIMIT 1`,
   )
-    .bind(ts, id)
+    .bind(id)
     .first();
   if (referral) return true;
   const ingested = await env.DB.prepare("SELECT id FROM ingested_offers WHERE id=? LIMIT 1")

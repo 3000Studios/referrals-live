@@ -939,7 +939,7 @@ export class ChatRoom {
       `SELECT r.title, COALESCE(m.votes,0) AS votes
        FROM referrals r
        LEFT JOIN referral_metrics m ON m.referral_id=r.id
-       WHERE r.status='public'
+       WHERE r.status='public' AND (r.user_id='user-system' OR r.terms_flagged=0)
        ORDER BY COALESCE(m.votes,0) DESC, COALESCE(m.clicks,0) DESC
        LIMIT 1`,
     ).first<any>();

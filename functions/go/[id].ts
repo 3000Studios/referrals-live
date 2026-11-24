@@ -20,11 +20,10 @@ async function resolveTargetUrl(env: Env, id: string, ts: number): Promise<Targe
     .prepare(
       `SELECT r.url AS url, r.user_id AS user_id
        FROM referrals r
-       LEFT JOIN featured_slots f ON f.referral_id=r.id AND f.ends_at>?
-       WHERE r.id=? AND r.terms_flagged=0 AND (r.status='public' OR f.referral_id IS NOT NULL)
+       WHERE r.id=? AND r.status='public' AND r.terms_flagged=0
        LIMIT 1`,
     )
-    .bind(ts, id)
+    .bind(id)
     .first<any>();
   if (referral?.url) {
     await env.DB

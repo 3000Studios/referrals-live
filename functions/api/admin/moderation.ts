@@ -61,8 +61,15 @@ export async function onRequestPost(context: { request: Request; env: Env }) {
   else if (action === "make_private") update = db.prepare("UPDATE referrals SET status='private', updated_at=? WHERE id=?").bind(ts, id);
   else return badRequest("Unknown action.");
 
+  // Approve/restore start the report count fresh; hide/make_private drop any Top Spot.
+  const cleanup =
+    action === "approve" || action === "restore"
+      ? db.prepare("DELETE FROM listing_reports WHERE referral_id=?").bind(id)
+      : db.prepare("DELETE FROM featured_slots WHERE referral_id=?").bind(id);
+
   await db.batch([
     update,
+    cleanup,
     db
       .prepare("INSERT INTO moderation_log (id, referral_id, actor, action, note, created_at) VALUES (?, ?, ?, ?, ?, ?)")
       .bind(uid("mod"), id, user.id, action, null, ts),
