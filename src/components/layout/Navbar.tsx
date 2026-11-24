@@ -66,7 +66,7 @@ export function Navbar() {
       style={{ backgroundColor: headerBg }}
       animate={hidden ? { y: -86, opacity: 0, rotateX: -14 } : { y: 0, opacity: 1, rotateX: 0 }}
       transition={{ duration: 0.28, ease: "easeOut" }}
-      className={clsx("sticky inset-x-0 top-10 z-50 border-b border-white/8 backdrop-blur-2xl transition-colors [box-shadow:0_4px_24px_rgba(0,0,0,0.5),0_1px_0_rgba(255,255,255,0.04)]")}
+      className={clsx("sticky inset-x-0 top-10 z-50 border-b border-white/[0.08] backdrop-blur-2xl transition-colors [box-shadow:0_4px_24px_rgba(0,0,0,0.5),0_1px_0_rgba(255,255,255,0.04)]")}
       onMouseMove={(e) => updatePointer(e.clientX, e.clientY, e.currentTarget.getBoundingClientRect())}
       onTouchMove={(e) => {
         const t = e.touches[0];
@@ -220,7 +220,7 @@ export function Navbar() {
           animate={{ height: "auto", opacity: 1, y: 0 }}
           exit={{ height: 0, opacity: 0, y: -8 }}
           transition={{ duration: 0.28, ease: "easeOut" }}
-          className="border-t border-white/8 bg-[#030407]/98 backdrop-blur-2xl lg:hidden"
+          className="border-t border-white/[0.08] bg-[#030407]/98 backdrop-blur-2xl lg:hidden"
         >
           <div className="flex flex-col gap-2 px-4 py-4">
             {links.map((l) => (

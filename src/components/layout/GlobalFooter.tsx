@@ -99,7 +99,7 @@ export const GlobalFooter = () => {
         </div>
 
         {/* FTC affiliate disclosure — kept prominent on every page */}
-        <p className="mt-14 rounded-2xl border border-white/8 bg-white/[0.03] px-5 py-4 text-[11px] leading-relaxed text-white/45">
+        <p className="mt-14 rounded-2xl border border-white/[0.08] bg-white/[0.03] px-5 py-4 text-[11px] leading-relaxed text-white/45">
           Affiliate disclosure: referrals.live, the site owner, and members who post here may earn a
           commission or referral credit when you sign up through links on this site — at no extra
           cost to you. Some links are the owner's own referral links and are labeled as such.{" "}

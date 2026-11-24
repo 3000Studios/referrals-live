@@ -46,7 +46,7 @@ export function Layout() {
             transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
             className="mx-auto max-w-7xl px-4 pb-24 [transform-style:preserve-3d]"
           >
-            <div className="page-shell rounded-[2rem] border border-white/6 px-4 py-7 md:px-8 md:py-10">
+            <div className="page-shell rounded-[2rem] border border-white/[0.06] px-4 py-7 md:px-8 md:py-10">
               <Suspense fallback={<PageLoader />}>
                 <Outlet />
               </Suspense>
