@@ -334,9 +334,9 @@ export function Premium() {
           <div className="glass rounded-3xl border border-white/10 p-5 space-y-4 text-xs text-muted">
             <div className="text-xs font-semibold uppercase tracking-[0.25em] text-white">FAQ</div>
             {[
-              ["Can I cancel?", "Yes — anytime from your dashboard. No fees, no friction."],
+              ["Can I cancel?", "Yes, anytime from the billing card on your dashboard. You keep Premium until the end of the month you paid for, and you are not charged again."],
               ["When does access start?", "As soon as Stripe or PayPal confirms payment."],
-              ["How do my links get on the homepage?", "Add them in your dashboard and submit them as public. After review they appear in the member boxes under the hero carousel."],
+              ["How do my links get on the homepage?", "Add them from your dashboard and tick the public box. Once they pass the automatic link and spam checks they go live in the member boxes under the featured carousel, and members can report any that break the rules."],
               ["What can I post?", "Your own referral links for real programs. You attest the program allows public posting — programs that bar it are held out of the homepage boxes. Listings are reviewed for dead links and spam."],
               ["Is browsing still free?", "Always. Pro only unlocks posting and featured placement — deals stay free for everyone."],
             ].map(([q, a]) => (

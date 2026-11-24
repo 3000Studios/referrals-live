@@ -4,6 +4,7 @@ import { Seo } from "@/components/seo/Seo";
 import { api } from "@/lib/api";
 import { useAppStore } from "@/store/useAppStore";
 import { useViewerMode } from "@/store/useViewerMode";
+import { SubscriptionControls } from "@/components/billing/SubscriptionControls";
 
 type MyReferral = {
   id: string;
@@ -287,6 +288,7 @@ export function Dashboard() {
               {premiumView ? "Review Premium" : "Upgrade"}
             </Link>
           </div>
+          <SubscriptionControls />
         </div>
 
         <div className="glass rounded-3xl border border-white/10 p-6">

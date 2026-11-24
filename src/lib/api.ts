@@ -105,6 +105,15 @@ export const api = {
       method: "POST",
       body: JSON.stringify(sessionId ? { sessionId } : {}),
     }),
+  subscription: () =>
+    apiFetch<{ ok: true; hasSubscription: boolean; status?: string; cancelAtPeriodEnd?: boolean; currentPeriodEnd?: number }>(
+      "/api/billing/manage",
+    ),
+  manageSubscription: (action: "cancel" | "resume") =>
+    apiFetch<{ ok: true; hasSubscription: boolean; status: string; cancelAtPeriodEnd: boolean; currentPeriodEnd: number }>(
+      "/api/billing/manage",
+      { method: "POST", body: JSON.stringify({ action }) },
+    ),
   moderationQueue: () => apiFetch<{ ok: true; items: ModerationItem[] }>("/api/admin/moderation"),
   moderate: (id: string, action: "approve" | "hide" | "restore" | "make_private") =>
     apiFetch<{ ok: true }>("/api/admin/moderation", { method: "POST", body: JSON.stringify({ id, action }) }),

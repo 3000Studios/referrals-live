@@ -45,13 +45,14 @@ function GuideCard({ title, tone, children }: { title: string; tone: "neon" | "g
 export function Program() {
   const { id } = useParams();
   const [program, setProgram] = useState<ProgramData | null>(null);
-  const [guide, setGuide] = useState<ProgramGuide | null>(null);
+  // undefined = still loading the guide chunk, null = no guide for this program.
+  const [guide, setGuide] = useState<ProgramGuide | null | undefined>(undefined);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!id) return;
     setProgram(null);
-    setGuide(null);
+    setGuide(undefined);
     setError(null);
     fetch(`/api/programs/${id}`)
       .then((r) => r.json())
@@ -212,6 +213,8 @@ export function Program() {
             <RelatedPrograms related={program.related} />
           </section>
         </>
+      ) : guide === undefined ? (
+        <div className="h-40 animate-pulse rounded-3xl border border-white/10 bg-white/5" aria-hidden />
       ) : (
         <section className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
           <div className="glass rounded-3xl border border-white/10 p-6">
