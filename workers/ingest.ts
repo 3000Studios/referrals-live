@@ -1,8 +1,12 @@
+import { checkChatText } from "../shared/moderation";
+
 export type Env = {
   DB: D1Database;
   CHAT: DurableObjectNamespace;
   GEMINI_API_KEY?: string;
 };
+
+type ChatIdentity = { userId: string; name: string; avatar: string; color: string; canPost: boolean };
 
 type ChatStoredMessage = {
   id: string;
@@ -703,6 +707,9 @@ export class ChatRoom {
   sockets: Set<WebSocket>;
   socketCanPost: WeakMap<WebSocket, boolean>;
   socketLastSent: WeakMap<WebSocket, number>;
+  socketIdentity: WeakMap<WebSocket, ChatIdentity>;
+  userSendLog: Map<string, number[]>;
+  userLastText: Map<string, string>;
 
   constructor(state: DurableObjectState, env: Env) {
     this.state = state;
@@ -710,6 +717,9 @@ export class ChatRoom {
     this.sockets = new Set();
     this.socketCanPost = new WeakMap();
     this.socketLastSent = new WeakMap();
+    this.socketIdentity = new WeakMap();
+    this.userSendLog = new Map();
+    this.userLastText = new Map();
     this.state.blockConcurrencyWhile(async () => {
       // Seed a small, clearly-labeled system intro if empty.
       const existing = await this.state.storage.get<string>("seeded");
@@ -746,26 +756,41 @@ export class ChatRoom {
     return null;
   }
 
-  async canPostFromRequest(request: Request) {
+  /**
+   * Who is on this socket, read from the session cookie on the server.
+   * Names, avatars and colors come from the account, never from the
+   * client, so nobody can post as someone else.
+   */
+  async identityFromRequest(request: Request): Promise<ChatIdentity | null> {
     const sessionId = this.cookie(request, "rl_session");
-    if (!sessionId) return false;
+    if (!sessionId) return null;
     const ts = Date.now();
     const row = await this.env.DB.prepare(
-      "SELECT s.id as sid, u.id as uid, sub.status as sub_status, sub.current_period_end as cpe FROM sessions s JOIN users u ON u.id=s.user_id LEFT JOIN subscriptions sub ON sub.user_id=u.id WHERE s.id=? AND s.expires_at>? LIMIT 1",
+      "SELECT u.id as uid, u.display_name as name, u.avatar as avatar, u.color as color, sub.status as sub_status, sub.current_period_end as cpe FROM sessions s JOIN users u ON u.id=s.user_id LEFT JOIN subscriptions sub ON sub.user_id=u.id WHERE s.id=? AND s.expires_at>? LIMIT 1",
     )
       .bind(sessionId, ts)
       .first<any>();
-    if (!row) return false;
+    if (!row) return null;
     const premium = row.sub_status === "active" && (!row.cpe || Number(row.cpe) > ts);
-    return Boolean(premium);
+    return {
+      userId: String(row.uid),
+      name: String(row.name ?? "member").slice(0, 32) || "member",
+      avatar: String(row.avatar ?? "spark").slice(0, 16),
+      color: String(row.color ?? "neon").slice(0, 16),
+      canPost: Boolean(premium),
+    };
   }
 
-  scrub(text: string) {
-    const t = text.trim().slice(0, 500);
-    const blocked = ["porn", "sex", "nazi", "hitler", "kill", "suicide", "rape"];
-    const lower = t.toLowerCase();
-    if (blocked.some((w) => lower.includes(w))) return "Message removed by moderation.";
-    return t;
+  /** Per-member flood limits: one message per 3s, five per 30s, no repeats. */
+  floodCheck(userId: string, text: string): string | null {
+    const now = Date.now();
+    const recent = (this.userSendLog.get(userId) ?? []).filter((t) => now - t < 30000);
+    if (recent.length && now - recent[recent.length - 1]! < 3000) return "Slow down a little. One message every few seconds.";
+    if (recent.length >= 5) return "You've sent 5 messages in 30 seconds. Take a short breather.";
+    if ((this.userLastText.get(userId) ?? "").toLowerCase() === text.toLowerCase()) return "You just sent that.";
+    this.userSendLog.set(userId, [...recent, now]);
+    this.userLastText.set(userId, text);
+    return null;
   }
 
   async fetch(request: Request) {
@@ -775,8 +800,10 @@ export class ChatRoom {
       const [client, server] = Object.values(pair) as [WebSocket, WebSocket];
       server.accept();
       this.sockets.add(server);
-      const canPost = await this.canPostFromRequest(request);
+      const identity = await this.identityFromRequest(request);
+      const canPost = Boolean(identity?.canPost);
       this.socketCanPost.set(server, canPost);
+      if (identity) this.socketIdentity.set(server, identity);
 
       const msgs = ((await this.state.storage.get<ChatStoredMessage[]>("messages")) ?? []);
       server.send(JSON.stringify({ type: "init", messages: msgs.slice(-50) }));
@@ -797,9 +824,10 @@ export class ChatRoom {
           if (!data?.type) return;
           const canPost = this.socketCanPost.get(server);
 
+          const who = this.socketIdentity.get(server);
           if (data.type === "typing") {
-            if (!canPost) return;
-            const user = String(data.user ?? "anon").slice(0, 32);
+            if (!canPost || !who) return;
+            const user = who.name;
             if (!user) return;
             const payload = JSON.stringify({ type: "typing", user });
             for (const ws of this.sockets) {
@@ -815,7 +843,8 @@ export class ChatRoom {
             if (!canPost) return;
             const msgId = String(data.messageId ?? "");
             const emoji = String(data.emoji ?? "");
-            const user = String(data.user ?? "anon").slice(0, 32);
+            if (!who) return;
+            const user = who.name;
             if (!msgId || !emoji || !user) return;
             if (!ALLOWED_REACTIONS.includes(emoji)) return;
             this.state.blockConcurrencyWhile(async () => {
@@ -843,24 +872,28 @@ export class ChatRoom {
           }
 
           if (data.type !== "msg") return;
-          if (!canPost) return;
-          // Basic per-socket rate limit
+          if (!canPost || !who) return;
+          const reject = (reason: string) => {
+            try {
+              server.send(JSON.stringify({ type: "rejected", reason }));
+            } catch {}
+          };
+          const verdict = checkChatText(String(data.text ?? ""));
+          if (!verdict.ok) return reject(verdict.reason);
+          const text = verdict.text ?? "";
+          const flood = this.floodCheck(who.userId, text);
+          if (flood) return reject(flood);
           const now = Date.now();
-          const last = this.socketLastSent.get(server) ?? 0;
-          if (now - last < 800) return;
           this.socketLastSent.set(server, now);
           const message: ChatStoredMessage = {
             id: crypto.randomUUID(),
             ts: now,
-            user: String(data.user ?? "anon").slice(0, 32),
-            role: String(data.role ?? "member"),
-            text: this.scrub(String(data.text ?? "")),
-            avatar: String(data.avatar ?? "spark").slice(0, 16),
-            color: String(data.color ?? "neon").slice(0, 16),
+            user: who.name,
+            role: "member",
+            text,
+            avatar: who.avatar,
+            color: who.color,
           };
-          if (!message.text.trim()) return;
-          // No deception: only allow system/guide messages from server-side seeds.
-          if (message.role === "system" || message.role === "bot") return;
 
           this.state.blockConcurrencyWhile(async () => {
             const existing = (await this.state.storage.get<any[]>("messages")) ?? [];
@@ -906,7 +939,7 @@ export class ChatRoom {
       `SELECT r.title, COALESCE(m.votes,0) AS votes
        FROM referrals r
        LEFT JOIN referral_metrics m ON m.referral_id=r.id
-       WHERE r.status='public'
+       WHERE r.status='public' AND (r.user_id='user-system' OR r.terms_flagged=0)
        ORDER BY COALESCE(m.votes,0) DESC, COALESCE(m.clicks,0) DESC
        LIMIT 1`,
     ).first<any>();

@@ -64,7 +64,7 @@ export async function onRequestPost(context: { request: Request; env: Env }) {
 
       await context.env.DB.prepare(
         `INSERT INTO referrals (id, user_id, title, description, url, category, tags_json, image_url, status, created_at, updated_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'public_candidate', ?, ?)`
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'private', ?, ?)`
       )
         .bind(id, user.id, title, description ?? "", url, category ?? "general", tagsJson, imageUrl ?? "", ts, ts)
         .run();

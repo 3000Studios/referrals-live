@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Seo } from "@/components/seo/Seo";
 import { useAppStore } from "@/store/useAppStore";
+import { ModerationPanel } from "@/components/admin/ModerationPanel";
 
 type Item = { domain: string; params: Record<string, string>; updatedAt: number };
 type OwnerProfile = {
@@ -417,6 +418,8 @@ export function Admin() {
           This is your control room. Work top to bottom — the steps below take you from {`"site is running"`} to {`"my links are earning."`}
         </p>
       </header>
+
+      <ModerationPanel />
 
       {/* HOW THIS DASHBOARD WORKS */}
       <div className="glass rounded-3xl border border-white/10 p-6">

@@ -1,6 +1,7 @@
 import type { Env } from "../_lib";
 import { json, safeOrigin } from "../_lib";
 import { requireUser } from "../_session";
+import { PREMIUM_PRICE_ID } from "./webhook";
 
 function formEncode(body: Record<string, string>) {
   return Object.entries(body)
@@ -27,8 +28,10 @@ export async function onRequestPost(context: { request: Request; env: Env }) {
   try {
     const user = await requireUser(context.request, context.env);
     if (!user) return json({ ok: false, error: "Unauthorized" }, { status: 401 });
-    const priceId = context.env.STRIPE_PRICE_ID;
-    if (!priceId) return json({ ok: false, error: "Billing not configured" }, { status: 503 });
+    if (user.premium) return json({ ok: true, alreadyPremium: true, url: "/dashboard" });
+    if (!context.env.STRIPE_SECRET_KEY) return json({ ok: false, error: "Billing not configured" }, { status: 503 });
+    // The live Premium price ($3.99/mo) unless an override is configured.
+    const priceId = context.env.STRIPE_PRICE_ID || PREMIUM_PRICE_ID;
 
     const origin = new URL(context.request.url).origin;
     const appOrigin = safeOrigin(context.env, origin);
@@ -54,11 +57,14 @@ export async function onRequestPost(context: { request: Request; env: Env }) {
       customer: customerId,
       "line_items[0][price]": priceId,
       "line_items[0][quantity]": "1",
-      success_url: `${appOrigin}/dashboard?billing=success`,
+      success_url: `${appOrigin}/dashboard?billing=success&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${appOrigin}/premium?billing=cancel`,
       client_reference_id: user.id,
       "metadata[user_id]": user.id,
       "subscription_data[metadata][user_id]": user.id,
+      "metadata[site]": "referrals.live",
+      "subscription_data[metadata][site]": "referrals.live",
+      allow_promotion_codes: "true",
     });
 
     return json({ ok: true, url: session.url });

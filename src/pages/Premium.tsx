@@ -88,6 +88,8 @@ function PayPalButton() {
 export function Premium() {
   const user = useAppStore((s) => s.user);
   const addEmailCapture = useAppStore((s) => s.addEmailCapture);
+  const hydrate = useAppStore((s) => s.hydrate);
+  const [syncing, setSyncing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [waitlistEmail, setWaitlistEmail] = useState("");
@@ -98,30 +100,66 @@ export function Premium() {
     trackPremiumView("premium_page");
   }, []);
 
+  // Back from Stripe: confirm the payment against Stripe and unlock Premium
+  // right away instead of waiting for the webhook.
+  useEffect(() => {
+    if (!user || user.premium) return;
+    const params = new URLSearchParams(window.location.search);
+    const sessionId = params.get("session_id") ?? "";
+    const returned = params.get("billing") === "success" || Boolean(sessionId);
+    if (!returned) return;
+    setSyncing(true);
+    fetch("/api/billing/sync", {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(sessionId ? { sessionId } : {}),
+    })
+      .then((r) => r.json().catch(() => null))
+      .then(async (d: { premium?: boolean } | null) => {
+        if (d?.premium) {
+          await hydrate();
+          trackEvent("premium_activated", { plan: "Premium" });
+        } else {
+          setError("Stripe hasn't confirmed this payment yet. Give it a minute and refresh, or email support@referrals.live.");
+        }
+      })
+      .catch(() => null)
+      .finally(() => setSyncing(false));
+  }, [user, hydrate]);
+
   function startCardCheckout() {
     setLoading(true);
     setError(null);
     trackEvent("premium_click", { plan: "Premium", method: "stripe" });
 
     if (!user) {
-      if (STRIPE_PRO_LINK) {
-        window.location.href = STRIPE_PRO_LINK;
-        return;
-      }
+      // Premium belongs to an account, so sign in first and come back here.
       window.location.href = "/login?next=/premium";
       return;
     }
+
+    // Payment Link fallback, tied to this account so the payment unlocks it.
+    const linkForUser = () => {
+      if (!STRIPE_PRO_LINK) return null;
+      const url = new URL(STRIPE_PRO_LINK);
+      url.searchParams.set("client_reference_id", user.id);
+      if (user.email) url.searchParams.set("prefilled_email", user.email);
+      return url.toString();
+    };
 
     fetch("/api/billing/checkout", { method: "POST", credentials: "include" })
       .then(async (r) => {
         const d = await r.json().catch(() => null) as { url?: string; error?: string } | null;
         if (r.ok && d?.url) { window.location.href = d.url; return; }
-        if (STRIPE_PRO_LINK) { window.location.href = STRIPE_PRO_LINK; return; }
+        const fallback = linkForUser();
+        if (fallback) { window.location.href = fallback; return; }
         const reason = d?.error ?? `Checkout server returned ${r.status}`;
         throw new Error(`${reason}. Try PayPal below or contact support@referrals.live.`);
       })
       .catch((err) => {
-        if (STRIPE_PRO_LINK) { window.location.href = STRIPE_PRO_LINK; return; }
+        const fallback = linkForUser();
+        if (fallback) { window.location.href = fallback; return; }
         setError(err instanceof Error ? err.message : "Unable to start checkout");
         setLoading(false);
       });
@@ -199,14 +237,26 @@ export function Premium() {
 
             <div className="mt-6">
               <div className="mb-2 text-xs font-semibold uppercase tracking-widest text-muted/60">Credit / Debit Card</div>
-              {cardCheckoutAvailable ? (
+              {syncing ? (
+                <div className="mb-3 rounded-2xl border border-gold/30 bg-gold/10 px-4 py-3 text-sm text-gold" role="status">
+                  Confirming your payment with Stripe…
+                </div>
+              ) : null}
+              {user?.premium ? (
+                <Link
+                  to="/dashboard"
+                  className="flex w-full items-center justify-center gap-2 rounded-2xl border border-gold/40 bg-gold/10 px-6 py-4 text-sm font-bold text-gold transition hover:bg-gold/20"
+                >
+                  Premium is active. Post your links
+                </Link>
+              ) : cardCheckoutAvailable ? (
                 <button
                   type="button"
                   onClick={startCardCheckout}
                   disabled={loading}
                   className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-gold to-amber-500 px-6 py-4 text-sm font-bold text-black transition-all hover:brightness-110 active:scale-[0.98] disabled:opacity-40"
                 >
-                  {loading ? "Connecting to Stripe…" : `Go Premium — ${PRO_PRICE_LABEL}`}
+                  {loading ? "Connecting to Stripe…" : user ? `Go Premium — ${PRO_PRICE_LABEL}` : `Sign in to go Premium — ${PRO_PRICE_LABEL}`}
                 </button>
               ) : (
                 <Link
@@ -284,9 +334,9 @@ export function Premium() {
           <div className="glass rounded-3xl border border-white/10 p-5 space-y-4 text-xs text-muted">
             <div className="text-xs font-semibold uppercase tracking-[0.25em] text-white">FAQ</div>
             {[
-              ["Can I cancel?", "Yes — anytime from your dashboard. No fees, no friction."],
+              ["Can I cancel?", "Yes, anytime from the billing card on your dashboard. You keep Premium until the end of the month you paid for, and you are not charged again."],
               ["When does access start?", "As soon as Stripe or PayPal confirms payment."],
-              ["How do my links get on the homepage?", "Add them in your dashboard and submit them as public. After review they appear in the member boxes under the hero carousel."],
+              ["How do my links get on the homepage?", "Add them from your dashboard and tick the public box. Once they pass the automatic link and spam checks they go live in the member boxes under the featured carousel, and members can report any that break the rules."],
               ["What can I post?", "Your own referral links for real programs. You attest the program allows public posting — programs that bar it are held out of the homepage boxes. Listings are reviewed for dead links and spam."],
               ["Is browsing still free?", "Always. Pro only unlocks posting and featured placement — deals stay free for everyone."],
             ].map(([q, a]) => (

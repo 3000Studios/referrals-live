@@ -89,7 +89,7 @@ export function Login() {
         {error ? <div className="rounded-2xl border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-100">{error}</div> : null}
         <div className="text-center text-sm text-muted">
           New here?{" "}
-          <Link className="text-electric hover:text-white" to="/register">
+          <Link className="text-electric hover:text-white" to={safeNext ? `/register?next=${encodeURIComponent(safeNext)}` : "/register"}>
             Create account
           </Link>
         </div>

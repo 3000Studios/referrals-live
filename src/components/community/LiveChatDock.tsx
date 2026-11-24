@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import clsx from "clsx";
 import { api } from "@/lib/api";
+import { checkChatText } from "../../../shared/moderation";
 import { useAppStore } from "@/store/useAppStore";
 
 type ChatMessage = {
@@ -39,7 +40,7 @@ const EMOJIS = [
 ];
 const SLASH_COMMANDS: Array<{ cmd: string; hint: string }> = [
   { cmd: "/help", hint: "Show available commands" },
-  { cmd: "/share", hint: "/share <url> — drop a referral link" },
+  { cmd: "/share", hint: "/share <referrals.live link> — point the room at your listing" },
   { cmd: "/wave", hint: "Send a quick wave to the room" },
   { cmd: "/me", hint: "/me <action> — narrate an action" },
   { cmd: "/tip", hint: "Random tip for boosting referrals" },
@@ -63,7 +64,11 @@ export function LiveChatDock({ defaultOpen = false, className }: { defaultOpen?:
   const [typingUsers, setTypingUsers] = useState<Record<string, number>>({});
   const [emojiOpen, setEmojiOpen] = useState(false);
   const [showSlash, setShowSlash] = useState(false);
+  const [conn, setConn] = useState<"connecting" | "live" | "offline">("connecting");
+  const [notice, setNotice] = useState<string | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
+  const sentLogRef = useRef<number[]>([]);
+  const lastTextRef = useRef<string>("");
   const listRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const lastTypingSentRef = useRef<number>(0);
@@ -72,48 +77,86 @@ export function LiveChatDock({ defaultOpen = false, className }: { defaultOpen?:
 
   useEffect(() => {
     if (!open) return;
-    const ws = new WebSocket(api.chatWsUrl());
-    wsRef.current = ws;
-    ws.addEventListener("message", (evt) => {
-      try {
-        const data = JSON.parse(String(evt.data));
-        if (data?.type === "init") {
-          setMessages((data.messages ?? []) as ChatMessage[]);
-          return;
-        }
-        if (data?.type === "cap") {
-          setServerCanPost(Boolean(data.canPost));
-          return;
-        }
-        if (data?.type === "presence") {
-          setPresence(Number(data.count ?? 0));
-          return;
-        }
-        if (data?.type === "msg") {
-          setMessages((m) => [...m, data.message].slice(-100));
-          return;
-        }
-        if (data?.type === "react" && data.messageId) {
-          setMessages((m) =>
-            m.map((msg) =>
-              msg.id === data.messageId ? { ...msg, reactions: data.reactions ?? {} } : msg,
-            ),
-          );
-          return;
-        }
-        if (data?.type === "typing" && typeof data.user === "string") {
-          const name = String(data.user);
-          setTypingUsers((prev) => ({ ...prev, [name]: Date.now() }));
-        }
-      } catch {}
-    });
+    let closedByUs = false;
+    let attempt = 0;
+    let retryTimer: number | undefined;
+
+    const connect = () => {
+      setConn("connecting");
+      const ws = new WebSocket(api.chatWsUrl());
+      wsRef.current = ws;
+      ws.addEventListener("open", () => {
+        attempt = 0;
+        setConn("live");
+      });
+      ws.addEventListener("close", () => {
+        if (wsRef.current === ws) wsRef.current = null;
+        if (closedByUs) return;
+        setConn("offline");
+        // Back off so a flaky phone connection doesn't hammer the room.
+        attempt += 1;
+        const wait = Math.min(30000, 1500 * 2 ** Math.min(attempt, 5));
+        retryTimer = window.setTimeout(connect, wait);
+      });
+      ws.addEventListener("message", (evt) => {
+        try {
+          const data = JSON.parse(String(evt.data));
+          if (data?.type === "init") {
+            setMessages((data.messages ?? []) as ChatMessage[]);
+            return;
+          }
+          if (data?.type === "cap") {
+            setServerCanPost(Boolean(data.canPost));
+            return;
+          }
+          if (data?.type === "presence") {
+            setPresence(Number(data.count ?? 0));
+            return;
+          }
+          if (data?.type === "msg") {
+            setMessages((m) => [...m, data.message].slice(-100));
+            return;
+          }
+          if (data?.type === "removed" && data.messageId) {
+            setMessages((m) => m.filter((msg) => msg.id !== data.messageId));
+            return;
+          }
+          if (data?.type === "rejected" && typeof data.reason === "string") {
+            setNotice(String(data.reason).slice(0, 200));
+            return;
+          }
+          if (data?.type === "react" && data.messageId) {
+            setMessages((m) =>
+              m.map((msg) =>
+                msg.id === data.messageId ? { ...msg, reactions: data.reactions ?? {} } : msg,
+              ),
+            );
+            return;
+          }
+          if (data?.type === "typing" && typeof data.user === "string") {
+            const name = String(data.user);
+            setTypingUsers((prev) => ({ ...prev, [name]: Date.now() }));
+          }
+        } catch {}
+      });
+    };
+
+    connect();
     return () => {
+      closedByUs = true;
+      if (retryTimer) window.clearTimeout(retryTimer);
       try {
-        ws.close();
+        wsRef.current?.close();
       } catch {}
       wsRef.current = null;
     };
   }, [open]);
+
+  useEffect(() => {
+    if (!notice) return;
+    const id = window.setTimeout(() => setNotice(null), 6000);
+    return () => window.clearTimeout(id);
+  }, [notice]);
 
   // Sweep stale typing indicators every second
   useEffect(() => {
@@ -161,8 +204,32 @@ export function LiveChatDock({ defaultOpen = false, className }: { defaultOpen?:
   };
 
   const sendMessage = (raw: string) => {
-    const t = raw.trim();
-    if (!t || !canPost) return;
+    if (!canPost) return;
+    const verdict = checkChatText(raw);
+    if (!verdict.ok) {
+      setNotice(verdict.reason);
+      return;
+    }
+    const t = verdict.text ?? raw.trim();
+    // Flood limits: one message every 3 seconds, five per 30 seconds, and
+    // no repeating the same message back to back. The room enforces the
+    // same limits server-side.
+    const now = Date.now();
+    const recent = sentLogRef.current.filter((ts) => now - ts < 30000);
+    if (recent.length && now - recent[recent.length - 1]! < 3000) {
+      setNotice("Slow down a little. One message every few seconds.");
+      return;
+    }
+    if (recent.length >= 5) {
+      setNotice("You've sent 5 messages in 30 seconds. Take a short breather.");
+      return;
+    }
+    if (t.toLowerCase() === lastTextRef.current.toLowerCase()) {
+      setNotice("You just sent that.");
+      return;
+    }
+    sentLogRef.current = [...recent, now];
+    lastTextRef.current = t;
     sendRaw({
       type: "msg",
       user: user?.displayName ?? "member",
@@ -191,6 +258,10 @@ export function LiveChatDock({ defaultOpen = false, className }: { defaultOpen?:
       case "/share": {
         if (!arg) {
           sendMessage("/share usage: paste a referral URL after the command");
+          return true;
+        }
+        if (!/^https:\/\/(www\.)?referrals\.live\//i.test(arg)) {
+          setNotice("Post your link as a listing from your dashboard, then /share its referrals.live page here.");
           return true;
         }
         sendMessage(`🔗 ${user?.displayName ?? "member"} shared: ${arg}`);
@@ -273,8 +344,20 @@ export function LiveChatDock({ defaultOpen = false, className }: { defaultOpen?:
       {open ? (
         <div className="mt-2 glass rounded-2xl border border-white/10 bg-black/50">
           <div className="flex items-center justify-between border-b border-white/10 px-4 py-2 text-xs uppercase tracking-[0.18em] text-muted">
-            <span>Members online</span>
+            <span className="flex items-center gap-2">
+              <span
+                className={clsx(
+                  "h-2 w-2 rounded-full",
+                  conn === "live" ? "bg-neon animate-pulse" : conn === "connecting" ? "bg-gold" : "bg-red-400",
+                )}
+                aria-hidden
+              />
+              {conn === "live" ? "Members online" : conn === "connecting" ? "Connecting…" : "Reconnecting…"}
+            </span>
             <span className="text-neon">{presence}</span>
+          </div>
+          <div className="border-b border-white/5 px-4 py-1.5 text-[11px] text-white/50">
+            Moderated room: be kind, no spam, no scams. Share outside links as a listing, then point to it here.
           </div>
           <div ref={listRef} className="h-72 overflow-y-auto px-4 py-3 text-sm">
             {messages.map((m) => {
@@ -345,6 +428,11 @@ export function LiveChatDock({ defaultOpen = false, className }: { defaultOpen?:
           <div className="border-t border-white/10 p-3">
             {typingDisplay ? (
               <div className="mb-2 text-[11px] italic text-muted">{typingDisplay}</div>
+            ) : null}
+            {notice ? (
+              <div role="status" className="mb-2 rounded-xl border border-gold/30 bg-gold/10 px-3 py-2 text-[12px] text-gold">
+                {notice}
+              </div>
             ) : null}
             {canPost ? (
               <div className="space-y-3">
@@ -424,6 +512,8 @@ export function LiveChatDock({ defaultOpen = false, className }: { defaultOpen?:
                       broadcastTyping();
                     }}
                     placeholder="Say something… (try /help)"
+                    maxLength={400}
+                    aria-label="Chat message"
                     className="flex-1 rounded-xl border border-white/10 bg-black/40 px-3 py-2 text-sm text-white outline-none ring-neon/30 focus:ring"
                     onKeyDown={(e) => {
                       if (e.key === "Enter") send();
@@ -440,7 +530,13 @@ export function LiveChatDock({ defaultOpen = false, className }: { defaultOpen?:
               </div>
             ) : (
               <div className="flex items-center justify-between gap-3 text-sm">
-                <div className="text-muted">Upgrade to Premium to post messages and react.</div>
+                <div className="text-muted">
+                  {user?.premium && conn === "live"
+                    ? "Your Premium is active. Refresh the page if posting doesn't unlock."
+                    : user
+                      ? "Upgrade to Premium to post messages and react."
+                      : "Log in and go Premium to post messages and react."}
+                </div>
                 <a
                   href="/premium"
                   className="rounded-xl border border-gold/40 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-gold hover:bg-gold/10"

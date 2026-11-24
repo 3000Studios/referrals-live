@@ -39,6 +39,9 @@ async function verifyStripeWebhook(env: Env, raw: ArrayBuffer, sigHeader: string
   if (!env.STRIPE_WEBHOOK_SECRET) return false;
   const parsed = parseStripeSig(sigHeader);
   if (!parsed) return false;
+  // Reject replays of old signed events (Stripe's libraries use 5 minutes).
+  const ageSec = Math.abs(Date.now() / 1000 - Number(parsed.t));
+  if (!Number.isFinite(ageSec) || ageSec > 300) return false;
   const payloadToSign = new TextEncoder().encode(`${parsed.t}.`).buffer;
   // concatenate `${t}.` + raw
   const combined = new Uint8Array(payloadToSign.byteLength + raw.byteLength);
@@ -49,6 +52,102 @@ async function verifyStripeWebhook(env: Env, raw: ArrayBuffer, sigHeader: string
   const computedHex = hex(computed);
   // allow any matching v1 signature
   return parsed.v1.some((sig) => timingSafeEqual(new TextEncoder().encode(sig), new TextEncoder().encode(computedHex)));
+}
+
+/** The live Premium Payment Link and price on the shared Stripe account. */
+export const PREMIUM_PAYMENT_LINK_ID = "plink_1UVdBZGejm3JMan4UGJNU8PP";
+export const PREMIUM_PRICE_ID = "price_1UVdBMGejm3JMan4GfOM4cOx";
+
+type Db = D1Database;
+
+/**
+ * The Stripe account serves several 3000 Studios sites and every webhook
+ * endpoint receives every event, so only act on checkouts that belong to
+ * referrals.live: our own Checkout Sessions (site metadata) or the Premium
+ * Payment Link. Access is granted only after the subscription itself is
+ * confirmed to be on the Premium price (see isPremiumSubscription).
+ */
+export function isOurCheckout(obj: any) {
+  return obj?.metadata?.site === "referrals.live" || obj?.payment_link === PREMIUM_PAYMENT_LINK_ID;
+}
+
+/** True only when the subscription has an item on the referrals.live Premium price. */
+export function isPremiumSubscription(env: Env, sub: any) {
+  const prices = new Set([PREMIUM_PRICE_ID, env.STRIPE_PRICE_ID].filter(Boolean));
+  return ((sub?.items?.data ?? []) as any[]).some((it) => prices.has(it?.price?.id));
+}
+
+/** current_period_end moved onto subscription items in API 2025-03 (basil). */
+export function periodEndMs(sub: any): number | null {
+  const top = Number(sub?.current_period_end ?? 0);
+  const item = Number(sub?.items?.data?.[0]?.current_period_end ?? 0);
+  const sec = top || item;
+  return sec ? sec * 1000 : null;
+}
+
+export function normalizeStatus(status: string | undefined) {
+  // past_due keeps access while Stripe retries the card; the sub moves to
+  // canceled or unpaid if retries fail, and access ends then.
+  return status === "active" || status === "trialing" || status === "past_due" ? "active" : "inactive";
+}
+
+async function userIdForCheckout(db: Db, obj: any): Promise<string | null> {
+  // Only the account id the site stamped on the checkout. Emails are not
+  // verified at signup, so a payer's email never links a payment.
+  const ref = String(obj?.client_reference_id ?? obj?.metadata?.user_id ?? "");
+  if (!ref.startsWith("user-")) return null;
+  const row = await db.prepare("SELECT id FROM users WHERE id=? LIMIT 1").bind(ref).first<any>();
+  return row?.id ? String(row.id) : null;
+}
+
+export async function stripeGet(env: Env, path: string) {
+  if (!env.STRIPE_SECRET_KEY) return null;
+  const res = await fetch(`https://api.stripe.com${path}`, {
+    headers: { Authorization: `Bearer ${env.STRIPE_SECRET_KEY}` },
+  });
+  if (!res.ok) return null;
+  return (await res.json().catch(() => null)) as any;
+}
+
+/** Writes the member's subscription row (insert or update). */
+export async function upsertSubscription(
+  db: Db,
+  userId: string,
+  fields: { customerId: string | null; subscriptionId: string | null; status: string; periodEnd: number | null },
+) {
+  await db
+    .prepare(
+      `INSERT INTO subscriptions (user_id, stripe_customer_id, stripe_sub_id, status, current_period_end)
+       VALUES (?, ?, ?, ?, ?)
+       ON CONFLICT(user_id) DO UPDATE SET
+         stripe_customer_id=COALESCE(excluded.stripe_customer_id, subscriptions.stripe_customer_id),
+         stripe_sub_id=COALESCE(excluded.stripe_sub_id, subscriptions.stripe_sub_id),
+         status=excluded.status,
+         current_period_end=excluded.current_period_end`,
+    )
+    .bind(userId, fields.customerId, fields.subscriptionId, fields.status, fields.periodEnd)
+    .run();
+}
+
+/** Activates Premium from a completed Checkout Session. Returns the user id. */
+export async function activateFromCheckout(env: Env, obj: any): Promise<string | null> {
+  const db = env.DB;
+  if (!isOurCheckout(obj)) return null;
+  if (obj?.status && obj.status !== "complete") return null;
+  if (obj?.mode && obj.mode !== "subscription") return null;
+  const userId = await userIdForCheckout(db, obj);
+  if (!userId) return null;
+  const subscriptionId = (typeof obj?.subscription === "string" ? obj.subscription : obj?.subscription?.id) ?? null;
+  const customerId = (typeof obj?.customer === "string" ? obj.customer : obj?.customer?.id) ?? null;
+
+  if (!subscriptionId) return null;
+  // Confirm with Stripe that this is a referrals.live Premium subscription.
+  const sub = await stripeGet(env, `/v1/subscriptions/${encodeURIComponent(subscriptionId)}`);
+  if (!sub || !isPremiumSubscription(env, sub)) return null;
+  const status = normalizeStatus(sub.status);
+  const periodEnd = periodEndMs(sub) ?? now() + 35 * 24 * 60 * 60 * 1000;
+  await upsertSubscription(db, userId, { customerId, subscriptionId, status, periodEnd });
+  return userId;
 }
 
 export async function onRequestPost(context: { request: Request; env: Env }) {
@@ -63,35 +162,18 @@ export async function onRequestPost(context: { request: Request; env: Env }) {
   const db = context.env.DB;
   const ts = now();
 
-  // We map via client_reference_id when present.
-  const userId =
-    obj?.client_reference_id ||
-    obj?.metadata?.user_id ||
-    obj?.metadata?.userId ||
-    null;
-
-  if (userId) {
-    await db
-      .prepare("INSERT INTO audit_log (id, user_id, action, meta_json, created_at) VALUES (?, ?, ?, ?, ?)")
-      .bind(`audit-${crypto.randomUUID()}`, userId, "stripe_webhook", JSON.stringify({ type }), ts)
-      .run();
-  }
-
   if (type === "checkout.session.completed") {
-    const subscriptionId = obj?.subscription as string | undefined;
-    const customerId = obj?.customer as string | undefined;
-    const clientRef = obj?.client_reference_id as string | undefined;
-    if (clientRef) {
+    const userId = await activateFromCheckout(context.env, obj);
+    if (userId) {
       await db
-        .prepare(
-          "INSERT OR REPLACE INTO subscriptions (user_id, stripe_customer_id, stripe_sub_id, status, current_period_end) VALUES (?, ?, ?, 'active', COALESCE(current_period_end, ?))",
-        )
-        .bind(clientRef, customerId ?? null, subscriptionId ?? null, ts + 30 * 24 * 60 * 60 * 1000)
-        .run();
+        .prepare("INSERT INTO audit_log (id, user_id, action, meta_json, created_at) VALUES (?, ?, ?, ?, ?)")
+        .bind(`audit-${crypto.randomUUID()}`, userId, "stripe_webhook", JSON.stringify({ type }), ts)
+        .run()
+        .catch(() => null);
 
       const conversion = await db.prepare(
         "SELECT id, referrer_id, code FROM conversions WHERE referred_user_id = ? AND status = 'pending' LIMIT 1"
-      ).bind(clientRef).first<any>();
+      ).bind(userId).first<any>().catch(() => null);
 
       if (conversion) {
         const commission = 1000;
@@ -105,36 +187,33 @@ export async function onRequestPost(context: { request: Request; env: Env }) {
     }
   }
 
-  if (type === "customer.subscription.created" || type === "customer.subscription.updated") {
+  if (type === "customer.subscription.created" || type === "customer.subscription.updated" || type === "customer.subscription.deleted") {
     const subscriptionId = obj?.id as string | undefined;
     const customerId = obj?.customer as string | undefined;
-    const currentPeriodEndSec = obj?.current_period_end as number | undefined;
-    const status = obj?.status as string | undefined;
-    const currentPeriodEnd = currentPeriodEndSec ? currentPeriodEndSec * 1000 : null;
-
-    if (customerId && subscriptionId) {
-      // Look up user by stripe_customer_id.
-      const row = await db.prepare("SELECT user_id FROM subscriptions WHERE stripe_customer_id=? LIMIT 1").bind(customerId).first<any>();
-      const targetUserId = row?.user_id;
-      if (targetUserId) {
-        const normalized = status === "active" || status === "trialing" ? "active" : "inactive";
-        await db
-          .prepare("UPDATE subscriptions SET stripe_sub_id=?, status=?, current_period_end=? WHERE user_id=?")
-          .bind(subscriptionId, normalized, currentPeriodEnd, targetUserId)
-          .run();
+    if (subscriptionId) {
+      // Find the member by subscription, then customer, then the user id we
+      // stamp into subscription metadata at checkout.
+      let row = await db.prepare("SELECT user_id FROM subscriptions WHERE stripe_sub_id=? LIMIT 1").bind(subscriptionId).first<any>();
+      if (!row && customerId) {
+        row = await db.prepare("SELECT user_id FROM subscriptions WHERE stripe_customer_id=? LIMIT 1").bind(customerId).first<any>();
       }
-    }
-  }
-
-  if (type === "customer.subscription.deleted") {
-    const customerId = obj?.customer as string | undefined;
-    if (customerId) {
-      const row = await db.prepare("SELECT user_id FROM subscriptions WHERE stripe_customer_id=? LIMIT 1").bind(customerId).first<any>();
+      const metaUser = String(obj?.metadata?.user_id ?? "");
+      if (!row && metaUser.startsWith("user-")) {
+        row = await db.prepare("SELECT id AS user_id FROM users WHERE id=? LIMIT 1").bind(metaUser).first<any>();
+      }
       if (row?.user_id) {
-        await db
-          .prepare("UPDATE subscriptions SET status='inactive', current_period_end=0 WHERE user_id=?")
-          .bind(row.user_id)
-          .run();
+        // Events can arrive out of order, so read the subscription as it is now.
+        const live = (await stripeGet(context.env, `/v1/subscriptions/${encodeURIComponent(subscriptionId)}`)) ?? obj;
+        if (isPremiumSubscription(context.env, live)) {
+          const ended = live?.status === "canceled" || (live === obj && type === "customer.subscription.deleted");
+          const status = ended ? "inactive" : normalizeStatus(live?.status);
+          await upsertSubscription(db, String(row.user_id), {
+            customerId: customerId ?? null,
+            subscriptionId,
+            status,
+            periodEnd: ended ? 0 : periodEndMs(live),
+          });
+        }
       }
     }
   }

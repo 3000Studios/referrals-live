@@ -25,6 +25,7 @@ export function Submit() {
   const [image, setImage] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [doneId, setDoneId] = useState<string | null>(null);
+  const [doneStatus, setDoneStatus] = useState<"public" | "private">("private");
   const user = useAppStore((s) => s.user);
   const [wantPublicCandidate, setWantPublicCandidate] = useState(false);
   const [termsAttested, setTermsAttested] = useState(false);
@@ -67,6 +68,7 @@ export function Submit() {
       });
       trackEvent("referral_submitted", { id: created.id });
       setDoneId(created.id);
+      setDoneStatus(created.status === "public" ? "public" : "private");
     } catch (err) {
       const message = err instanceof Error ? err.message : "Failed to submit referral.";
       setError(message);
@@ -155,7 +157,8 @@ export function Submit() {
       <div className="text-xs font-semibold uppercase tracking-[0.25em] text-neon">Submission</div>
       <h1 className="font-display text-4xl font-extrabold text-white">Submit a referral</h1>
       <p className="mt-3 max-w-2xl text-sm text-muted">
-        Member submissions stay on user-owned boards. Public homepage referrals are curated and owner-attributed.
+        Free accounts save links to a private board. Premium members can post links publicly, where they go live after
+        automatic spam checks and other members can report anything that breaks the rules.
       </p>
 
       <div className="mt-10 grid gap-10 lg:grid-cols-[1.1fr_0.9fr]">
@@ -237,7 +240,7 @@ export function Submit() {
                 checked={wantPublicCandidate}
                 onChange={(e) => setWantPublicCandidate(e.target.checked)}
               />
-              <span>Submit as a public candidate (premium)</span>
+              <span>Post it publicly on referrals.live (Premium)</span>
             </label>
           ) : null}
           {user?.premium && wantPublicCandidate ? (
@@ -251,7 +254,7 @@ export function Submit() {
               <span>
                 <span className="font-semibold text-gold">Terms check:</span> I confirm this program's
                 referral terms allow public posting of referral links. Many programs bar public
-                posting — if this one does, it stays off the homepage boxes and can be flagged on review.
+                posting. Listings that break a program's rules get reported and hidden.
               </span>
             </label>
           ) : null}
@@ -280,9 +283,13 @@ export function Submit() {
           </div>
           {doneId ? (
             <div className="glass rounded-3xl border border-neon/30 p-6 text-sm text-white">
-              <div className="font-display text-lg font-bold text-neon">Live on your device</div>
+              <div className="font-display text-lg font-bold text-neon">
+                {doneStatus === "public" ? "Your link is live" : "Saved to your board"}
+              </div>
               <p className="mt-2 text-muted">
-                Listing <span className="text-white">{doneId}</span> is now in your member board.
+                {doneStatus === "public"
+                  ? "It passed the spam checks and now shows in the member boxes and Browse. You can pin it as a Top Spot from your dashboard."
+                  : "It's saved privately on your member board. Only you can see it."}
               </p>
               <Link className="mt-4 inline-flex text-electric hover:text-white" to="/dashboard">
                 Open Dashboard →

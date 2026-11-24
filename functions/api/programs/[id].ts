@@ -1,35 +1,18 @@
 import type { Env } from "../_lib";
 import { json, now } from "../_lib";
 
-function prosForCategory(category: string) {
-  const key = category.toLowerCase();
-  if (key === "fintech") return ["Fast payout potential", "Strong signup intent", "High-value referrals"];
-  if (key === "saas") return ["Recurring revenue potential", "Easy to share with teams", "Good content-marketing fit"];
-  if (key === "ecommerce") return ["Broad consumer appeal", "Seasonal spikes", "Strong social sharing"];
-  return ["Easy to explain", "Shareable with niche audiences", "Works well with creator-led distribution"];
-}
-
-function consForCategory(category: string) {
-  const key = category.toLowerCase();
-  if (key === "fintech") return ["Eligibility can be geo-restricted", "Compliance copy matters", "Payout windows vary"];
-  if (key === "saas") return ["Crowded category", "Need intent-driven traffic", "Program terms can change"];
-  if (key === "ecommerce") return ["Lower payout per action", "Higher competition on coupons", "Short promo windows"];
-  return ["Program terms change over time", "Need periodic verification", "Conversion depends on audience fit"];
-}
-
 export async function onRequestGet(context: { request: Request; env: Env; params: { id: string } }) {
   const id = context.params.id;
   const ts = now();
 
   const referral = await context.env.DB.prepare(
-    `SELECT r.id, r.title, r.description, r.url, r.category, r.tags_json, r.image_url, r.created_at, COALESCE(m.votes,0) votes, COALESCE(m.clicks,0) clicks
+    `SELECT r.id, r.user_id, r.title, r.description, r.url, r.category, r.tags_json, r.image_url, r.created_at, COALESCE(m.votes,0) votes, COALESCE(m.clicks,0) clicks
      FROM referrals r
      LEFT JOIN referral_metrics m ON m.referral_id=r.id
-     LEFT JOIN featured_slots f ON f.referral_id=r.id AND f.ends_at>?
-     WHERE r.id=? AND (r.status='public' OR f.referral_id IS NOT NULL)
+     WHERE r.id=? AND r.status='public' AND (r.user_id='user-system' OR r.terms_flagged=0)
      LIMIT 1`,
   )
-    .bind(ts, id)
+    .bind(id)
     .first<any>();
 
   const ingested = !referral
@@ -72,17 +55,7 @@ export async function onRequestGet(context: { request: Request; env: Env; params
       votes,
       clicks,
       verified: votes >= 25 || clicks >= 150,
-      pros: prosForCategory(category),
-      cons: consForCategory(category),
-      howToJoin: [
-        "Open the official offer page.",
-        "Confirm the latest program terms on the destination site.",
-        "Complete signup and follow their referral instructions.",
-      ],
-      reviews: [
-        { author: "Community review", text: "High-intent offer with solid sharing potential if your audience already trusts this brand." },
-        { author: "Growth review", text: "Best results come from niche-targeted traffic and transparent positioning." },
-      ],
+      owner: referral ? (referral.user_id === "user-system" ? "system" : "member") : "system",
       related: relatedRows.results ?? [],
     },
   });

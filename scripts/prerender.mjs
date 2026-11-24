@@ -241,6 +241,10 @@ const catalog = JSON.parse(
 const { blogArticles } = await loadModule(path.join(srcRoot, 'data', 'blogArticles.ts'))
 const { categories } = await loadModule(path.join(srcRoot, 'data', 'categories.ts'))
 
+const guides = JSON.parse(
+  fs.readFileSync(path.join(srcRoot, 'data', 'programGuides.json'), 'utf8'),
+)
+
 const catName = (id) => categories.find((c) => c.id === id)?.name ?? id
 const catDesc = (id) => categories.find((c) => c.id === id)?.description ?? ''
 
@@ -254,6 +258,8 @@ const OWNER_LINK_IDS = new Set([
   'ref-usmobile',
   'ref-grant',
   'ref-freelancer',
+  'ref-g2a',
+  'ref-zo',
 ])
 
 const companyName = (p) => p.title.split(/[—–]/)[0].trim() || p.title
@@ -346,44 +352,71 @@ ${items
   })
 }
 
-// Program detail pages — one per catalog entry. Beyond the listing summary,
-// each page carries factual orientation a reviewer (or visitor) can verify:
-// how referral programs work in general, what to check before joining, and
-// where the company's own binding terms live. No reward amounts, codes, or
-// payout claims are stated for any program — the catalog does not carry
-// verified figures, so none are printed.
+const POSTING_TEXT = {
+  allowed: 'Public sharing allowed',
+  restricted: 'Public sharing restricted',
+  unclear: 'Public sharing rules unclear',
+}
+const stripNumber = (t) => String(t).replace(/^\s*\d+[.)]\s*/, '')
+const list = (items, tag = 'ul') =>
+  `<${tag}>\n${items.map((i) => `          <li>${esc(tag === 'ol' ? stripNumber(i) : i)}</li>`).join('\n')}\n        </${tag}>`
+
+// Program detail pages — one per catalog entry. Each carries an original
+// guide written from the company's own pages (src/data/programGuides.json):
+// how the program pays, who qualifies, how to join, tips, pitfalls, an FAQ,
+// whether public sharing is allowed, and the official sources it was
+// checked against. Figures appear only where an official page stated them.
 for (const p of catalog) {
   builders[`/program/${p.id}`] = () => {
     const company = companyName(p)
+    const g = guides[p.id]
     const related = catalog
       .filter((q) => q.category === p.category && q.id !== p.id)
       .slice(0, 3)
     const official = OWNER_LINK_IDS.has(p.id)
       ? `        <p>Current terms, eligibility, and rewards for this program are published by ${esc(company)} and are shown when you open the offer — referrals.live does not set or guarantee them.</p>`
       : `        <p><a href="${esc(p.url)}" rel="nofollow noopener" target="_blank">Official ${esc(company)} program page</a> — the current terms, eligibility, and rewards, published by ${esc(company)}.</p>`
-    return {
-      title: `${p.title} — referrals.live`,
-      description: p.description,
-      inner: `<main>
-      <article>
-        <p><a href="/browse">All programs</a> · <a href="/categories">${esc(catName(p.category))}</a></p>
-        <h1>${esc(p.title)}</h1>
-        <p>${esc(p.description)}</p>
-        ${p.image ? `<p><img src="${esc(p.image)}" alt="${esc(p.title)}" loading="lazy" /></p>` : ''}
-        <p>Category: ${esc(catName(p.category))}${p.tags?.length ? ` · Tags: ${esc(p.tags.join(', '))}` : ''}</p>
-        <p><a href="/offer/${esc(p.id)}">Get offer</a></p>
-        <h2>About the ${esc(company)} referral program</h2>
-        <p>${esc(p.description)} This listing sits in the ${esc(catName(p.category))} category of the directory — ${esc(catDesc(p.category))} The summary here is orientation only; the binding rules of the program are the ones ${esc(company)} publishes.</p>
-${official}
-        <h2>How referral programs work</h2>
-        <p>Referral programs are run by the companies themselves. A company gives its customers a way to invite other people; if a new customer signs up and meets the program's conditions, the company may reward the inviter, the new customer, or both. The reward, the conditions, and how long anything takes to arrive are all set by the company in its program terms — they are not set by referrals.live, and the company can change or end them at any time.</p>
-        <h2>Before you join</h2>
+    const guideHtml = g
+      ? `        <h2>How the ${esc(g.company)} program pays</h2>
+        ${list(g.howItPays)}
+        <h2>Who qualifies</h2>
+        ${list(g.eligibility)}
+        <h2>How to join and share</h2>
+        ${list(g.steps, 'ol')}
+        <h2>Tips</h2>
+        ${list(g.tips)}
+        <h2>Watch out for</h2>
+        ${list(g.watchOuts)}
+        <h2>Common questions</h2>
+${g.faq.map((f) => `        <h3>${esc(f.q)}</h3>\n        <p>${esc(f.a)}</p>`).join('\n')}
+        <h2>Sharing rules</h2>
+        <p>${esc(POSTING_TEXT[g.publicPosting] ?? '')}. ${esc(g.publicPostingNote)}</p>
+        <h2>Sources</h2>
+        <p>Written by referrals.live from ${esc(g.company)}'s own pages, checked Nov 24, 2026. Programs change often, so the company's current terms always win.</p>
+        <ul>
+${g.sources.map((s) => `          <li><a href="${esc(s.url)}" rel="nofollow noopener" target="_blank">${esc(s.title)}</a></li>`).join('\n')}
+        </ul>`
+      : `        <h2>Before you join</h2>
         <ul>
           <li>Read the current terms on the company's program page before signing up — rewards and eligibility change often.</li>
           <li>Check who counts as a new customer. Many programs exclude existing customers, members of the same household, or self-referrals.</li>
-          <li>Check the qualifying steps and their deadlines. Programs commonly require specific actions — a first purchase, a deposit, or keeping the account open for a set period — inside a limited window.</li>
-          <li>Keep a record of your signup until any reward arrives. Only the company can credit its own program, so a missing reward is a question for ${esc(company)}, not for referrals.live.</li>
-        </ul>
+          <li>Check the qualifying steps and their deadlines.</li>
+          <li>Keep a record of your signup until any reward arrives.</li>
+        </ul>`
+    return {
+      title: g ? `${g.company} referral program: how it pays and how to join — referrals.live` : `${p.title} — referrals.live`,
+      description: g ? g.summary.slice(0, 158) : p.description,
+      inner: `<main>
+      <article>
+        <p><a href="/browse">All programs</a> · <a href="/categories">${esc(catName(p.category))}</a></p>
+        <h1>${esc(g ? `${g.company} referral program` : p.title)}</h1>
+        <p>${esc(g ? g.summary : p.description)}</p>
+        ${g ? `<p>${esc(g.whoItsFor)}</p>` : ''}
+        ${p.image ? `<p><img src="${esc(p.image)}" alt="${esc(p.title)}" loading="lazy" /></p>` : ''}
+        <p>Category: ${esc(catName(p.category))}${p.tags?.length ? ` · Tags: ${esc(p.tags.join(', '))}` : ''}</p>
+        <p><a href="/offer/${esc(p.id)}">Get offer</a></p>
+${official}
+${guideHtml}
         <p><a href="/disclosure">Affiliate disclosure</a> · <a href="/browse">Browse more programs</a></p>
       </article>${
         related.length

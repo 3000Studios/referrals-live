@@ -9,6 +9,8 @@ export type Env = {
   GOOGLE_CLIENT_ID?: string;
   GOOGLE_CLIENT_SECRET?: string;
   LEAD_WEBHOOK_URL?: string;
+  /** ChatRoom Durable Object (class lives in the referrals-live-ingest Worker). */
+  CHAT?: DurableObjectNamespace;
 };
 
 export function json(data: unknown, init: ResponseInit = {}) {

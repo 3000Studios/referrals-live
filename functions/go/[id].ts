@@ -5,23 +5,32 @@ function replaceTokens(value: string, profile: Record<string, string>) {
   return value.replace(/\{\{([A-Z_]+)\}\}/g, (_match, token) => profile[token] ?? "");
 }
 
-async function resolveTargetUrl(env: Env, id: string, ts: number): Promise<string | null> {
+type Target = { url: string; houseLink: boolean };
+
+/**
+ * Resolves where /go/:id sends the visitor.
+ *
+ * houseLink is true only for the site's own curated rows (the catalog owned
+ * by user-system, and ingested offers). Owner attribution is applied to
+ * house links only. A member's listing always goes out exactly as the
+ * member posted it, so their referral code is never swapped or stamped.
+ */
+async function resolveTargetUrl(env: Env, id: string, ts: number): Promise<Target | null> {
   const referral = await env.DB
     .prepare(
-      `SELECT r.url AS url
+      `SELECT r.url AS url, r.user_id AS user_id
        FROM referrals r
-       LEFT JOIN featured_slots f ON f.referral_id=r.id AND f.ends_at>?
-       WHERE r.id=? AND (r.status='public' OR f.referral_id IS NOT NULL)
+       WHERE r.id=? AND r.status='public' AND r.terms_flagged=0
        LIMIT 1`,
     )
-    .bind(ts, id)
+    .bind(id)
     .first<any>();
   if (referral?.url) {
     await env.DB
       .prepare("UPDATE referral_metrics SET clicks=clicks+1, last_click_at=? WHERE referral_id=?")
       .bind(ts, id)
       .run();
-    return String(referral.url);
+    return { url: String(referral.url), houseLink: referral.user_id === "user-system" };
   }
 
   const ingested = await env.DB
@@ -36,7 +45,7 @@ async function resolveTargetUrl(env: Env, id: string, ts: number): Promise<strin
       .bind(ts, id)
       .run()
       .catch(() => null);
-    return String(ingested.url);
+    return { url: String(ingested.url), houseLink: true };
   }
 
   return null;
@@ -55,8 +64,8 @@ export async function onRequestGet(context: { request: Request; env: Env; params
     return Response.redirect(`${origin}/browse`, 302);
   }
 
-  let out = target;
-  try {
+  let out = target.url;
+  if (target.houseLink) try {
     const u = new URL(out);
     const domain = u.hostname.replace(/^www\./, "").toLowerCase();
     const attr = await db.prepare("SELECT params_json FROM owner_attribution WHERE domain=? LIMIT 1").bind(domain).first<any>();

@@ -11,6 +11,8 @@ export function Register() {
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const mode = params.get("mode") ?? "";
+  const nextParam = params.get("next");
+  const safeNext = nextParam && nextParam.startsWith("/") && !nextParam.startsWith("//") ? nextParam : null;
   const headline = useMemo(() => (mode === "username" ? "Claim your username" : "Create account"), [mode]);
   const subline = useMemo(
     () =>
@@ -23,7 +25,7 @@ export function Register() {
   const onSubmit = (e: FormEvent) => {
     e.preventDefault();
     register(email.trim(), password, name.trim() || "Creator")
-      .then(() => navigate("/dashboard?onboarding=1"))
+      .then(() => navigate(safeNext ?? "/dashboard?onboarding=1"))
       .catch(() => null);
   };
 
