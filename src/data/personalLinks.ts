@@ -94,6 +94,17 @@ export const personalLinks: PersonalLink[] = [
     image: "https://www.google.com/s2/favicons?domain=zo.computer&sz=256",
     ctaLabel: "Try Zo Computer",
   },
+  {
+    id: "owner-kalshi",
+    name: "Kalshi",
+    bonus: "Referee gets $25",
+    terms:
+      "Join Kalshi through the owner's referral link: new US users get $25 after completing KYC and transacting $25+ on Predictions within 7 days of opening, under Kalshi's current referral terms. Kalshi is a CFTC-regulated prediction market exchange.",
+    categoryLabel: "Fintech & Banking",
+    url: "https://kalshi.com/t/4u2ig7jc",
+    image: "https://www.google.com/s2/favicons?domain=kalshi.com&sz=256",
+    ctaLabel: "Join Kalshi",
+  },
   // Harvested owner links (Chime, Rakuten, Discover, …) drop in here as the
   // desk verifies each one against the program's public-posting terms.
 ];
