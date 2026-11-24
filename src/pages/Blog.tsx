@@ -60,7 +60,7 @@ export function Blog() {
             {idx === 4 ? <AdSlot variant="in-feed" className="md:col-span-2" /> : null}
             <Link
               to={`/blog/${a.slug}`}
-              className="glass group relative overflow-hidden rounded-3xl border border-white/7 p-6 transition-all duration-300 hover:border-neon/30 hover:[box-shadow:0_0_30px_rgba(0,255,136,0.06)]"
+              className="glass group relative overflow-hidden rounded-3xl border border-white/[0.07] p-6 transition-all duration-300 hover:border-neon/30 hover:[box-shadow:0_0_30px_rgba(0,255,136,0.06)]"
             >
             <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-neon/15 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
             <div className="flex items-center gap-3 text-[11px] text-muted">

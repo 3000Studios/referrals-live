@@ -137,7 +137,7 @@ export function Home() {
             { step: "2", icon: "✍️", title: "Sign up through the link", desc: "The link carries the poster's referral credit. Sign up on the company's own site — we never see your password or your money." },
             { step: "3", icon: "💰", title: "You earn — poster earns", desc: "Complete the program's steps and the company pays your bonus and the poster's credit. Want your links here? Premium members post theirs from their dashboard — they land in the member boxes under the carousel." },
           ].map((s) => (
-            <div key={s.step} className="glass relative overflow-hidden rounded-3xl border border-white/8 p-8 text-center">
+            <div key={s.step} className="glass relative overflow-hidden rounded-3xl border border-white/[0.08] p-8 text-center">
               <div className="pointer-events-none absolute right-4 top-4 font-display text-4xl font-extrabold text-white/5 select-none">0{s.step}</div>
               <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-gold/25 bg-gold/10 text-2xl">{s.icon}</div>
               <h3 className="mt-5 font-display text-xl font-bold text-white">{s.title}</h3>
@@ -223,7 +223,7 @@ export function Home() {
       </section>
 
       {/* ================= PRO STRIP ================= */}
-      <section className="mt-16 rounded-3xl border border-gold/30 bg-gradient-to-br from-gold/12 via-transparent to-gold/5 px-6 py-10 text-center md:px-12">
+      <section className="mt-16 rounded-3xl border border-gold/30 bg-gradient-to-br from-gold/[0.12] via-transparent to-gold/5 px-6 py-10 text-center md:px-12">
         <div className="text-xs font-semibold uppercase tracking-[0.25em] text-gold">For posters</div>
         <h2 className="mt-2 font-display text-3xl font-bold text-white">Your links could be on this page</h2>
         <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-white/70">

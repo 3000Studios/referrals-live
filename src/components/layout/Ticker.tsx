@@ -17,7 +17,7 @@ export function Ticker() {
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_50%_100%_at_0%_50%,rgba(0,255,136,0.04),transparent)]" />
       <div className="mx-auto flex max-w-7xl items-center gap-0 px-0 py-2.5 text-[10px] uppercase tracking-[0.2em]">
         {/* Label chip */}
-        <div className="shrink-0 flex items-center gap-1.5 border-r border-white/8 bg-neon/8 px-4 py-1">
+        <div className="shrink-0 flex items-center gap-1.5 border-r border-white/[0.08] bg-neon/[0.08] px-4 py-1">
           <span className="h-1.5 w-1.5 rounded-full bg-neon animate-glow-pulse" />
           <span className="font-bold text-neon whitespace-nowrap">Trending</span>
         </div>

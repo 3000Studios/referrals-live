@@ -4,13 +4,13 @@
 @layer components {
   /* Signature 3000 card */
   .card-3000 {
-    @apply rounded-2xl border border-white/7 bg-[rgba(6,10,20,0.9)] p-6
+    @apply rounded-2xl border border-white/[0.07] bg-[rgba(6,10,20,0.9)] p-6
            transition-all duration-400 ease-out;
     position: relative;
     overflow: hidden;
   }
   .card-3000:hover {
-    @apply -translate-y-1 border-white/12;
+    @apply -translate-y-1 border-white/[0.12];
     box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6), 0 0 24px rgba(52, 211, 153, 0.08);
   }
 
@@ -32,7 +32,7 @@
   /* Badge */
   .badge-neural {
     @apply px-2.5 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-[0.18em]
-           border border-white/8 bg-white/4 text-muted;
+           border border-white/[0.08] bg-white/[0.04] text-muted;
   }
 }
 

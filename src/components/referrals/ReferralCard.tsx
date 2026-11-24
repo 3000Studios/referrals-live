@@ -59,7 +59,7 @@ export function ReferralCard({ referral, index = 0, variant = "default" }: Props
           "border transition-colors duration-300",
           isTrending
             ? "border-neon/15 ring-1 ring-neon/10"
-            : "border-white/7",
+            : "border-white/[0.07]",
         )}
       >
         {/* Aurora depth layer */}
@@ -140,7 +140,7 @@ export function ReferralCard({ referral, index = 0, variant = "default" }: Props
 
           {/* Stats row */}
           <div className="flex flex-wrap items-center gap-3 text-[12px] text-muted">
-            <span className="rounded-md border border-white/8 bg-white/4 px-2 py-0.5 text-[11px] font-medium text-white/60">
+            <span className="rounded-md border border-white/[0.08] bg-white/[0.04] px-2 py-0.5 text-[11px] font-medium text-white/60">
               {referral.category}
             </span>
             <span className="flex items-center gap-1 text-electric/80">
@@ -198,13 +198,13 @@ export function ReferralCard({ referral, index = 0, variant = "default" }: Props
           <div className="flex flex-wrap gap-2 pt-0.5">
             <Link
               to="/premium"
-              className="rounded-full border border-gold/25 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-gold/70 transition hover:border-gold/50 hover:bg-gold/8 hover:text-gold"
+              className="rounded-full border border-gold/25 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-gold/70 transition hover:border-gold/50 hover:bg-gold/[0.08] hover:text-gold"
             >
               ⚡ Boost with Pro
             </Link>
             <a
               href={`/program/${referral.id}`}
-              className="rounded-full border border-white/8 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/50 transition hover:border-electric/30 hover:text-electric/80"
+              className="rounded-full border border-white/[0.08] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/50 transition hover:border-electric/30 hover:text-electric/80"
             >
               {referral.owner === "member" ? "Program page →" : "How it pays →"}
             </a>
