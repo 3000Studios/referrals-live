@@ -11,6 +11,7 @@ import { AdSlot } from "@/components/monetization/AdSlot";
 import { videoForCategory } from "@/data/media";
 import { HeroCarousel } from "@/components/home/HeroCarousel";
 import { MemberBoxes } from "@/components/home/MemberBoxes";
+import { TopSpots } from "@/components/home/TopSpots";
 
 const FAQS = [
   {
@@ -121,6 +122,7 @@ export function Home() {
       </section>
 
       {/* ================= MEMBER BOXES ================= */}
+      <TopSpots />
       <MemberBoxes referrals={referrals} />
 
       {/* ================= HOW IT WORKS ================= */}

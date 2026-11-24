@@ -33,10 +33,14 @@ export async function onRequestPost(context: { request: Request; env: Env }) {
   if (slot !== 1 && slot !== 2) return badRequest("Slot must be 1 or 2.");
   if (!referralId) return badRequest("Missing referralId.");
 
-  const owned = await context.env.DB.prepare("SELECT id FROM referrals WHERE id=? AND user_id=? LIMIT 1")
+  const owned = await context.env.DB.prepare("SELECT id, status, terms_flagged FROM referrals WHERE id=? AND user_id=? LIMIT 1")
     .bind(referralId, user.id)
     .first<any>();
   if (!owned) return json({ ok: false, error: "Referral not found" }, { status: 404 });
+  // Top Spots are public placements, so only live, unhidden listings qualify.
+  if (owned.status !== "public" || Number(owned.terms_flagged ?? 0) === 1) {
+    return badRequest("Only your live public listings can take a Top Spot. Post it publicly first.");
+  }
 
   const ts = now();
   const days = Number(context.env.SESSION_DAYS ?? "30") || 30;

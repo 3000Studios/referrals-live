@@ -1,6 +1,8 @@
 import { Link } from "react-router-dom";
 import { categories } from "@/data/categories";
 import type { ApiReferral } from "@/lib/api";
+import { TiltCard } from "@/components/effects/TiltCard";
+import { ReportButton } from "@/components/community/ReportButton";
 
 /**
  * Member boxes — subscribers' own referral links, rendered directly below
@@ -33,7 +35,7 @@ export function MemberBoxes({ referrals }: { referrals: ApiReferral[] }) {
           </h2>
           <p className="mt-1 max-w-2xl text-sm text-muted">
             Premium members post their best referral links from their dashboard — these boxes are
-            theirs. Every poster attested that their program allows public posting.
+            theirs. Every poster confirmed their program allows public posting, and members can report anything that breaks the rules.
           </p>
         </div>
         <Link
@@ -47,42 +49,43 @@ export function MemberBoxes({ referrals }: { referrals: ApiReferral[] }) {
       {listings.length ? (
         <div className="acss-cards acss-cards--dense mt-6">
           {listings.map((r) => (
-            <article
-              key={r.id}
-              className="glass flex flex-col rounded-3xl border border-white/10 p-4 transition hover:border-neon/40"
-            >
-              <div className="flex items-center gap-3">
-                <img
-                  src={r.image}
-                  alt=""
-                  className="h-10 w-10 rounded-xl bg-white/95 object-contain p-1"
-                  loading="lazy"
-                  decoding="async"
-                />
-                <div className="min-w-0">
-                  <h3 className="truncate text-sm font-bold text-white">{r.title}</h3>
-                  <div className="text-[11px] uppercase tracking-wide text-muted">
-                    {catName(r.category)}
+            <TiltCard key={r.id} tilt={8} className="group glass border border-white/10">
+              <article className="flex h-full flex-col p-4">
+                <div className="flex items-center gap-3">
+                  <img
+                    src={r.image}
+                    alt=""
+                    className="h-10 w-10 rounded-xl bg-white/95 object-contain p-1 transition-transform duration-500 group-hover:rotate-[-6deg] group-hover:scale-110"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                  <div className="min-w-0">
+                    <h3 className="truncate text-sm font-bold text-white">{r.title}</h3>
+                    <div className="text-[11px] uppercase tracking-wide text-muted">
+                      {catName(r.category)}
+                    </div>
                   </div>
                 </div>
-              </div>
-              <p className="mt-3 line-clamp-3 flex-1 text-xs leading-relaxed text-white/70">
-                {r.description}
-              </p>
-              <div className="mt-3 flex items-center justify-between gap-2">
-                <span className="text-[11px] text-muted">
-                  {r.clicks} clicks · {r.votes} votes
-                </span>
-                <a
-                  href={`/offer/${r.id}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="rounded-xl bg-gradient-to-r from-neon to-emerald-400 px-4 py-2 text-xs font-bold text-black transition hover:brightness-110 active:scale-95"
-                >
-                  Get offer →
-                </a>
-              </div>
-            </article>
+                <p className="mt-3 line-clamp-3 flex-1 text-xs leading-relaxed text-white/70">
+                  {r.description}
+                </p>
+                {r.poster ? <div className="mt-2 text-[11px] text-white/45">Posted by {r.poster}</div> : null}
+                <div className="mt-3 flex items-center justify-between gap-2">
+                  <span className="text-[11px] text-muted">
+                    {r.clicks} clicks · {r.votes} votes
+                  </span>
+                  <a
+                    href={`/offer/${r.id}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="rounded-xl bg-gradient-to-r from-neon to-emerald-400 px-4 py-2 text-xs font-bold text-black transition hover:brightness-110 active:scale-95"
+                  >
+                    Get offer →
+                  </a>
+                </div>
+                <ReportButton referralId={r.id} className="mt-2 self-end" />
+              </article>
+            </TiltCard>
           ))}
         </div>
       ) : (

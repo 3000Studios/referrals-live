@@ -7,6 +7,7 @@ import { videoForCategory } from "@/data/media";
 import { useAppStore } from "@/store/useAppStore";
 import { trackOutboundClick, trackVote } from "@/lib/analytics";
 import { ShareButtons } from "@/components/social/ShareButtons";
+import { ReportButton } from "@/components/community/ReportButton";
 import clsx from "clsx";
 import type { Referral } from "@/store/useAppStore";
 
@@ -52,6 +53,7 @@ export function ReferralCard({ referral, index = 0, variant = "default" }: Props
       className="h-full"
     >
       <TiltCard
+        tone={isTrending ? "electric" : "neon"}
         className={clsx(
           "group glass card-shell h-full",
           "border transition-colors duration-300",
@@ -204,9 +206,13 @@ export function ReferralCard({ referral, index = 0, variant = "default" }: Props
               href={`/program/${referral.id}`}
               className="rounded-full border border-white/8 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/50 transition hover:border-electric/30 hover:text-electric/80"
             >
-              Program page →
+              {referral.owner === "member" ? "Program page →" : "How it pays →"}
             </a>
+            {referral.owner === "member" ? <ReportButton referralId={referral.id} className="ml-auto" /> : null}
           </div>
+          {referral.owner === "member" && referral.poster ? (
+            <div className="text-[11px] text-white/45">Posted by {referral.poster}</div>
+          ) : null}
 
           <ShareButtons referralId={referral.id} title={referral.title} url={referral.url} />
         </div>

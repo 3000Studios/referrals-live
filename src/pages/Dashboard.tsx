@@ -45,6 +45,11 @@ export function Dashboard() {
 
   const load = async () => {
     setError(null);
+    // Back from Stripe checkout: confirm the payment before reading status.
+    if (params.get("billing") === "success") {
+      const sessionId = params.get("session_id") ?? undefined;
+      await api.billingSync(sessionId).catch(() => null);
+    }
     await hydrate();
     const me = (await api.me()).user;
     if (!me) return;
@@ -393,7 +398,7 @@ export function Dashboard() {
           <div>
             <h2 className="font-display text-2xl font-bold text-white">Your referrals</h2>
             <p className="mt-1 text-sm text-muted">
-              Links you've added. Premium members can promote 2 of them to the homepage with the slot buttons.
+              Links you've added. Premium members can pin 2 live links as Top Spots on the homepage and Browse page.
             </p>
           </div>
           <Link to="/submit" className="text-sm font-semibold text-electric hover:text-white">
@@ -408,14 +413,20 @@ export function Dashboard() {
                 <div>
                   <div className="font-semibold text-white">{r.title}</div>
                   <div className="text-xs text-muted">
-                    {r.votes} votes · {r.clicks} clicks · <span className="text-white/80">{r.status}</span>
-                    {" · "}
+                    {r.votes} votes · {r.clicks} clicks ·{" "}
                     {r.termsFlagged ? (
-                      <span className="text-red-300">terms flagged — held out of homepage boxes</span>
-                    ) : r.termsAttested ? (
-                      <span className="text-neon">terms attested ✓</span>
+                      <span className="text-red-300">hidden after member reports</span>
+                    ) : r.status === "public" ? (
+                      <span className="text-neon">live on the site</span>
+                    ) : r.status === "public_candidate" ? (
+                      <span className="text-gold">waiting for review</span>
                     ) : (
-                      <span className="text-white/60">not terms-attested — hidden from homepage boxes</span>
+                      <span className="text-white/80">private, only you see it</span>
+                    )}
+                    {r.termsFlagged ? null : r.termsAttested ? (
+                      <>{" · "}<span className="text-neon">terms confirmed ✓</span></>
+                    ) : (
+                      <>{" · "}<span className="text-white/60">terms not confirmed, so it stays off the public boxes</span></>
                     )}
                   </div>
                 </div>

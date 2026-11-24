@@ -7,6 +7,7 @@ import { sortByNewest, sortByPopular, sortByTrending } from "@/lib/trending";
 import { categories } from "@/data/categories";
 import { AdSlot } from "@/components/monetization/AdSlot";
 import { api } from "@/lib/api";
+import { TopSpots } from "@/components/home/TopSpots";
 
 type Sort = "trending" | "popular" | "newest";
 
@@ -77,6 +78,8 @@ export function Browse() {
           </p>
         </div>
       </div>
+
+      <TopSpots compact />
 
       <div className="mt-8 grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
         <div className="glass rounded-3xl border border-white/10 p-4">

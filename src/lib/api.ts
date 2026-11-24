@@ -23,6 +23,8 @@ export type ApiReferral = {
   owner?: "system" | "member";
   termsAttested?: boolean;
   termsFlagged?: boolean;
+  /** Display name of the member who posted it (null for catalog rows). */
+  poster?: string | null;
 };
 
 export type ApiBlogVideo = { src: string; label: string; attributionLabel: string; attributionHref: string };
@@ -35,6 +37,33 @@ export type ApiBlogListItem = {
   publishedAt: number;
 };
 export type ApiBlogPost = ApiBlogListItem & { contentMd: string };
+
+export type ReportReason = "spam" | "broken" | "scam" | "not_allowed" | "offensive" | "other";
+
+export type TopSpot = {
+  id: string;
+  title: string;
+  description: string;
+  category: string;
+  tags: string[];
+  image: string | null;
+  poster: string;
+  clicks: number;
+  votes: number;
+  endsAt: number;
+};
+
+export type ModerationItem = {
+  id: string;
+  title: string;
+  url: string;
+  status: string;
+  termsAttested: boolean;
+  hidden: boolean;
+  reports: number;
+  poster: string;
+  createdAt: number;
+};
 
 async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(path, {
@@ -64,7 +93,21 @@ export const api = {
     ),
   myReferrals: () => apiFetch<{ ok: true; referrals: any[] }>("/api/my/referrals"),
   createReferral: (input: { title: string; description: string; url: string; category: string; tags: string[]; imageUrl: string; status?: "private" | "public_candidate"; termsAttested?: boolean }) =>
-    apiFetch<{ ok: true; referral: { id: string } }>("/api/referrals", { method: "POST", body: JSON.stringify(input) }),
+    apiFetch<{ ok: true; referral: { id: string; status: "public" | "private" } }>("/api/referrals", { method: "POST", body: JSON.stringify(input) }),
+  reportListing: (id: string, reason: ReportReason, note?: string) =>
+    apiFetch<{ ok: true; hidden?: boolean; alreadyReported?: boolean }>(`/api/referrals/${encodeURIComponent(id)}/report`, {
+      method: "POST",
+      body: JSON.stringify({ reason, note }),
+    }),
+  topSpots: () => apiFetch<{ ok: true; spots: TopSpot[] }>("/api/top-spots"),
+  billingSync: (sessionId?: string) =>
+    apiFetch<{ ok: true; premium: boolean; status: string; currentPeriodEnd: number }>("/api/billing/sync", {
+      method: "POST",
+      body: JSON.stringify(sessionId ? { sessionId } : {}),
+    }),
+  moderationQueue: () => apiFetch<{ ok: true; items: ModerationItem[] }>("/api/admin/moderation"),
+  moderate: (id: string, action: "approve" | "hide" | "restore" | "make_private") =>
+    apiFetch<{ ok: true }>("/api/admin/moderation", { method: "POST", body: JSON.stringify({ id, action }) }),
   vote: (id: string) => apiFetch<{ ok: true }>(`/api/referrals/${id}/vote`, { method: "POST" }),
   share: (id: string, channel: string) => apiFetch<{ ok: true }>(`/api/referrals/${id}/share`, { method: "POST", body: JSON.stringify({ channel }) }),
 
@@ -84,7 +127,9 @@ export const api = {
 
   chatWsUrl: () => {
     const proto = window.location.protocol === "https:" ? "wss:" : "ws:";
-    return `${proto}//referrals-live-ingest.mr-jwswain.workers.dev/chat/ws`;
+    // Same-origin so the session cookie reaches the room and Premium
+    // members can post (the old cross-origin workers.dev URL never got it).
+    return `${proto}//${window.location.host}/api/chat/ws`;
   },
   scanDiscovery: (filter: string) =>
     apiFetch<{ ok: true; results: ApiReferral[] }>(
